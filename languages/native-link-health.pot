@@ -1,0 +1,420 @@
+# Copyright (C) 2026 [AUTHOR_NAME]
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Native Link Health 1.0.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/native-link-health\n"
+"POT-Creation-Date: 2026-05-25 00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Native Link Health manual update\n"
+"X-Domain: native-link-health\n"
+
+msgid "%1$s appears %2$d times."
+msgstr ""
+
+msgid "%d affected URLs"
+msgstr ""
+
+msgid "%d links"
+msgstr ""
+
+msgid "(no title)"
+msgstr ""
+
+msgid "&laquo;"
+msgstr ""
+
+msgid "&raquo;"
+msgstr ""
+
+msgid "4xx"
+msgstr ""
+
+msgid "5xx"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "Approve All"
+msgstr ""
+
+msgid "Auto-fix Rules"
+msgstr ""
+
+msgid "Automatic rule editing is reserved for Native Link Health Pro. The engine is available for stored rules."
+msgstr ""
+
+msgid "Automation"
+msgstr ""
+
+msgid "Available in Pro"
+msgstr ""
+
+msgid "Avg Batch Time"
+msgstr ""
+
+msgid "Broken"
+msgstr ""
+
+msgid "Broken Links"
+msgstr ""
+
+msgid "Broken URL"
+msgstr ""
+
+msgid "CSV Export"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Canonical links that differ from the post permalink were found."
+msgstr ""
+
+msgid "Corrected %d links."
+msgstr ""
+
+msgid "Correction Suggestions"
+msgstr ""
+
+msgid "Daily"
+msgstr ""
+
+msgid "Discovered"
+msgstr ""
+
+msgid "Domain ignore lists are reserved for Native Link Health Pro."
+msgstr ""
+
+msgid "Download the current broken-link report as a CSV file."
+msgstr ""
+
+msgid "Edit URL"
+msgstr ""
+
+msgid "Email Notifications"
+msgstr ""
+
+msgid "Email alerts for newly broken links are reserved for Native Link Health Pro."
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Error Type"
+msgstr ""
+
+msgid "Every 15 minutes"
+msgstr ""
+
+msgid "Export CSV"
+msgstr ""
+
+msgid "Fixed"
+msgstr ""
+
+msgid "Found"
+msgstr ""
+
+msgid "Found %s"
+msgstr ""
+
+msgid "From"
+msgstr ""
+
+msgid "Full Scan"
+msgstr ""
+
+msgid "Group By"
+msgstr ""
+
+msgid "Group by domain"
+msgstr ""
+
+msgid "Group by error type"
+msgstr ""
+
+msgid "Group by post"
+msgstr ""
+
+msgid "Hide History"
+msgstr ""
+
+msgid "History"
+msgstr ""
+
+msgid "Hourly"
+msgstr ""
+
+msgid "HTTP media references were found on an HTTPS site."
+msgstr ""
+
+msgid "Ignore"
+msgstr ""
+
+msgid "Ignore this URL permanently?"
+msgstr ""
+
+msgid "Ignored"
+msgstr ""
+
+msgid "Ignored URLs"
+msgstr ""
+
+msgid "Impact %d"
+msgstr ""
+
+msgid "Insufficient permissions."
+msgstr ""
+
+msgid "Invalid canonicals"
+msgstr ""
+
+msgid "Last Checked"
+msgstr ""
+
+msgid "Last scan cycle: %1$s | Next scheduled: %2$s | Posts scanned: %3$d"
+msgstr ""
+
+msgid "Link Health"
+msgstr ""
+
+msgid "Manual scan complete. Posts scanned: %d."
+msgstr ""
+
+msgid "Manual scan progress: %1$d of %2$d posts."
+msgstr ""
+
+msgid "Missing correction pattern."
+msgstr ""
+
+msgid "Missing ignore data."
+msgstr ""
+
+msgid "Missing re-check data."
+msgstr ""
+
+msgid "Missing timeline data."
+msgstr ""
+
+msgid "Missing URL data."
+msgstr ""
+
+msgid "Mixed content"
+msgstr ""
+
+msgid "Multiple broken links point to %s."
+msgstr ""
+
+msgid "Native Link Health"
+msgstr ""
+
+msgid "Native Link Health SEO Audit"
+msgstr ""
+
+msgid "Native Link Health Settings"
+msgstr ""
+
+msgid "Never"
+msgstr ""
+
+msgid "New"
+msgstr ""
+
+msgid "New URL"
+msgstr ""
+
+msgid "No broken links recorded."
+msgstr ""
+
+msgid "No grouping"
+msgstr ""
+
+msgid "No history recorded."
+msgstr ""
+
+msgid "No invalid canonical links found in content."
+msgstr ""
+
+msgid "No mixed content references found."
+msgstr ""
+
+msgid "No orphan pages found."
+msgstr ""
+
+msgid "No redundant links found."
+msgstr ""
+
+msgid "Not scheduled"
+msgstr ""
+
+msgid "Orphan pages"
+msgstr ""
+
+msgid "Pages without internal inbound links were found."
+msgstr ""
+
+msgid "Peak Memory"
+msgstr ""
+
+msgid "Post"
+msgstr ""
+
+msgid "Post #%d"
+msgstr ""
+
+msgid "Post ID"
+msgstr ""
+
+msgid "Post Title"
+msgstr ""
+
+msgid "Post title"
+msgstr ""
+
+msgid "Pro"
+msgstr ""
+
+msgid "Quick Scan"
+msgstr ""
+
+msgid "Rate limited; retry scheduled."
+msgstr ""
+
+msgid "Re-check"
+msgstr ""
+
+msgid "Redirect chain auditing requires HEAD scan history."
+msgstr ""
+
+msgid "Redirect chains"
+msgstr ""
+
+msgid "Redundant links"
+msgstr ""
+
+msgid "Regression"
+msgstr ""
+
+msgid "Regression filter"
+msgstr ""
+
+msgid "Repeated broken path pattern: %s."
+msgstr ""
+
+msgid "Repeated links were found on individual pages."
+msgstr ""
+
+msgid "Replacement"
+msgstr ""
+
+msgid "Replacement domain or URL"
+msgstr ""
+
+msgid "Request failed."
+msgstr ""
+
+msgid "Run SEO Audit"
+msgstr ""
+
+msgid "Run Scan Now"
+msgstr ""
+
+msgid "Running audit..."
+msgstr ""
+
+msgid "SEO Audit"
+msgstr ""
+
+msgid "SEO audit complete."
+msgstr ""
+
+msgid "Save & Correct"
+msgstr ""
+
+msgid "Save Changes"
+msgstr ""
+
+msgid "Scan Frequency"
+msgstr ""
+
+msgid "Scan Settings"
+msgstr ""
+
+msgid "Scan mode"
+msgstr ""
+
+msgid "Scan queued."
+msgstr ""
+
+msgid "Scanned %1$d of %2$d posts."
+msgstr ""
+
+msgid "Scanning Custom Post Types is available in Native Link Health Pro."
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Site is not served over HTTPS, so mixed content was not checked."
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Status Code"
+msgstr ""
+
+msgid "The free scanner runs every 15 minutes and processes 5 posts per cycle."
+msgstr ""
+
+msgid "The free tier uses a fixed 15 minute cron interval."
+msgstr ""
+
+msgid "Timeout"
+msgstr ""
+
+msgid "To"
+msgstr ""
+
+msgid "URL corrected and re-checked."
+msgstr ""
+
+msgid "URL ignored."
+msgstr ""
+
+msgid "URL or post title"
+msgstr ""
+
+msgid "URL was not found in post content."
+msgstr ""
+
+msgid "URLs Checked"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Unknown domain"
+msgstr ""
+
+msgid "Upgrade to Pro"
+msgstr ""
+
+msgid "Weekly"
+msgstr ""
+
+msgid "Working..."
+msgstr ""
+
+msgid "You do not have permission to access this page."
+msgstr ""
+
+msgid "example.com\n*.example.org"
+msgstr ""

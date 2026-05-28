@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# WordPress
+wp-content/uploads/
+wp-content/cache/
+
+# Package managers
+node_modules/
+vendor/
+composer.lock
+package-lock.json
+yarn.lock
+
+# Build
+*.map
+dist/
+build/
