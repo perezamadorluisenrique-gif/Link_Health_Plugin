@@ -69,6 +69,7 @@ function nlh_bootstrap(): void {
 	$scanner = new NLH_Scanner();
 	add_action( 'nlh_run_batch', array( $scanner, 'run_batch' ) );
 	add_action( 'save_post', array( $scanner, 'handle_post_saved' ), 10, 3 );
+	add_action( 'deleted_post', 'nlh_cleanup_deleted_post' );
 
 	if ( is_admin() ) {
 		$admin = new NLH_Admin( $scanner );
@@ -77,3 +78,26 @@ function nlh_bootstrap(): void {
 }
 
 nlh_bootstrap();
+
+/**
+ * Cleans up link scan data when a post is deleted.
+ *
+ * @since 1.0.1
+ * @param int $post_id Deleted post ID.
+ */
+function nlh_cleanup_deleted_post( int $post_id ): void {
+    global $wpdb;
+
+    $post_id = (int) $post_id;
+    if ( $post_id <= 0 ) {
+        return;
+    }
+
+    foreach ( array( 'nlh_link_errors', 'nlh_link_events', 'nlh_correction_log' ) as $table ) {
+        $wpdb->delete(
+            $wpdb->prefix . $table,
+            array( 'post_id' => $post_id ),
+            array( '%d' )
+        );
+    }
+}

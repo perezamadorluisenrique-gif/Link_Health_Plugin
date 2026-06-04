@@ -210,7 +210,11 @@ class NLH_Scanner {
 				}
 
 				++$urls_checked_in_batch;
-				$response = $this->head_request( $url );
+				try {
+					$response = $this->head_request( $url );
+				} catch ( \Throwable $e ) {
+					$response = new WP_Error( 'http_request_failed', $e->getMessage() );
+				}
 				$code     = (int) wp_remote_retrieve_response_code( $response );
 
 				if ( 429 === $code ) {
@@ -246,7 +250,20 @@ class NLH_Scanner {
 						$this->record_link_event( $url_hash, (int) $post->ID, $event_type, $code ?: 0 );
 					}
 
+					// Prevent stale OK cache — re-check this URL sooner.
+					delete_transient( 'nlh_ok_' . $url_hash );
+
 					$impact_score = $this->calculate_impact_score( (int) $post->ID );
+
+					// Preserve original discovery date if this URL was already tracked.
+					$existing_discovered = $wpdb->get_var(
+						$wpdb->prepare(
+							"SELECT discovered_at FROM {$table} WHERE post_id = %d AND url_hash = %s",
+							$post->ID,
+							$url_hash
+						)
+					);
+					$discovered_at = $existing_discovered ?: current_time( 'mysql', true );
 
 					$wpdb->replace(
 						$table,
@@ -257,7 +274,7 @@ class NLH_Scanner {
 							'status_code'     => $code ?: 0,
 							'error_message'   => sanitize_text_field( $error ),
 							'impact_score'    => $impact_score,
-							'discovered_at'   => current_time( 'mysql', true ),
+							'discovered_at'   => $discovered_at,
 							'last_checked_at' => current_time( 'mysql', true ),
 						),
 						array( '%d', '%s', '%s', '%d', '%s', '%d', '%s', '%s' )
@@ -355,7 +372,7 @@ class NLH_Scanner {
 		$groups = array();
 
 		if ( 'domain' === $group_by ) {
-			$rows = $wpdb->get_results( "SELECT id, post_id, raw_url, url_hash, status_code, error_message, impact_score, discovered_at, last_checked_at FROM {$table} ORDER BY impact_score DESC, last_checked_at DESC" );
+			$rows = $wpdb->get_results( "SELECT id, post_id, raw_url, url_hash, status_code, error_message, impact_score, discovered_at, last_checked_at FROM {$table} ORDER BY impact_score DESC, last_checked_at DESC LIMIT 1000" );
 			$map  = array();
 
 			foreach ( (array) $rows as $row ) {
@@ -599,7 +616,11 @@ class NLH_Scanner {
 		$table    = $wpdb->prefix . 'nlh_link_errors';
 		$url      = esc_url_raw( $url );
 		$url_hash = md5( $url );
-		$response = $this->head_request( $url );
+		try {
+			$response = $this->head_request( $url );
+		} catch ( \Throwable $e ) {
+			$response = new WP_Error( 'http_request_failed', $e->getMessage() );
+		}
 		$code     = (int) wp_remote_retrieve_response_code( $response );
 
 		if ( 429 === $code ) {
@@ -714,6 +735,8 @@ class NLH_Scanner {
 		}
 
 		if ( $updated ) {
+			// Temporarily unhook handle_post_saved to avoid redundant re-scan.
+			remove_action( 'save_post', array( $this, 'handle_post_saved' ), 10, 3 );
 			$result = wp_update_post(
 				array(
 					'ID'           => $post_id,
@@ -721,6 +744,7 @@ class NLH_Scanner {
 				),
 				true
 			);
+			add_action( 'save_post', array( $this, 'handle_post_saved' ), 10, 3 );
 
 			return ! is_wp_error( $result );
 		}
@@ -865,9 +889,23 @@ class NLH_Scanner {
 			$url = ( is_ssl() ? 'https:' : 'http:' ) . $url;
 		}
 
+		// Exclude any URL that belongs to this WordPress installation to prevent self-request loops.
+		$site_url  = site_url();
+		$site_host = wp_parse_url( $site_url, PHP_URL_HOST );
+		$url_host  = wp_parse_url( $url, PHP_URL_HOST );
+		if ( $site_host && $url_host && strtolower( $site_host ) === strtolower( $url_host ) ) {
+			// Only skip if the URL path is under the same WP installation path.
+			// This allows co-hosted external services (e.g. example.com:8443/api) to still be scanned.
+			$site_path = (string) ( wp_parse_url( $site_url, PHP_URL_PATH ) ?: '/' );
+			$url_path  = (string) ( wp_parse_url( $url, PHP_URL_PATH ) ?: '/' );
+			if ( 0 === strpos( trailingslashit( $url_path ), trailingslashit( $site_path ) ) ) {
+				return false;
+			}
+		}
+
 		$home = home_url();
-		$url_no_frag  = strtok( $url, '#' );
-		$home_no_frag = strtok( $home, '#' );
+		$url_no_frag  = explode( '#', $url, 2 )[0] ?? $url;
+		$home_no_frag = explode( '#', $home, 2 )[0] ?? $home;
 		if ( $url_no_frag === $home_no_frag ) {
 			return false;
 		}
@@ -879,7 +917,27 @@ class NLH_Scanner {
 			return false;
 		}
 
-		return false !== filter_var( $this->prepare_url_for_request( $url ), FILTER_VALIDATE_URL );
+		// Block requests to localhost and private IPs (SSRF protection).
+		$url_host = strtolower( $parts['host'] );
+		if ( in_array( $url_host, array( 'localhost', '127.0.0.1', '::1', '0.0.0.0' ), true ) ) {
+			return false;
+		}
+		if ( filter_var( $url_host, FILTER_VALIDATE_IP ) ) {
+			// Check private/reserved ranges: 10.x.x.x, 172.16-31.x.x, 192.168.x.x
+			if ( ! filter_var( $url_host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+				return false;
+			}
+		}
+
+		$prepared = $this->prepare_url_for_request( $url );
+		if ( false !== filter_var( $prepared, FILTER_VALIDATE_URL ) ) {
+			return true;
+		}
+		// FILTER_VALIDATE_URL rejects percent-encoded hostnames
+		// (e.g. "https://iranin%C3%BAnlado.usa"), but cURL and
+		// wp_safe_remote_head handle them correctly per RFC 3986.
+		$prepared_parts = wp_parse_url( $prepared );
+		return ! empty( $prepared_parts['scheme'] ) && ! empty( $prepared_parts['host'] );
 	}
 
 	/**
@@ -955,21 +1013,39 @@ class NLH_Scanner {
 	}
 
 	/**
-	 * Updates cumulative scan metrics.
+	 * Updates scan metrics from actual database state.
 	 *
 	 * @param array $batch_metrics Metrics for this batch.
 	 * @return void
 	 */
 	private function update_scan_metrics( array $batch_metrics ): void {
+		global $wpdb;
+
+		$table_errors = $wpdb->prefix . 'nlh_link_errors';
+		$table_events = $wpdb->prefix . 'nlh_link_events';
+
 		$metrics = get_option( 'nlh_scan_metrics', array() );
 
 		if ( ! is_array( $metrics ) ) {
 			$metrics = array();
 		}
 
-		foreach ( array( 'total_urls_checked', 'total_broken_found', 'total_skipped_valid', 'total_retries' ) as $key ) {
-			$metrics[ $key ] = (int) ( $metrics[ $key ] ?? 0 ) + (int) ( $batch_metrics[ $key ] ?? 0 );
-		}
+		// Broken links: exact current count from DB (reflects reality, never inflates).
+		$metrics['total_broken_found'] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_errors}" );
+
+		// URLs checked: unique URLs ever recorded across errors + events.
+		// Grows only when new URLs appear, never from re-scans.
+		$metrics['total_urls_checked'] = (int) $wpdb->get_var(
+			"SELECT COUNT(DISTINCT url_hash) FROM (
+				SELECT url_hash FROM {$table_errors}
+				UNION
+				SELECT url_hash FROM {$table_events}
+			) AS unique_urls"
+		);
+
+		// Performance counters: cumulative across all scans.
+		$metrics['total_skipped_valid'] = (int) ( $metrics['total_skipped_valid'] ?? 0 ) + (int) ( $batch_metrics['total_skipped_valid'] ?? 0 );
+		$metrics['total_retries']       = (int) ( $metrics['total_retries'] ?? 0 ) + (int) ( $batch_metrics['total_retries'] ?? 0 );
 
 		$metrics['last_batch_duration'] = (float) ( $batch_metrics['last_batch_duration'] ?? 0 );
 		$metrics['peak_memory_usage']   = (int) ( $batch_metrics['peak_memory_usage'] ?? 0 );
@@ -985,24 +1061,37 @@ class NLH_Scanner {
 	 * @return array|WP_Error
 	 */
 	private function head_request( string $url ) {
-		$response = wp_safe_remote_head(
-			$this->prepare_url_for_request( $url ),
-			array(
-				'timeout'     => 15,
-				'redirection' => 5,
-				'user-agent'  => 'WordPress/NativeLinkHealth-' . NLH_VERSION,
-			)
+		/**
+		 * Filters the user-agent sent for link checking requests.
+		 *
+		 * A browser-like user-agent avoids false 403s from Google,
+		 * Cloudflare, and other bot-detection systems.
+		 *
+		 * @since 1.0.1
+		 * @param string $user_agent The HTTP User-Agent header value.
+		 */
+		$user_agent = apply_filters(
+			'nlh_user_agent',
+			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 		);
 
+		$args = array(
+			'timeout'     => 15,
+			'redirection' => 5,
+			'user-agent'  => $user_agent,
+		);
+
+		$prepared_url = $this->prepare_url_for_request( $url );
+
+		// Use non-safe HTTP functions because wp_safe_remote_head() rejects
+		// non-resolvable hosts (e.g. defunct domains with broken DNS), which
+		// are precisely the broken links we need to detect. The URL has
+		// already passed is_scannable_url() which excludes self-referencing
+		// URLs and non-http/https schemes.
+		$response = wp_remote_head( $prepared_url, $args );
+
 		if ( is_wp_error( $response ) || 405 === (int) wp_remote_retrieve_response_code( $response ) ) {
-			$response = wp_safe_remote_get(
-				$this->prepare_url_for_request( $url ),
-				array(
-					'timeout'     => 15,
-					'redirection' => 5,
-					'user-agent'  => 'WordPress/NativeLinkHealth-' . NLH_VERSION,
-				)
-			);
+			$response = wp_remote_get( $prepared_url, $args );
 		}
 
 		return $response;
@@ -1017,9 +1106,19 @@ class NLH_Scanner {
 	private function prepare_url_for_request( string $url ): string {
 		$parts = wp_parse_url( $url );
 		if ( isset( $parts['host'] ) && preg_match( '/[^\x00-\x7F]/', $parts['host'] ) ) {
-			$ascii = idn_to_ascii( $parts['host'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 );
-			if ( false !== $ascii ) {
-				$parts['host'] = $ascii;
+			if ( function_exists( 'idn_to_ascii' ) ) {
+				$ascii = idn_to_ascii( $parts['host'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 );
+				if ( false !== $ascii ) {
+					$parts['host'] = $ascii;
+				} else {
+					// IDN conversion failed (e.g. invalid TLD like .usa).
+					// Remove non-ASCII instead of percent-encoding the host,
+					// which would break wp_safe_remote_head's URL validation.
+					$parts['host'] = preg_replace( '/[^\x00-\x7F]/', '', $parts['host'] );
+				}
+			} else {
+				// intl extension not available — remove non-ASCII from host.
+				$parts['host'] = preg_replace( '/[^\x00-\x7F]/', '', $parts['host'] );
 			}
 			$url = $parts['scheme'] . '://' . $parts['host'] .
 				( isset( $parts['path'] ) ? $parts['path'] : '' ) .
@@ -1084,6 +1183,16 @@ class NLH_Scanner {
 				$ids[] = $id;
 			}
 		}
+
+		// Also collect named anchors: <a name="fragment">
+		$proc2 = new WP_HTML_Tag_Processor( $content );
+		while ( $proc2->next_tag( array( 'tag_name' => 'A' ) ) ) {
+			$name = $proc2->get_attribute( 'name' );
+			if ( is_string( $name ) && '' !== $name ) {
+				$ids[] = $name;
+			}
+		}
+		$ids = array_unique( $ids );
 
 		if ( empty( $ids ) && ! empty( $urls ) ) {
 			return $urls;

@@ -26,7 +26,7 @@ class NLH_Export {
 		global $wpdb;
 
 		$table = $wpdb->prefix . 'nlh_link_errors';
-		$rows  = $wpdb->get_results( "SELECT post_id, raw_url, status_code, error_message, discovered_at, last_checked_at FROM {$table} ORDER BY impact_score DESC, last_checked_at DESC" );
+		$rows  = $wpdb->get_results( "SELECT post_id, raw_url, status_code, error_message, discovered_at, last_checked_at FROM {$table} ORDER BY impact_score DESC, last_checked_at DESC LIMIT 10000" );
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=utf-8' );
@@ -50,6 +50,12 @@ class NLH_Export {
 				__( 'Last Checked', 'native-link-health' ),
 			)
 		);
+
+		// Prime post caches to avoid N+1 queries for each row's title.
+		if ( ! empty( $rows ) ) {
+			$post_ids = array_unique( wp_list_pluck( $rows, 'post_id' ) );
+			_prime_post_caches( $post_ids, true, true );
+		}
 
 		foreach ( (array) $rows as $row ) {
 			fputcsv(

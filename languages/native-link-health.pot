@@ -418,3 +418,36 @@ msgstr ""
 
 msgid "example.com\n*.example.org"
 msgstr ""
+
+msgid "Request timed out. The scan may have too many links to check."
+msgstr ""
+
+msgid "Scan failed at post %d: %s. You can reload and try again."
+msgstr ""
+
+msgid "An earlier scan was interrupted at post %d. Resume scanning?"
+msgstr ""
+
+msgid "Server error: "
+msgstr ""
+
+msgid "link"
+msgstr ""
+
+msgid "Today"
+msgstr ""
+
+msgid "Yesterday"
+msgstr ""
+
+msgid "This Week"
+msgstr ""
+
+msgid "Last Week"
+msgstr ""
+
+msgid "This Month"
+msgstr ""
+
+msgid "Older"
+msgstr ""

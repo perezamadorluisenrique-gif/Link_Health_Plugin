@@ -66,7 +66,8 @@ class NLH_Activator {
 			last_checked_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),
 			UNIQUE KEY url_hash_post (url_hash, post_id),
-			KEY post_id (post_id)
+			KEY post_id (post_id),
+			KEY status_code (status_code)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
 		dbDelta( $sql );
@@ -110,6 +111,19 @@ class NLH_Activator {
 
 		if ( is_array( $columns ) && ! in_array( 'last_ok_at', $columns, true ) ) {
 			$wpdb->query( "ALTER TABLE {$errors_table} ADD last_ok_at datetime DEFAULT NULL AFTER impact_score" );
+		}
+
+		// Add status_code index for performance.
+		$existing_keys = $wpdb->get_results( "SHOW INDEX FROM {$errors_table}" );
+		$has_status_key = false;
+		foreach ( $existing_keys as $key ) {
+			if ( 'status_code' === $key->Key_name ) {
+				$has_status_key = true;
+				break;
+			}
+		}
+		if ( ! $has_status_key ) {
+			$wpdb->query( "ALTER TABLE {$errors_table} ADD KEY status_code (status_code)" );
 		}
 
 		$events_table = $wpdb->prefix . 'nlh_link_events';

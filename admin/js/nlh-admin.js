@@ -1,15 +1,24 @@
 (function () {
 	'use strict';
 
-	function ajaxPost(data) {
+	function ajaxPost(data, timeoutMs) {
+		timeoutMs = timeoutMs || 120000; // default 2 minutes per chunk.
+
+		var controller = new AbortController();
+		var timer = window.setTimeout(function () {
+			controller.abort();
+		}, timeoutMs);
+
 		return fetch(nlh_ajax.url, {
 			method: 'POST',
 			credentials: 'same-origin',
+			signal: controller.signal,
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
 			},
 			body: new URLSearchParams(data).toString()
 		}).then(function (response) {
+			window.clearTimeout(timer);
 			return response.json().then(function (json) {
 				if (!response.ok || !json.success) {
 					var message = json && json.data && json.data.message ? json.data.message : nlh_ajax.i18n.error;
@@ -18,6 +27,12 @@
 
 				return json.data || {};
 			});
+		}).catch(function (error) {
+			window.clearTimeout(timer);
+			if (error.name === 'AbortError') {
+				throw new Error(nlh_ajax.i18n.timeout);
+			}
+			throw error;
 		});
 	}
 
@@ -169,68 +184,22 @@
 
 	function applyDashboardFilters() {
 		var errorType = document.getElementById('nlh-filter-error-type');
-		var postText = document.getElementById('nlh-filter-post');
 		var search = document.getElementById('nlh-filter-search');
 		var activeRegression = document.querySelector('.nlh-regression-filter-btn.current');
 		var regressionFilter = activeRegression ? activeRegression.dataset.regressionFilter : 'all';
 		var errorValue = errorType ? errorType.value : 'all';
-		var postValue = postText ? postText.value.toLowerCase() : '';
 		var searchValue = search ? search.value.toLowerCase() : '';
-		var fromValue = '';
-		var toValue = '';
-		var activeDatePreset = document.querySelector('.nlh-date-preset-btn.current');
-		if (activeDatePreset) {
-			var preset = activeDatePreset.dataset.preset;
-			if (preset !== 'all') {
-				var now = new Date();
-				var from;
-				switch (preset) {
-					case '7d':
-						from = new Date(now);
-						from.setDate(from.getDate() - 7);
-						break;
-					case '30d':
-						from = new Date(now);
-						from.setDate(from.getDate() - 30);
-						break;
-					case '90d':
-						from = new Date(now);
-						from.setDate(from.getDate() - 90);
-						break;
-					case 'month':
-						from = new Date(now.getFullYear(), now.getMonth(), 1);
-						break;
-				}
-				if (from) {
-					fromValue = from.getFullYear() + '-' + String(from.getMonth() + 1).padStart(2, '0') + '-' + String(from.getDate()).padStart(2, '0');
-					toValue = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-				}
-			}
-		}
 
 		document.querySelectorAll('.nlh-link-card').forEach(function (card) {
 			var postTitle = (card.dataset.postTitle || '').toLowerCase();
 			var url = (card.dataset.url || '').toLowerCase();
-			var discovered = card.dataset.discovered || '';
 			var visible = true;
 
 			if (errorValue !== 'all' && card.dataset.errorType !== errorValue) {
 				visible = false;
 			}
 
-			if (postValue && postTitle.indexOf(postValue) === -1) {
-				visible = false;
-			}
-
 			if (searchValue && url.indexOf(searchValue) === -1 && postTitle.indexOf(searchValue) === -1) {
-				visible = false;
-			}
-
-			if (fromValue && discovered < fromValue) {
-				visible = false;
-			}
-
-			if (toValue && discovered > toValue) {
 				visible = false;
 			}
 
@@ -250,12 +219,157 @@
 
 	function updateGroupVisibility() {
 		document.querySelectorAll('.nlh-group').forEach(function (group) {
-			var hasVisibleCards = Array.prototype.some.call(group.querySelectorAll('.nlh-link-card'), function (card) {
+			var visibleCards = Array.prototype.filter.call(group.querySelectorAll('.nlh-link-card'), function (card) {
 				return !card.hidden;
 			});
+			var hasVisibleCards = visibleCards.length > 0;
 
 			group.hidden = !hasVisibleCards;
+
+			// Update group header count for chronological groups.
+			var header = group.querySelector('.nlh-group-header');
+			if (header) {
+				var countEl = header.querySelector('strong');
+				if (countEl) {
+					var label = visibleCards.length === 1 ? '1 ' + nlh_ajax.i18n.chronoLink : visibleCards.length + ' ' + nlh_ajax.i18n.chronoLinks;
+					countEl.textContent = label;
+				}
+			}
 		});
+	}
+
+	function getTimeBucketLabel(bucket) {
+		var labels = {
+			'Today': nlh_ajax.i18n.chronoToday || 'Today',
+			'Yesterday': nlh_ajax.i18n.chronoYesterday || 'Yesterday',
+			'This Week': nlh_ajax.i18n.chronoThisWeek || 'This Week',
+			'Last Week': nlh_ajax.i18n.chronoLastWeek || 'Last Week',
+			'This Month': nlh_ajax.i18n.chronoThisMonth || 'This Month',
+			'Older': nlh_ajax.i18n.chronoOlder || 'Older'
+		};
+		return labels[bucket] || bucket;
+	}
+
+	function computeTimeBucket(discoveredYmd) {
+		if (!discoveredYmd) return 'Older';
+
+		var parts = discoveredYmd.split('-');
+		if (parts.length !== 3) return 'Older';
+
+		var discovered = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+
+		// Use server-provided today date to avoid timezone mismatches.
+		var serverToday = nlh_ajax.serverToday || '';
+		var todayParts = serverToday ? serverToday.split('-') : [];
+		var today;
+		if (todayParts.length === 3) {
+			today = new Date(parseInt(todayParts[0], 10), parseInt(todayParts[1], 10) - 1, parseInt(todayParts[2], 10));
+		} else {
+			var now = new Date();
+			today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		}
+
+		var diffTime = today.getTime() - discovered.getTime();
+		var diffDays = Math.round(diffTime / 86400000);
+
+		if (diffDays < 0) return 'Today';
+		if (diffDays === 0) return 'Today';
+		if (diffDays === 1) return 'Yesterday';
+
+		// Get this week's Monday.
+		var dayOfWeek = today.getDay();
+		var mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+		var thisMonday = new Date(today);
+		thisMonday.setDate(today.getDate() + mondayOffset);
+
+		// Get last week's Monday.
+		var lastMonday = new Date(thisMonday);
+		lastMonday.setDate(thisMonday.getDate() - 7);
+
+		// Get this month's first day.
+		var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+		if (discovered >= thisMonday) return 'This Week';
+		if (discovered >= lastMonday) return 'Last Week';
+		if (discovered >= monthStart) return 'This Month';
+		return 'Older';
+	}
+
+	function applyChronologicalGrouping() {
+		var container = document.querySelector('.nlh-groups-container');
+		if (!container) {
+			container = document.querySelector('.nlh-cards-container');
+			if (!container) return;
+		}
+
+		// Get all link cards (visible and hidden) from the container.
+		var allCards = Array.from(container.querySelectorAll('.nlh-link-card'));
+		if (!allCards.length) return;
+
+		// Compute buckets.
+		var buckets = {};
+		var bucketOrder = ['Today', 'Yesterday', 'This Week', 'Last Week', 'This Month', 'Older'];
+
+		allCards.forEach(function (card) {
+			var bucket = computeTimeBucket(card.dataset.discovered);
+			if (!buckets[bucket]) {
+				buckets[bucket] = [];
+			}
+			buckets[bucket].push(card);
+		});
+
+		// Sort within each bucket by discovered_at descending.
+		bucketOrder.forEach(function (bucket) {
+			if (buckets[bucket]) {
+				buckets[bucket].sort(function (a, b) {
+					return (b.dataset.discovered || '').localeCompare(a.dataset.discovered || '');
+				});
+			}
+		});
+
+		// Build group HTML.
+		var html = '';
+		bucketOrder.forEach(function (bucket) {
+			var items = buckets[bucket];
+			if (!items || !items.length) return;
+
+			var itemsHtml = items.map(function (card) {
+				return card.outerHTML;
+			}).join('');
+
+			html += '<div class="nlh-group" aria-expanded="true">';
+			html += '<button type="button" class="nlh-group-header nlh-group-toggle" aria-expanded="true">';
+			html += '<span>' + escapeHtml(getTimeBucketLabel(bucket)) + '</span>';
+			var countLabel = items.length === 1 ? '1 ' + nlh_ajax.i18n.chronoLink : items.length + ' ' + nlh_ajax.i18n.chronoLinks;
+			html += '<strong>' + escapeHtml(countLabel) + '</strong>';
+			html += '</button>';
+			html += '<div class="nlh-group-items">' + itemsHtml + '</div>';
+			html += '</div>';
+		});
+
+		// If no cards fell into any bucket, don't touch the container.
+		if (!html) return;
+
+		container.innerHTML = html;
+
+		// Hide empty state if present.
+		var emptyState = document.querySelector('.nlh-empty-state');
+		if (emptyState) {
+			emptyState.hidden = true;
+		}
+
+		// Ensure container uses groups-container styling.
+		container.classList.remove('nlh-cards-container');
+		container.classList.add('nlh-groups-container');
+
+		// Update group visibility based on filtered state.
+		updateGroupVisibility();
+
+		// Hide bottom pagination — chronological grouping is client-side.
+		var pagination = document.querySelector('.tablenav.bottom');
+		if (pagination) {
+			pagination.style.display = 'none';
+		}
 	}
 
 	function setProgress(result) {
@@ -285,9 +399,21 @@
 		}).then(function (data) {
 			setProgress(data);
 
+			// Persist offset for potential resume on failure.
+			if (mode === 'full') {
+				try {
+					sessionStorage.setItem('nlh_scan_offset', data.next);
+				} catch (e) {}
+			}
+
 			if (mode === 'full' && !data.done) {
 				return runScanChunk(mode, data.next, button);
 			}
+
+			// Scan complete — clear stored offset.
+			try {
+				sessionStorage.removeItem('nlh_scan_offset');
+			} catch (e) {}
 
 			showNotice(data.message || nlh_ajax.i18n.scanQueued, 'success');
 			window.setTimeout(function () {
@@ -295,11 +421,14 @@
 			}, 700);
 			return data;
 		}).catch(function (error) {
-			showNotice(error.message, 'error');
-		}).finally(function () {
-			if (mode !== 'full' || offset === 0) {
-				setButtonBusy(button, false);
+			var msg;
+			if (mode === 'full' && offset > 0) {
+				msg = nlh_ajax.i18n.scanError.replace('%s', error.message).replace('%d', offset);
+			} else {
+				msg = error.message;
 			}
+			showNotice(msg, 'error');
+			throw error; // Let caller know the scan failed.
 		});
 	}
 
@@ -358,7 +487,7 @@
 	}
 
 	document.addEventListener('input', function (event) {
-		if (event.target.closest('#nlh-filter-error-type, #nlh-filter-post, #nlh-filter-search')) {
+		if (event.target.closest('#nlh-filter-search')) {
 			applyDashboardFilters();
 		}
 	});
@@ -371,6 +500,16 @@
 		}
 
 		if (groupBy) {
+			if (groupBy.value === 'chronological') {
+				// Client-side chronological grouping — no page reload needed.
+				var url = new URL(window.location.href);
+				url.searchParams.set('nlh_group_by', 'chronological');
+				url.searchParams.delete('paged');
+				window.history.replaceState({}, '', url.toString());
+				applyChronologicalGrouping();
+				return;
+			}
+
 			var url = new URL(window.location.href);
 			url.searchParams.set('nlh_group_by', groupBy.value);
 			url.searchParams.delete('paged');
@@ -387,7 +526,6 @@
 		var regressionButton = event.target.closest('.nlh-regression-filter-btn');
 		var approveAll = event.target.closest('.nlh-approve-all');
 		var timelineButton = event.target.closest('.nlh-toggle-timeline');
-		var presetButton = event.target.closest('[data-preset]');
 		var seoButton = event.target.closest('#nlh-run-seo-audit');
 
 		if (editToggle) {
@@ -425,24 +563,14 @@
 		if (regressionButton) {
 			document.querySelectorAll('.nlh-regression-filter-btn').forEach(function (button) {
 				button.classList.remove('current');
+				button.setAttribute('aria-pressed', 'false');
 			});
 			regressionButton.classList.add('current');
+			regressionButton.setAttribute('aria-pressed', 'true');
 			if (window.history && window.history.replaceState) {
 				var filterUrl = new URL(window.location.href);
 				filterUrl.searchParams.set('nlh_filter', regressionButton.dataset.regressionFilter);
 				window.history.replaceState({}, '', filterUrl.toString());
-			}
-			applyDashboardFilters();
-		}
-
-		if (presetButton) {
-			event.preventDefault();
-			var wasActive = presetButton.classList.contains('current');
-			document.querySelectorAll('.nlh-date-preset-btn').forEach(function (btn) {
-				btn.classList.remove('current');
-			});
-			if (!wasActive) {
-				presetButton.classList.add('current');
 			}
 			applyDashboardFilters();
 		}
@@ -543,11 +671,13 @@
 			if (!wrapper.hidden) {
 				wrapper.hidden = true;
 				timelineButton.textContent = nlh_ajax.i18n.showHistory;
+				timelineButton.setAttribute('aria-expanded', 'false');
 				return;
 			}
 
 			wrapper.hidden = false;
 			timelineButton.textContent = nlh_ajax.i18n.hideHistory;
+			timelineButton.setAttribute('aria-expanded', 'true');
 
 			if (timeline.dataset.loaded === '1') {
 				return;
@@ -564,6 +694,7 @@
 				renderTimeline(timeline, Array.isArray(events) ? events : []);
 				timeline.dataset.loaded = '1';
 				timelineButton.textContent = nlh_ajax.i18n.hideHistory;
+				timelineButton.setAttribute('aria-expanded', 'true');
 			}).catch(function (error) {
 				showNotice(error.message, 'error');
 			}).finally(function () {
@@ -642,10 +773,53 @@
 			var modeField = runNowForm.querySelector('[name="scan_mode"]');
 			var mode = modeField ? modeField.value : 'quick';
 
+			// Clear any stale resume offset on a fresh scan.
+			try { sessionStorage.removeItem('nlh_scan_offset'); } catch (e) {}
+
 			setButtonBusy(button, true);
-			runScanChunk(mode, 0, button);
+			runScanChunk(mode, 0, button).finally(function () {
+				setButtonBusy(button, false);
+			});
 		}
 	});
 
 	applyDashboardFilters();
+
+	// Apply chronological grouping on load if that mode is active.
+	var urlParams = new URLSearchParams(window.location.search);
+	if (urlParams.get('nlh_group_by') === 'chronological') {
+		applyChronologicalGrouping();
+	}
+
+	// Resume a previously interrupted scan if sessionStorage has an offset.
+	(function checkResumeScan() {
+		var storedOffset;
+		try { storedOffset = sessionStorage.getItem('nlh_scan_offset'); } catch (e) {}
+		if (!storedOffset) return;
+
+		var offset = parseInt(storedOffset, 10);
+		if (isNaN(offset) || offset <= 0) return;
+
+		var runNowForm = document.getElementById('nlh-run-now-form');
+		if (!runNowForm) return;
+
+		var button = runNowForm.querySelector('button[type="submit"]');
+		if (!button) return;
+
+		// Ask user before resuming.
+		if (!window.confirm(
+			nlh_ajax.i18n.resumeScan
+				.replace('%d', String(offset))
+		)) {
+			try { sessionStorage.removeItem('nlh_scan_offset'); } catch (e) {}
+			return;
+		}
+
+		setButtonBusy(button, true);
+		var modeField = runNowForm.querySelector('[name="scan_mode"]');
+		var mode = modeField ? modeField.value : 'full';
+		runScanChunk(mode, offset, button).finally(function () {
+			setButtonBusy(button, false);
+		});
+	})();
 }());

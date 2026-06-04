@@ -161,7 +161,7 @@ class NLH_Rules_Engine {
 			case 'contains':
 				return false !== stripos( (string) $actual, (string) $value );
 			case 'in':
-				return is_array( $value ) && in_array( $actual, $value, false );
+				return is_array( $value ) && in_array( (string) $actual, $value, true );
 			case 'not_equals':
 				return (string) $actual !== (string) $value;
 			case 'greater_than':

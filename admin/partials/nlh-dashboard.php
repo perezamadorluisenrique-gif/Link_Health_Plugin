@@ -61,7 +61,7 @@ $render_card = function ( $row ) {
 		data-post-title="<?php echo esc_attr( $post_title ); ?>"
 		data-error-type="<?php echo esc_attr( $error_type ); ?>"
 		data-discovered="<?php echo esc_attr( $discovered_ymd ); ?>"
-		data-regression="<?php echo $is_regression ? '1' : '0'; ?>"
+		data-regression="<?php echo esc_attr( $is_regression ? '1' : '0' ); ?>"
 	>
 		<div class="nlh-card-body">
 			<div class="nlh-card-main">
@@ -169,6 +169,42 @@ $render_card = function ( $row ) {
 		?>
 	</p>
 
+	<div class="nlh-filter-bar">
+		<div class="nlh-filter-group">
+			<label>
+				<span><?php esc_html_e( 'Error Type', 'native-link-health' ); ?></span>
+				<select id="nlh-filter-error-type">
+					<option value="all"><?php esc_html_e( 'All', 'native-link-health' ); ?></option>
+					<option value="4xx"><?php esc_html_e( '4xx', 'native-link-health' ); ?></option>
+					<option value="5xx"><?php esc_html_e( '5xx', 'native-link-health' ); ?></option>
+					<option value="timeout"><?php esc_html_e( 'Timeout', 'native-link-health' ); ?></option>
+				</select>
+			</label>
+			<label>
+				<span><?php esc_html_e( 'Search', 'native-link-health' ); ?></span>
+				<input type="search" id="nlh-filter-search" placeholder="<?php esc_attr_e( 'URL or post title', 'native-link-health' ); ?>">
+			</label>
+		</div>
+		<span class="nlh-filter-divider" role="separator"></span>
+		<div class="nlh-filter-group">
+			<label>
+				<span><?php esc_html_e( 'Group By', 'native-link-health' ); ?></span>
+				<select id="nlh-group-by" name="nlh_group_by">
+					<option value="none" <?php selected( $group_by, 'none' ); ?>><?php esc_html_e( 'No grouping', 'native-link-health' ); ?></option>
+					<option value="domain" <?php selected( $group_by, 'domain' ); ?>><?php esc_html_e( 'Group by domain', 'native-link-health' ); ?></option>
+					<option value="error_type" <?php selected( $group_by, 'error_type' ); ?>><?php esc_html_e( 'Group by error type', 'native-link-health' ); ?></option>
+					<option value="post" <?php selected( $group_by, 'post' ); ?>><?php esc_html_e( 'Group by post', 'native-link-health' ); ?></option>
+					<option value="chronological" <?php selected( $group_by, 'chronological' ); ?>><?php esc_html_e( 'Chronological', 'native-link-health' ); ?></option>
+				</select>
+			</label>
+			<div class="nlh-regression-filter" role="group" aria-label="<?php esc_attr_e( 'Regression filter', 'native-link-health' ); ?>">
+				<button type="button" class="button nlh-regression-filter-btn <?php echo 'all' === $filter ? 'current' : ''; ?>" data-regression-filter="all" aria-pressed="<?php echo 'all' === $filter ? 'true' : 'false'; ?>"><?php esc_html_e( 'All', 'native-link-health' ); ?></button>
+				<button type="button" class="button nlh-regression-filter-btn <?php echo 'new' === $filter ? 'current' : ''; ?>" data-regression-filter="new" aria-pressed="<?php echo 'new' === $filter ? 'true' : 'false'; ?>"><?php esc_html_e( 'New', 'native-link-health' ); ?></button>
+				<button type="button" class="button nlh-regression-filter-btn <?php echo 'regression' === $filter ? 'current' : ''; ?>" data-regression-filter="regression" aria-pressed="<?php echo 'regression' === $filter ? 'true' : 'false'; ?>"><?php esc_html_e( 'Regression', 'native-link-health' ); ?></button>
+			</div>
+		</div>
+	</div>
+
 	<?php if ( ! empty( $suggestions ) ) : ?>
 		<div class="nlh-suggestions-section">
 			<h2><?php esc_html_e( 'Correction Suggestions', 'native-link-health' ); ?></h2>
@@ -196,49 +232,11 @@ $render_card = function ( $row ) {
 		</div>
 	<?php endif; ?>
 
-	<div class="nlh-filter-bar">
-		<label>
-			<span><?php esc_html_e( 'Error Type', 'native-link-health' ); ?></span>
-			<select id="nlh-filter-error-type">
-				<option value="all"><?php esc_html_e( 'All', 'native-link-health' ); ?></option>
-				<option value="4xx"><?php esc_html_e( '4xx', 'native-link-health' ); ?></option>
-				<option value="5xx"><?php esc_html_e( '5xx', 'native-link-health' ); ?></option>
-				<option value="timeout"><?php esc_html_e( 'Timeout', 'native-link-health' ); ?></option>
-			</select>
-		</label>
-		<label>
-			<span><?php esc_html_e( 'Post', 'native-link-health' ); ?></span>
-			<input type="search" id="nlh-filter-post" placeholder="<?php esc_attr_e( 'Post title', 'native-link-health' ); ?>">
-		</label>
-		<div class="nlh-date-presets" role="group" aria-label="<?php esc_attr_e( 'Date range filter', 'native-link-health' ); ?>">
-			<button type="button" class="button button-small nlh-date-preset-btn current" data-preset="all"><?php esc_html_e( 'All dates', 'native-link-health' ); ?></button>
-			<button type="button" class="button button-small nlh-date-preset-btn" data-preset="7d"><?php esc_html_e( '7 days', 'native-link-health' ); ?></button>
-			<button type="button" class="button button-small nlh-date-preset-btn" data-preset="30d"><?php esc_html_e( '30 days', 'native-link-health' ); ?></button>
-			<button type="button" class="button button-small nlh-date-preset-btn" data-preset="90d"><?php esc_html_e( '90 days', 'native-link-health' ); ?></button>
-			<button type="button" class="button button-small nlh-date-preset-btn" data-preset="month"><?php esc_html_e( 'This month', 'native-link-health' ); ?></button>
-		</div>
-		<label>
-			<span><?php esc_html_e( 'Search', 'native-link-health' ); ?></span>
-			<input type="search" id="nlh-filter-search" placeholder="<?php esc_attr_e( 'URL or post title', 'native-link-health' ); ?>">
-		</label>
-		<label>
-			<span><?php esc_html_e( 'Group By', 'native-link-health' ); ?></span>
-			<select id="nlh-group-by" name="nlh_group_by">
-				<option value="none" <?php selected( $group_by, 'none' ); ?>><?php esc_html_e( 'No grouping', 'native-link-health' ); ?></option>
-				<option value="domain" <?php selected( $group_by, 'domain' ); ?>><?php esc_html_e( 'Group by domain', 'native-link-health' ); ?></option>
-				<option value="error_type" <?php selected( $group_by, 'error_type' ); ?>><?php esc_html_e( 'Group by error type', 'native-link-health' ); ?></option>
-				<option value="post" <?php selected( $group_by, 'post' ); ?>><?php esc_html_e( 'Group by post', 'native-link-health' ); ?></option>
-			</select>
-		</label>
-		<div class="nlh-regression-filter" aria-label="<?php esc_attr_e( 'Regression filter', 'native-link-health' ); ?>">
-			<button type="button" class="button nlh-regression-filter-btn <?php echo 'all' === $filter ? 'current' : ''; ?>" data-regression-filter="all"><?php esc_html_e( 'All', 'native-link-health' ); ?></button>
-			<button type="button" class="button nlh-regression-filter-btn <?php echo 'new' === $filter ? 'current' : ''; ?>" data-regression-filter="new"><?php esc_html_e( 'New', 'native-link-health' ); ?></button>
-			<button type="button" class="button nlh-regression-filter-btn <?php echo 'regression' === $filter ? 'current' : ''; ?>" data-regression-filter="regression"><?php esc_html_e( 'Regression', 'native-link-health' ); ?></button>
-		</div>
-	</div>
-
 	<?php if ( empty( $rows ) && empty( $groups ) ) : ?>
-		<div class="nlh-empty-state"><?php esc_html_e( 'No broken links recorded.', 'native-link-health' ); ?></div>
+		<div class="nlh-empty-state">
+			<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
+			<span class="nlh-empty-state-text"><?php esc_html_e( 'No broken links recorded.', 'native-link-health' ); ?></span>
+		</div>
 	<?php elseif ( ! empty( $groups ) ) : ?>
 		<div class="nlh-groups-container">
 			<?php foreach ( $groups as $index => $group ) : ?>

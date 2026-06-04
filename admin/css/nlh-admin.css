@@ -1,9 +1,10 @@
 .nlh-wrap .nlh-page-header {
 	align-items: center;
 	display: flex;
-	gap: 16px;
+	flex-wrap: wrap;
+	gap: 12px;
 	justify-content: space-between;
-	margin-bottom: 14px;
+	margin-bottom: 16px;
 }
 
 .nlh-run-now-form {
@@ -15,13 +16,16 @@
 }
 
 .nlh-status-line {
+	background: #f6f7f7;
+	border-radius: 6px;
 	color: #50575e;
-	margin: 8px 0 16px;
+	margin: 12px 0 16px;
+	padding: 10px 14px;
 }
 
 .nlh-notice {
 	margin: 12px 0;
-	padding: 8px 12px;
+	padding: 10px 14px;
 }
 
 .nlh-notice.is-success {
@@ -35,7 +39,7 @@
 .nlh-metrics-grid {
 	display: grid;
 	gap: 12px;
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	grid-template-columns: repeat(4, 1fr);
 	margin: 14px 0;
 }
 
@@ -51,6 +55,11 @@
 	justify-content: center;
 	padding: 16px;
 	text-align: center;
+	transition: box-shadow 160ms ease;
+}
+
+.nlh-metric-card:hover {
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .nlh-metric-card .dashicons {
@@ -68,7 +77,7 @@
 	color: #646970;
 	font-size: 11px;
 	font-weight: 700;
-	letter-spacing: 0;
+	letter-spacing: 0.5px;
 	text-transform: uppercase;
 }
 
@@ -83,6 +92,15 @@
 	display: none;
 }
 
+.nlh-scan-progress:not([hidden]) {
+	animation: nlh-fade-in 200ms ease;
+}
+
+@keyframes nlh-fade-in {
+	from { opacity: 0; transform: translateY(-4px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
 .nlh-progress-bar {
 	background: #dcdcde;
 	border-radius: 999px;
@@ -95,12 +113,31 @@
 	background: #2271b1;
 	display: block;
 	height: 100%;
-	transition: width 160ms ease;
+	position: relative;
+	transition: width 300ms ease;
+}
+
+.nlh-progress-bar-fill::after {
+	animation: nlh-progress-pulse 1.5s ease-in-out infinite;
+	background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+	content: "";
+	height: 100%;
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+@keyframes nlh-progress-pulse {
+	0% { opacity: 0.5; }
+	50% { opacity: 1; }
+	100% { opacity: 0.5; }
 }
 
 .nlh-progress-text {
 	color: #646970;
 	font-size: 12px;
+	font-weight: 600;
 	min-width: 150px;
 }
 
@@ -109,8 +146,8 @@
 }
 
 .nlh-suggestions-section h2 {
-	font-size: 16px;
-	margin: 0 0 10px;
+	font-size: 14px;
+	margin: 0 0 12px;
 }
 
 .nlh-suggestion-card {
@@ -121,16 +158,17 @@
 	border-radius: 6px;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12px;
-	justify-content: space-between;
+	gap: 10px;
 	margin-bottom: 10px;
-	padding: 12px;
+	padding: 12px 14px;
 }
 
 .nlh-suggestion-card > div {
 	display: flex;
+	flex: 1;
 	flex-direction: column;
 	gap: 3px;
+	min-width: 140px;
 }
 
 .nlh-suggestion-label {
@@ -144,9 +182,9 @@
 	border-radius: 6px;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12px;
+	gap: 10px;
 	margin: 16px 0;
-	padding: 12px;
+	padding: 12px 14px;
 }
 
 .nlh-filter-bar label {
@@ -157,24 +195,23 @@
 
 .nlh-filter-bar label span {
 	color: #50575e;
-	font-size: 12px;
+	font-size: 11px;
 	font-weight: 600;
+	letter-spacing: 0.3px;
+	text-transform: uppercase;
 }
 
-.nlh-date-presets {
-	align-items: center;
-	background: #f0f0f1;
-	border-radius: 4px;
+.nlh-filter-bar .nlh-filter-group {
+	align-items: end;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 2px;
-	padding: 4px;
+	gap: 8px;
 }
 
-.nlh-date-preset-btn.current {
-	background: #2271b1;
-	border-color: #2271b1;
-	color: #fff;
+.nlh-filter-bar .nlh-filter-divider {
+	align-self: stretch;
+	background: #dcdcde;
+	width: 1px;
 }
 
 .nlh-regression-filter {
@@ -316,6 +353,7 @@
 
 .nlh-card-actions {
 	display: flex;
+	flex-shrink: 0;
 	flex-wrap: wrap;
 	gap: 6px;
 	justify-content: flex-end;
@@ -388,6 +426,12 @@
 	padding: 12px 14px;
 }
 
+.nlh-timeline-wrapper {
+	background: #f6f7f7;
+	border-top: 1px solid #dcdcde;
+	padding: 12px 14px;
+}
+
 .nlh-inline-edit-form {
 	align-items: center;
 	display: flex;
@@ -397,6 +441,17 @@
 
 .nlh-inline-edit-form input[type="url"] {
 	min-width: min(560px, 100%);
+}
+
+.nlh-toggle-timeline::before {
+	content: "▸";
+	display: inline-block;
+	margin-right: 4px;
+	transition: transform 200ms ease;
+}
+
+.nlh-toggle-timeline[aria-expanded="true"]::before {
+	transform: rotate(90deg);
 }
 
 .nlh-timeline {
@@ -445,10 +500,27 @@
 }
 
 .nlh-empty-state {
+	align-items: center;
 	background: #fff;
 	border: 1px solid #dcdcde;
 	border-radius: 6px;
-	padding: 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 32px 18px;
+	text-align: center;
+}
+
+.nlh-empty-state .dashicons {
+	color: #646970;
+	font-size: 32px;
+	height: 32px;
+	width: 32px;
+}
+
+.nlh-empty-state-text {
+	color: #646970;
+	font-size: 14px;
 }
 
 .nlh-broken-links-table {
@@ -469,10 +541,21 @@
 }
 
 .nlh-pro-footer {
-	background: #fff;
-	border-left: 4px solid #2271b1;
+	align-items: center;
+	background: #f0f6fc;
+	border: 1px solid #c5d9ed;
+	border-radius: 6px;
+	color: #50575e;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
 	margin-top: 18px;
-	padding: 10px 12px;
+	padding: 12px 14px;
+}
+
+.nlh-pro-footer a {
+	font-weight: 600;
+	white-space: nowrap;
 }
 
 .nlh-settings-form textarea[disabled],
@@ -537,6 +620,12 @@
 	gap: 2px;
 }
 
+@media screen and (max-width: 960px) {
+	.nlh-metrics-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
 @media screen and (max-width: 782px) {
 	.nlh-wrap .nlh-page-header,
 	.nlh-card-body {
@@ -548,6 +637,10 @@
 		justify-content: flex-start;
 	}
 
+	.nlh-card-meta {
+		font-size: 11px;
+	}
+
 	.nlh-filter-bar label,
 	.nlh-filter-bar input,
 	.nlh-filter-bar select,
@@ -556,7 +649,27 @@
 		width: 100%;
 	}
 
+	.nlh-filter-bar .nlh-filter-divider {
+		display: none;
+	}
+
 	.nlh-progress-text {
 		min-width: 0;
+	}
+}
+
+@media screen and (max-width: 480px) {
+	.nlh-metrics-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.nlh-group-toggle::before {
+		transition: none;
+	}
+
+	.nlh-progress-bar-fill::after {
+		animation: none;
 	}
 }

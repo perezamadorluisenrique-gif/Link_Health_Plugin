@@ -188,27 +188,39 @@ class NLH_Admin {
 				'url'         => admin_url( 'admin-ajax.php' ),
 				'nonce'       => wp_create_nonce( 'nlh_ajax_nonce' ),
 				'runNowNonce' => wp_create_nonce( 'nlh_run_now_action' ),
+				'serverToday' => wp_date( 'Y-m-d' ),
 				'i18n'        => array(
-					'working'       => __( 'Working...', 'native-link-health' ),
-					'scanQueued'    => __( 'Scan queued.', 'native-link-health' ),
-					'confirmIgnore' => __( 'Ignore this URL permanently?', 'native-link-health' ),
-					'error'         => __( 'Request failed.', 'native-link-health' ),
-					'unknown'       => __( 'Unknown', 'native-link-health' ),
-					'showHistory'   => __( 'History', 'native-link-health' ),
-					'hideHistory'   => __( 'Hide History', 'native-link-health' ),
-					'noHistory'     => __( 'No history recorded.', 'native-link-health' ),
-					'seoRunning'    => __( 'Running audit...', 'native-link-health' ),
-					'auditComplete' => __( 'SEO audit complete.', 'native-link-health' ),
-					'progress'      => __( 'Scanned %1$d of %2$d posts.', 'native-link-health' ),
-					'eventBroken'         => __( 'Broken', 'native-link-health' ),
-					'eventFixed'          => __( 'Fixed', 'native-link-health' ),
-					'eventRegression'     => __( 'Regression', 'native-link-health' ),
-					'eventIgnored'        => __( 'Ignored', 'native-link-health' ),
-					'seoOrphanPages'      => __( 'Orphan pages', 'native-link-health' ),
-					'seoRedirectChains'   => __( 'Redirect chains', 'native-link-health' ),
-					'seoMixedContent'     => __( 'Mixed content', 'native-link-health' ),
+					'working'              => __( 'Working...', 'native-link-health' ),
+					'scanQueued'           => __( 'Scan queued.', 'native-link-health' ),
+					'confirmIgnore'        => __( 'Ignore this URL permanently?', 'native-link-health' ),
+					'error'                => __( 'Request failed.', 'native-link-health' ),
+					'unknown'              => __( 'Unknown', 'native-link-health' ),
+					'showHistory'          => __( 'History', 'native-link-health' ),
+					'hideHistory'          => __( 'Hide History', 'native-link-health' ),
+					'noHistory'            => __( 'No history recorded.', 'native-link-health' ),
+					'seoRunning'           => __( 'Running audit...', 'native-link-health' ),
+					'auditComplete'        => __( 'SEO audit complete.', 'native-link-health' ),
+					'progress'             => __( 'Scanned %1$d of %2$d posts.', 'native-link-health' ),
+					'eventBroken'          => __( 'Broken', 'native-link-health' ),
+					'eventFixed'           => __( 'Fixed', 'native-link-health' ),
+					'eventRegression'      => __( 'Regression', 'native-link-health' ),
+					'eventIgnored'         => __( 'Ignored', 'native-link-health' ),
+					'seoOrphanPages'       => __( 'Orphan pages', 'native-link-health' ),
+					'seoRedirectChains'    => __( 'Redirect chains', 'native-link-health' ),
+					'seoMixedContent'      => __( 'Mixed content', 'native-link-health' ),
 					'seoInvalidCanonicals' => __( 'Invalid canonicals', 'native-link-health' ),
-					'seoRedundantLinks'   => __( 'Redundant links', 'native-link-health' ),
+					'seoRedundantLinks'    => __( 'Redundant links', 'native-link-health' ),
+					'chronoToday'          => __( 'Today', 'native-link-health' ),
+					'chronoYesterday'      => __( 'Yesterday', 'native-link-health' ),
+					'chronoThisWeek'       => __( 'This Week', 'native-link-health' ),
+					'chronoLastWeek'       => __( 'Last Week', 'native-link-health' ),
+					'chronoThisMonth'      => __( 'This Month', 'native-link-health' ),
+					'chronoOlder'          => __( 'Older', 'native-link-health' ),
+					'chronoLink'           => __( 'link', 'native-link-health' ),
+					'chronoLinks'          => __( 'links', 'native-link-health' ),
+					'timeout'              => __( 'Request timed out. The scan may have too many links to check.', 'native-link-health' ),
+					'scanError'            => __( 'Scan failed at post %d: %s. You can reload and try again.', 'native-link-health' ),
+					'resumeScan'           => __( 'An earlier scan was interrupted at post %d. Resume scanning?', 'native-link-health' ),
 				),
 			)
 		);
@@ -415,47 +427,52 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function ajax_correct_url(): void {
-		$this->verify_ajax_request();
+		$this->run_ajax_safe( function () {
+			$this->verify_ajax_request();
 
-		$post_id   = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
-		$record_id = isset( $_POST['record_id'] ) ? absint( $_POST['record_id'] ) : 0;
-		$old_url   = isset( $_POST['old_url'] ) ? esc_url_raw( wp_unslash( $_POST['old_url'] ) ) : '';
-		$new_url   = isset( $_POST['new_url'] ) ? esc_url_raw( wp_unslash( $_POST['new_url'] ) ) : '';
+			$post_id   = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+			$record_id = isset( $_POST['record_id'] ) ? absint( $_POST['record_id'] ) : 0;
+			$old_url   = isset( $_POST['old_url'] ) ? esc_url_raw( wp_unslash( $_POST['old_url'] ) ) : '';
+			$new_url   = isset( $_POST['new_url'] ) ? esc_url_raw( wp_unslash( $_POST['new_url'] ) ) : '';
 
-		if ( ! $post_id || '' === $old_url || '' === $new_url ) {
-			wp_send_json_error( array( 'message' => __( 'Missing URL data.', 'native-link-health' ) ), 400 );
-		}
+			if ( ! $post_id || '' === $old_url || '' === $new_url ) {
+				$this->clean_output_buffer();
+				wp_send_json_error( array( 'message' => __( 'Missing URL data.', 'native-link-health' ) ), 400 );
+			}
 
-		if ( ! nlh_update_post_link( $post_id, $old_url, $new_url ) ) {
-			wp_send_json_error( array( 'message' => __( 'URL was not found in post content.', 'native-link-health' ) ), 404 );
-		}
+			if ( ! nlh_update_post_link( $post_id, $old_url, $new_url ) ) {
+				$this->clean_output_buffer();
+				wp_send_json_error( array( 'message' => __( 'URL was not found in post content.', 'native-link-health' ) ), 404 );
+			}
 
-		global $wpdb;
-		$table = $wpdb->prefix . 'nlh_link_errors';
+			global $wpdb;
+			$table = $wpdb->prefix . 'nlh_link_errors';
 
-		$this->log_correction( $post_id, $old_url, $new_url, 'manual' );
-		$this->scanner->clear_url_cache( $old_url, $post_id );
-		$this->scanner->clear_url_cache( $new_url, $post_id );
-		delete_post_meta( $post_id, '_nlh_last_scan' );
+			$this->log_correction( $post_id, $old_url, $new_url, 'manual' );
+			$this->scanner->clear_url_cache( $old_url, $post_id );
+			$this->scanner->clear_url_cache( $new_url, $post_id );
+			delete_post_meta( $post_id, '_nlh_last_scan' );
 
-		if ( $record_id <= 0 ) {
-			$record_id = (int) $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT id FROM {$table} WHERE post_id = %d AND url_hash = %s LIMIT 1",
-					$post_id,
-					md5( $old_url )
+			if ( $record_id <= 0 ) {
+				$record_id = (int) $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT id FROM {$table} WHERE post_id = %d AND url_hash = %s LIMIT 1",
+						$post_id,
+						md5( $old_url )
+					)
+				);
+			}
+
+			$result = $this->scanner->recheck_url( $new_url, $post_id, $record_id );
+
+			$this->clean_output_buffer();
+			wp_send_json_success(
+				array_merge(
+					array( 'message' => __( 'URL corrected and re-checked.', 'native-link-health' ) ),
+					$result
 				)
 			);
-		}
-
-		$result = $this->scanner->recheck_url( $new_url, $post_id, $record_id );
-
-		wp_send_json_success(
-			array_merge(
-				array( 'message' => __( 'URL corrected and re-checked.', 'native-link-health' ) ),
-				$result
-			)
-		);
+		} );
 	}
 
 	/**
@@ -464,17 +481,21 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function ajax_recheck_url(): void {
-		$this->verify_ajax_request();
+		$this->run_ajax_safe( function () {
+			$this->verify_ajax_request();
 
-		$url       = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
-		$post_id   = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
-		$record_id = isset( $_POST['record_id'] ) ? absint( $_POST['record_id'] ) : 0;
+			$url       = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
+			$post_id   = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+			$record_id = isset( $_POST['record_id'] ) ? absint( $_POST['record_id'] ) : 0;
 
-		if ( '' === $url || ! $post_id || ! $record_id ) {
-			wp_send_json_error( array( 'message' => __( 'Missing re-check data.', 'native-link-health' ) ), 400 );
-		}
+			if ( '' === $url || ! $post_id || ! $record_id ) {
+				$this->clean_output_buffer();
+				wp_send_json_error( array( 'message' => __( 'Missing re-check data.', 'native-link-health' ) ), 400 );
+			}
 
-		wp_send_json_success( $this->scanner->recheck_url( $url, $post_id, $record_id ) );
+			$this->clean_output_buffer();
+			wp_send_json_success( $this->scanner->recheck_url( $url, $post_id, $record_id ) );
+		} );
 	}
 
 	/**
@@ -483,56 +504,60 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function ajax_ignore_url(): void {
-		$this->verify_ajax_request();
+		$this->run_ajax_safe( function () {
+			$this->verify_ajax_request();
 
-		$url       = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
-		$post_id   = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
-		$record_id = isset( $_POST['record_id'] ) ? absint( $_POST['record_id'] ) : 0;
+			$url       = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
+			$post_id   = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+			$record_id = isset( $_POST['record_id'] ) ? absint( $_POST['record_id'] ) : 0;
 
-		if ( '' === $url || ! $record_id ) {
-			wp_send_json_error( array( 'message' => __( 'Missing ignore data.', 'native-link-health' ) ), 400 );
-		}
+			if ( '' === $url || ! $record_id ) {
+				$this->clean_output_buffer();
+				wp_send_json_error( array( 'message' => __( 'Missing ignore data.', 'native-link-health' ) ), 400 );
+			}
 
-		$ignored = get_option( 'nlh_ignored_urls', array() );
+			$ignored = get_option( 'nlh_ignored_urls', array() );
 
-		if ( ! is_array( $ignored ) ) {
-			$ignored = array();
-		}
+			if ( ! is_array( $ignored ) ) {
+				$ignored = array();
+			}
 
-		if ( ! in_array( $url, $ignored, true ) ) {
-			$ignored[] = $url;
-			update_option( 'nlh_ignored_urls', array_values( $ignored ) );
-		}
+			if ( ! in_array( $url, $ignored, true ) ) {
+				$ignored[] = $url;
+				update_option( 'nlh_ignored_urls', array_values( $ignored ) );
+			}
 
-		global $wpdb;
-		$table    = $wpdb->prefix . 'nlh_link_errors';
-		$url_hash = md5( $url );
+			global $wpdb;
+			$table    = $wpdb->prefix . 'nlh_link_errors';
+			$url_hash = md5( $url );
 
-		if ( $post_id > 0 ) {
-			$this->scanner->record_link_event( $url_hash, $post_id, 'ignored', 0 );
-		}
+			if ( $post_id > 0 ) {
+				$this->scanner->record_link_event( $url_hash, $post_id, 'ignored', 0 );
+			}
 
-		$where   = array( 'url_hash' => $url_hash );
-		$formats = array( '%s' );
-		if ( ! empty( $_POST['post_id'] ) ) {
-			$where['post_id'] = $post_id;
-			$formats[] = '%d';
-		}
-		$wpdb->delete( $table, $where, $formats );
-		delete_transient( 'nlh_ok_' . $url_hash );
+			$where   = array( 'url_hash' => $url_hash );
+			$formats = array( '%s' );
+			if ( ! empty( $_POST['post_id'] ) ) {
+				$where['post_id'] = $post_id;
+				$formats[] = '%d';
+			}
+			$wpdb->delete( $table, $where, $formats );
+			delete_transient( 'nlh_ok_' . $url_hash );
 
-		$retry_prefix         = $wpdb->esc_like( '_transient_nlh_retry_' . $url_hash . '_' ) . '%';
-		$retry_timeout_prefix = $wpdb->esc_like( '_transient_timeout_nlh_retry_' . $url_hash . '_' ) . '%';
+			$retry_prefix         = $wpdb->esc_like( '_transient_nlh_retry_' . $url_hash . '_' ) . '%';
+			$retry_timeout_prefix = $wpdb->esc_like( '_transient_timeout_nlh_retry_' . $url_hash . '_' ) . '%';
 
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
-				$retry_prefix,
-				$retry_timeout_prefix
-			)
-		);
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+					$retry_prefix,
+					$retry_timeout_prefix
+				)
+			);
 
-		wp_send_json_success( array( 'message' => __( 'URL ignored.', 'native-link-health' ) ) );
+			$this->clean_output_buffer();
+			wp_send_json_success( array( 'message' => __( 'URL ignored.', 'native-link-health' ) ) );
+		} );
 	}
 
 	/**
@@ -541,33 +566,48 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function ajax_run_now(): void {
-		check_ajax_referer( 'nlh_run_now_action', 'nonce' );
+		$this->run_ajax_safe( function () {
+			check_ajax_referer( 'nlh_run_now_action', 'nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'native-link-health' ) ), 403 );
-		}
+			if ( ! current_user_can( 'manage_options' ) ) {
+				$this->clean_output_buffer();
+				wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'native-link-health' ) ), 403 );
+			}
 
-		$mode       = isset( $_POST['mode'] ) ? sanitize_key( wp_unslash( $_POST['mode'] ) ) : 'quick';
-		$offset     = isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0;
-		$chunk_size = 'full' === $mode ? 50 : 5;
-		$result     = $this->scanner->run_full_scan( $chunk_size, $offset );
+			// Prevent PHP timeout during long scans with many HTTP requests.
+			if ( function_exists( 'set_time_limit' ) ) {
+				set_time_limit( 0 );
+			}
 
-		$result['message'] = sprintf(
-			/* translators: 1: scanned count, 2: total count. */
-			__( 'Manual scan progress: %1$d of %2$d posts.', 'native-link-health' ),
-			(int) $result['scanned'],
-			(int) $result['total']
-		);
+			// Raise memory limit for large content processing.
+			if ( function_exists( 'wp_raise_memory_limit' ) ) {
+				wp_raise_memory_limit( 'admin' );
+			}
 
-		if ( ! empty( $result['done'] ) ) {
+			$mode       = isset( $_POST['mode'] ) ? sanitize_key( wp_unslash( $_POST['mode'] ) ) : 'quick';
+			$offset     = isset( $_POST['offset'] ) ? absint( $_POST['offset'] ) : 0;
+			$chunk_size = 'full' === $mode ? 50 : 5;
+
+			$result = $this->scanner->run_full_scan( $chunk_size, $offset );
+
 			$result['message'] = sprintf(
-				/* translators: %d: scanned post count. */
-				__( 'Manual scan complete. Posts scanned: %d.', 'native-link-health' ),
-				(int) $result['scanned']
+				/* translators: 1: scanned count, 2: total count. */
+				__( 'Manual scan progress: %1$d of %2$d posts.', 'native-link-health' ),
+				(int) $result['scanned'],
+				(int) $result['total']
 			);
-		}
 
-		wp_send_json_success( $result );
+			if ( ! empty( $result['done'] ) ) {
+				$result['message'] = sprintf(
+					/* translators: %d: scanned post count. */
+					__( 'Manual scan complete. Posts scanned: %d.', 'native-link-health' ),
+					(int) $result['scanned']
+				);
+			}
+
+			$this->clean_output_buffer();
+			wp_send_json_success( $result );
+		} );
 	}
 
 	/**
@@ -576,55 +616,59 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function ajax_bulk_correct(): void {
-		$this->verify_ajax_request();
+		$this->run_ajax_safe( function () {
+			$this->verify_ajax_request();
 
-		$pattern     = isset( $_POST['pattern'] ) ? sanitize_text_field( wp_unslash( $_POST['pattern'] ) ) : '';
-		$type        = isset( $_POST['type'] ) ? sanitize_key( wp_unslash( $_POST['type'] ) ) : 'domain_death';
-		$replacement = isset( $_POST['replacement'] ) ? esc_url_raw( wp_unslash( $_POST['replacement'] ) ) : '';
+			$pattern     = isset( $_POST['pattern'] ) ? sanitize_text_field( wp_unslash( $_POST['pattern'] ) ) : '';
+			$type        = isset( $_POST['type'] ) ? sanitize_key( wp_unslash( $_POST['type'] ) ) : 'domain_death';
+			$replacement = isset( $_POST['replacement'] ) ? esc_url_raw( wp_unslash( $_POST['replacement'] ) ) : '';
 
-		if ( '' === $pattern ) {
-			wp_send_json_error( array( 'message' => __( 'Missing correction pattern.', 'native-link-health' ) ), 400 );
-		}
-
-		global $wpdb;
-		$table = $wpdb->prefix . 'nlh_link_errors';
-		$rows  = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT id, post_id, raw_url, url_hash FROM {$table} WHERE raw_url LIKE %s",
-				'%://' . $wpdb->esc_like( $pattern ) . '%'
-			)
-		);
-		$count = 0;
-
-		foreach ( (array) $rows as $row ) {
-			$old_url = (string) $row->raw_url;
-			$new_url = $this->build_bulk_replacement_url( $old_url, $pattern, $replacement, $type );
-
-			if ( $old_url === $new_url ) {
-				continue;
+			if ( '' === $pattern ) {
+				$this->clean_output_buffer();
+				wp_send_json_error( array( 'message' => __( 'Missing correction pattern.', 'native-link-health' ) ), 400 );
 			}
 
-			if ( nlh_update_post_link( (int) $row->post_id, $old_url, $new_url ) ) {
-				++$count;
-				$this->log_correction( (int) $row->post_id, $old_url, $new_url, 'bulk' );
-				$this->scanner->clear_url_cache( $old_url, (int) $row->post_id );
-				$this->scanner->clear_url_cache( $new_url, (int) $row->post_id );
-				$this->scanner->delete_error_record( (int) $row->id, (int) $row->post_id, (string) $row->url_hash );
+			global $wpdb;
+			$table = $wpdb->prefix . 'nlh_link_errors';
+			$rows  = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT id, post_id, raw_url, url_hash FROM {$table} WHERE raw_url LIKE %s",
+					'%://' . $wpdb->esc_like( $pattern ) . '%'
+				)
+			);
+			$count = 0;
+
+			foreach ( (array) $rows as $row ) {
+				$old_url = (string) $row->raw_url;
+				$new_url = $this->build_bulk_replacement_url( $old_url, $pattern, $replacement, $type );
+
+				if ( $old_url === $new_url ) {
+					continue;
+				}
+
+				if ( nlh_update_post_link( (int) $row->post_id, $old_url, $new_url ) ) {
+					++$count;
+					$this->log_correction( (int) $row->post_id, $old_url, $new_url, 'bulk' );
+					$this->scanner->clear_url_cache( $old_url, (int) $row->post_id );
+					$this->scanner->clear_url_cache( $new_url, (int) $row->post_id );
+					$this->scanner->delete_error_record( (int) $row->id, (int) $row->post_id, (string) $row->url_hash );
+				}
 			}
-		}
 
-		delete_transient( 'nlh_suggestions' );
+			delete_transient( 'nlh_suggestions' );
 
-		wp_send_json_success(
-			array(
-				'message' => sprintf(
-					/* translators: %d: corrected link count. */
-					__( 'Corrected %d links.', 'native-link-health' ),
-					$count
-				),
-				'count'   => $count,
-			)
-		);
+			$this->clean_output_buffer();
+			wp_send_json_success(
+				array(
+					'message' => sprintf(
+						/* translators: %d: corrected link count. */
+						__( 'Corrected %d links.', 'native-link-health' ),
+						$count
+					),
+					'count'   => $count,
+				)
+			);
+		} );
 	}
 
 	/**
@@ -633,20 +677,23 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function ajax_run_seo_audit(): void {
-		$this->verify_ajax_request();
+		$this->run_ajax_safe( function () {
+			$this->verify_ajax_request();
 
-		$audit   = new NLH_SEO_Audit();
-		$results = array(
-			'orphan_pages'       => $audit->audit_orphan_pages(),
-			'redirect_chains'    => $audit->audit_redirect_chains(),
-			'mixed_content'      => $audit->audit_mixed_content(),
-			'invalid_canonicals' => $audit->audit_invalid_canonicals(),
-			'redundant_links'    => $audit->audit_redundant_links(),
-		);
+			$audit   = new NLH_SEO_Audit();
+			$results = array(
+				'orphan_pages'       => $audit->audit_orphan_pages(),
+				'redirect_chains'    => $audit->audit_redirect_chains(),
+				'mixed_content'      => $audit->audit_mixed_content(),
+				'invalid_canonicals' => $audit->audit_invalid_canonicals(),
+				'redundant_links'    => $audit->audit_redundant_links(),
+			);
 
-		set_transient( 'nlh_seo_audit_results', $results, DAY_IN_SECONDS );
+			set_transient( 'nlh_seo_audit_results', $results, DAY_IN_SECONDS );
 
-		wp_send_json_success( $results );
+			$this->clean_output_buffer();
+			wp_send_json_success( $results );
+		} );
 	}
 
 	/**
@@ -655,26 +702,30 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function ajax_get_timeline(): void {
-		$this->verify_ajax_request();
+		$this->run_ajax_safe( function () {
+			$this->verify_ajax_request();
 
-		$url_hash = isset( $_POST['url_hash'] ) ? sanitize_text_field( wp_unslash( $_POST['url_hash'] ) ) : '';
-		$post_id  = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+			$url_hash = isset( $_POST['url_hash'] ) ? sanitize_text_field( wp_unslash( $_POST['url_hash'] ) ) : '';
+			$post_id  = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
 
-		if ( '' === $url_hash || ! $post_id ) {
-			wp_send_json_error( array( 'message' => __( 'Missing timeline data.', 'native-link-health' ) ), 400 );
-		}
+			if ( '' === $url_hash || ! $post_id ) {
+				$this->clean_output_buffer();
+				wp_send_json_error( array( 'message' => __( 'Missing timeline data.', 'native-link-health' ) ), 400 );
+			}
 
-		global $wpdb;
-		$events = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT event_type, status_code, event_at FROM {$wpdb->prefix}nlh_link_events WHERE url_hash = %s AND post_id = %d ORDER BY event_at ASC",
-				$url_hash,
-				$post_id
-			),
-			ARRAY_A
-		);
+			global $wpdb;
+			$events = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT event_type, status_code, event_at FROM {$wpdb->prefix}nlh_link_events WHERE url_hash = %s AND post_id = %d ORDER BY event_at ASC",
+					$url_hash,
+					$post_id
+				),
+				ARRAY_A
+			);
 
-		wp_send_json_success( is_array( $events ) ? $events : array() );
+			$this->clean_output_buffer();
+			wp_send_json_success( is_array( $events ) ? $events : array() );
+		} );
 	}
 
 	/**
@@ -753,6 +804,39 @@ class NLH_Admin {
 	 *
 	 * @return void
 	 */
+	/**
+	 * Discards any stray output (warnings, notices) before sending JSON.
+	 * Call before every wp_send_json_success/error to prevent JSON parse errors.
+	 */
+	private function clean_output_buffer(): void {
+		if ( ob_get_level() ) {
+			ob_clean();
+		}
+	}
+
+	/**
+	 * Wraps a callback in output-buffer cleanup so stray PHP notices
+	 * don't corrupt the JSON response. Any \Throwable is caught and
+	 * returned as a JSON error.
+	 *
+	 * @param callable $callback The AJAX logic to run.
+	 * @return void
+	 */
+	private function run_ajax_safe( callable $callback ): void {
+		try {
+			$callback();
+		} catch ( \Throwable $e ) {
+			if ( ob_get_level() ) {
+				ob_clean();
+			}
+			wp_send_json_error(
+				array(
+					'message' => __( 'Server error: ', 'native-link-health' ) . $e->getMessage(),
+				)
+			);
+		}
+	}
+
 	private function verify_ajax_request(): void {
 		check_ajax_referer( 'nlh_ajax_nonce', 'nonce' );
 
