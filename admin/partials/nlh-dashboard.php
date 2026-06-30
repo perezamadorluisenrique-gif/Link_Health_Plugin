@@ -10,34 +10,53 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $render_card = function ( $row ) {
-	$post_id       = absint( $row->post_id );
-	$record_id     = absint( $row->id );
-	$raw_url       = (string) $row->raw_url;
-	$display_url   = wp_html_excerpt( $raw_url, 72, '...' );
-	$post_title    = get_the_title( $post_id );
-	$post_title    = $post_title ? $post_title : __( '(no title)', 'native-link-health' );
-	$edit_post_url = get_edit_post_link( $post_id, '' );
-	$status_code   = (int) $row->status_code;
-	$impact_score  = isset( $row->impact_score ) ? (int) $row->impact_score : 0;
-	$discovered    = (string) $row->discovered_at;
+	$post_id     = absint( $row->post_id );
+	$record_id   = absint( $row->id );
+	$raw_url     = (string) $row->raw_url;
+	$display_url = wp_html_excerpt( $raw_url, 72, '...' );
+	$source_type = isset( $row->source_type ) ? (string) $row->source_type : 'post';
+	$is_post_src = ( 'post' === $source_type );
+
+	if ( 'comment' === $source_type ) {
+		// post_id holds the comment id for comment-sourced records.
+		$comment       = get_comment( $post_id );
+		$parent_post   = $comment ? (int) $comment->comment_post_ID : 0;
+		$parent_title  = $parent_post ? get_the_title( $parent_post ) : '';
+		$post_title    = $parent_title
+			? sprintf( /* translators: %s: post title. */ __( 'Comment on “%s”', 'native-link-health' ), $parent_title )
+			: __( '(comment)', 'native-link-health' );
+		$edit_post_url = $comment ? get_edit_comment_link( $post_id ) : '';
+		$source_label  = __( 'Comment', 'native-link-health' );
+	} elseif ( 'menu' === $source_type ) {
+		$post_title    = __( 'Navigation menu', 'native-link-health' );
+		$edit_post_url = admin_url( 'nav-menus.php' );
+		$source_label  = __( 'Menu', 'native-link-health' );
+	} else {
+		$post_title    = get_the_title( $post_id );
+		$post_title    = $post_title ? $post_title : __( '(no title)', 'native-link-health' );
+		$edit_post_url = get_edit_post_link( $post_id, '' );
+		$source_label  = '';
+	}
+
+	$status_code    = (int) $row->status_code;
+	$impact_score   = isset( $row->impact_score ) ? (int) $row->impact_score : 0;
+	$discovered     = (string) $row->discovered_at;
 	$discovered_ymd = $discovered ? substr( $discovered, 0, 10 ) : '';
-	$post          = get_post( $post_id );
-	$post_age_days = $post ? ( time() - (int) get_post_time( 'U', true, $post ) ) / DAY_IN_SECONDS : 9999;
-	$is_front      = (int) get_option( 'page_on_front' ) === $post_id;
-	$is_regression = ! empty( $row->is_regression );
-	$error_type    = 'timeout';
-	$severity      = 'low';
+	$post           = $is_post_src ? get_post( $post_id ) : null;
+	$post_age_days  = $post ? ( time() - (int) get_post_time( 'U', true, $post ) ) / DAY_IN_SECONDS : 9999;
+	$is_front       = $is_post_src && (int) get_option( 'page_on_front' ) === $post_id;
+	$is_regression  = ! empty( $row->is_regression );
+	$error_type     = $this->scanner->classify_error_type( $status_code, (string) $row->error_message );
+	$severity       = 'low';
 
 	if ( $status_code >= 500 ) {
-		$error_type = '5xx';
-		$severity   = 'critical';
+		$severity = 'critical';
 	} elseif ( $status_code >= 400 ) {
-		$error_type = '4xx';
-		$severity   = 410 === $status_code ? 'low' : 'medium';
+		$severity = 410 === $status_code ? 'low' : 'medium';
 
 		if ( 404 === $status_code && $is_front ) {
 			$severity = 'critical';
-		} elseif ( $status_code < 500 && $post_age_days < 90 && 410 !== $status_code ) {
+		} elseif ( $post_age_days < 90 && 410 !== $status_code ) {
 			$severity = 'high';
 		}
 	}
@@ -60,6 +79,7 @@ $render_card = function ( $row ) {
 		data-url-hash="<?php echo esc_attr( (string) $row->url_hash ); ?>"
 		data-post-title="<?php echo esc_attr( $post_title ); ?>"
 		data-error-type="<?php echo esc_attr( $error_type ); ?>"
+		data-source="<?php echo esc_attr( $source_type ); ?>"
 		data-discovered="<?php echo esc_attr( $discovered_ymd ); ?>"
 		data-regression="<?php echo esc_attr( $is_regression ? '1' : '0' ); ?>"
 	>
@@ -76,18 +96,36 @@ $render_card = function ( $row ) {
 					<?php echo esc_html( $display_url ); ?>
 				</a>
 				<div class="nlh-card-meta">
-					<?php echo wp_kses_post( $this->get_status_badge( $status_code ) ); ?>
-					<span class="nlh-impact-pill nlh-impact-<?php echo esc_attr( $impact_class ); ?>">
+					<?php if ( $source_label ) :
+						$source_tooltips = array(
+							'comment' => __( 'This broken link was found inside a comment, not in post content.', 'native-link-health' ),
+							'menu'    => __( 'This broken link was found in a navigation menu item.', 'native-link-health' ),
+						);
+						$source_tip = isset( $source_tooltips[ $source_type ] ) ? $source_tooltips[ $source_type ] : '';
+					?>
+						<span class="nlh-source-badge nlh-source-<?php echo esc_attr( $source_type ); ?>"<?php echo $source_tip ? ' title="' . esc_attr( $source_tip ) . '"' : ''; ?>><?php echo esc_html( $source_label ); ?></span>
+					<?php endif; ?>
+					<?php echo wp_kses_post( $this->get_status_badge( $status_code, $error_type ) ); ?>
+					<?php
+					$impact_tips = array(
+						'critical' => __( 'Critical impact (≥85): fixing this link should be your top priority — it affects high-traffic or high-authority pages.', 'native-link-health' ),
+						'high'     => __( 'High impact (60–84): this broken link noticeably affects your site\'s authority or user experience.', 'native-link-health' ),
+						'medium'   => __( 'Medium impact (25–59): worth fixing, but lower priority than high-impact links.', 'native-link-health' ),
+						'low'      => __( 'Low impact (<25): minor broken link with little effect on authority or traffic.', 'native-link-health' ),
+					);
+					$impact_tip = $impact_tips[ $impact_class ] ?? '';
+					?>
+					<span class="nlh-impact-pill nlh-impact-<?php echo esc_attr( $impact_class ); ?>"<?php echo $impact_tip ? ' title="' . esc_attr( $impact_tip ) . '"' : ''; ?>>
 						<?php
 						printf(
 							/* translators: %d: impact score. */
 							esc_html__( 'Impact %d', 'native-link-health' ),
-							$impact_score
+							(int) $impact_score
 						);
 						?>
 					</span>
 					<?php if ( $is_regression ) : ?>
-						<span class="nlh-regression-badge"><?php esc_html_e( 'Regression', 'native-link-health' ); ?></span>
+						<span class="nlh-regression-badge" title="<?php esc_attr_e( 'Regression: this link was working before but recently broke — it may indicate a site migration, domain change, or content removal.', 'native-link-health' ); ?>"><?php esc_html_e( 'Regression', 'native-link-health' ); ?></span>
 					<?php endif; ?>
 					<span class="nlh-error-cell"><?php echo esc_html( (string) $row->error_message ); ?></span>
 					<span>
@@ -102,12 +140,15 @@ $render_card = function ( $row ) {
 				</div>
 			</div>
 			<div class="nlh-card-actions">
-				<a href="#" class="button button-small nlh-edit-toggle"><?php esc_html_e( 'Edit URL', 'native-link-health' ); ?></a>
-				<a href="#" class="button button-small nlh-recheck-url"><?php esc_html_e( 'Re-check', 'native-link-health' ); ?></a>
+				<?php if ( $is_post_src ) : ?>
+					<a href="#" class="button button-small nlh-edit-toggle"><?php esc_html_e( 'Edit URL', 'native-link-health' ); ?></a>
+					<a href="#" class="button button-small nlh-recheck-url"><?php esc_html_e( 'Re-check', 'native-link-health' ); ?></a>
+				<?php endif; ?>
 				<a href="#" class="button button-small nlh-ignore-url"><?php esc_html_e( 'Ignore', 'native-link-health' ); ?></a>
 				<button type="button" class="button button-small nlh-toggle-timeline"><?php esc_html_e( 'History', 'native-link-health' ); ?></button>
 			</div>
 		</div>
+		<?php if ( $is_post_src ) : ?>
 		<div class="nlh-inline-edit-row" hidden>
 			<form class="nlh-inline-edit-form">
 				<input type="hidden" name="post_id" value="<?php echo esc_attr( (string) $post_id ); ?>">
@@ -121,6 +162,7 @@ $render_card = function ( $row ) {
 				<button type="button" class="button button-small nlh-cancel-edit"><?php esc_html_e( 'Cancel', 'native-link-health' ); ?></button>
 			</form>
 		</div>
+		<?php endif; ?>
 		<div class="nlh-timeline-wrapper" hidden>
 			<div class="nlh-timeline" data-url-hash="<?php echo esc_attr( (string) $row->url_hash ); ?>" data-post-id="<?php echo esc_attr( (string) $post_id ); ?>"></div>
 		</div>
@@ -148,6 +190,8 @@ $render_card = function ( $row ) {
 		</form>
 	</div>
 
+	<?php $this->render_health_overview(); ?>
+
 	<?php $this->render_metrics_panel(); ?>
 
 	<div class="nlh-scan-progress" hidden>
@@ -169,7 +213,35 @@ $render_card = function ( $row ) {
 		?>
 	</p>
 
-	<div class="nlh-filter-bar">
+	<?php if ( $posts_scanned < $total_posts ) : ?>
+	<div class="nlh-scan-incomplete-notice" role="status">
+		<span class="dashicons dashicons-clock" aria-hidden="true"></span>
+		<div>
+			<strong><?php esc_html_e( 'Scan in progress — results may be incomplete', 'native-link-health' ); ?></strong>
+			<span>
+			<?php
+			if ( 0 === $posts_scanned ) {
+				esc_html_e( 'No posts have been scanned yet. The background scanner will start automatically, or click "Run Scan Now" for an immediate check.', 'native-link-health' );
+			} else {
+				printf(
+					/* translators: 1: posts scanned so far, 2: total posts to scan. */
+					esc_html__( '%1$d of %2$d posts scanned so far. The scanner processes a few posts at a time to keep your site fast — results will fill in as it runs.', 'native-link-health' ),
+					absint( $posts_scanned ),
+					absint( $total_posts )
+				);
+			}
+			?>
+			</span>
+		</div>
+	</div>
+	<?php endif; ?>
+
+	<p class="nlh-gentle-note">
+		<span class="dashicons dashicons-shield-alt" aria-hidden="true"></span>
+		<?php esc_html_e( 'Scanning is gentle by design: a few links at a time, 100% on your own server. No cloud, no accounts, and it never spikes your site. Editing a post? Use “Scan Now” in the editor sidebar for an instant check.', 'native-link-health' ); ?>
+	</p>
+
+	<div class="nlh-filter-bar" id="nlh-broken-links">
 		<div class="nlh-filter-group">
 			<label>
 				<span><?php esc_html_e( 'Error Type', 'native-link-health' ); ?></span>
@@ -177,7 +249,10 @@ $render_card = function ( $row ) {
 					<option value="all"><?php esc_html_e( 'All', 'native-link-health' ); ?></option>
 					<option value="4xx"><?php esc_html_e( '4xx', 'native-link-health' ); ?></option>
 					<option value="5xx"><?php esc_html_e( '5xx', 'native-link-health' ); ?></option>
-					<option value="timeout"><?php esc_html_e( 'Timeout', 'native-link-health' ); ?></option>
+					<option value="fragment"><?php esc_html_e( 'Missing anchor', 'native-link-health' ); ?></option>
+					<option value="dns"><?php esc_html_e( 'DNS', 'native-link-health' ); ?></option>
+					<option value="ssl"><?php esc_html_e( 'SSL', 'native-link-health' ); ?></option>
+					<option value="timeout"><?php esc_html_e( 'Timeout / connection', 'native-link-health' ); ?></option>
 				</select>
 			</label>
 			<label>
@@ -232,6 +307,21 @@ $render_card = function ( $row ) {
 		</div>
 	<?php endif; ?>
 
+	<?php
+	// Pro touchpoints. Each renders only when the monetization layer is enabled
+	// (and the feature is not already licensed); otherwise nothing appears.
+	NLH_Pro::upsell_card( 'bulk_fix' );
+	NLH_Pro::upsell_card( 'reporting' );
+
+	/**
+	 * Extension point: the Pro plugin injects its bulk find-and-replace and
+	 * scheduled-report tools here.
+	 *
+	 * @since 1.3.0
+	 */
+	do_action( 'nlh_dashboard_tools' );
+	?>
+
 	<?php if ( empty( $rows ) && empty( $groups ) ) : ?>
 		<div class="nlh-empty-state">
 			<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
@@ -270,28 +360,72 @@ $render_card = function ( $row ) {
 	<?php endif; ?>
 
 	<?php if ( $total_pages > 1 ) : ?>
-		<div class="tablenav bottom">
-			<div class="tablenav-pages">
-				<?php
-				echo wp_kses_post(
-					paginate_links(
-						array(
-							'base'      => add_query_arg( 'paged', '%#%' ),
-							'format'    => '',
-							'current'   => $paged,
-							'total'     => $total_pages,
-							'prev_text' => __( '&laquo;', 'native-link-health' ),
-							'next_text' => __( '&raquo;', 'native-link-health' ),
-						)
-					)
-				);
-				?>
-			</div>
-		</div>
-	<?php endif; ?>
+	<?php
+	$nlh_page_url = static fn( int $p ): string => esc_url( add_query_arg( 'paged', $p ) );
 
-	<p class="nlh-pro-footer">
-		<?php esc_html_e( 'Scanning Custom Post Types is available in Native Link Health Pro.', 'native-link-health' ); ?>
-		<a href="<?php echo esc_url( NLH_UPGRADE_URL ); ?>"><?php esc_html_e( 'Upgrade to Pro', 'native-link-health' ); ?></a>
-	</p>
+	$nlh_visible = array();
+	for ( $i = 1; $i <= $total_pages; $i++ ) {
+		if ( 1 === $i || $total_pages === $i || abs( $i - $paged ) <= 1 ) {
+			$nlh_visible[] = $i;
+		}
+	}
+	$nlh_visible = array_unique( $nlh_visible );
+	sort( $nlh_visible );
+	?>
+	<nav class="nlh-pagination" aria-label="<?php esc_attr_e( 'Navegación de páginas', 'native-link-health' ); ?>">
+		<span class="nlh-pagination__counter">
+			<?php
+			echo wp_kses(
+				sprintf(
+					/* translators: 1: current page number, 2: total pages */
+					__( 'Página %1$s de %2$s', 'native-link-health' ),
+					'<strong>' . absint( $paged ) . '</strong>',
+					'<strong>' . absint( $total_pages ) . '</strong>'
+				),
+				array( 'strong' => array() )
+			);
+			?>
+		</span>
+		<div class="nlh-pagination__controls">
+			<?php if ( $paged > 1 ) : ?>
+				<a href="<?php echo $nlh_page_url( $paged - 1 ); ?>" class="nlh-pagination__btn nlh-pagination__btn--prev">
+					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M8 2.5L3.5 6.5L8 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					<?php esc_html_e( 'Anterior', 'native-link-health' ); ?>
+				</a>
+			<?php else : ?>
+				<span class="nlh-pagination__btn nlh-pagination__btn--prev is-disabled" aria-disabled="true">
+					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M8 2.5L3.5 6.5L8 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					<?php esc_html_e( 'Anterior', 'native-link-health' ); ?>
+				</span>
+			<?php endif; ?>
+
+			<?php
+			$nlh_prev_p = null;
+			foreach ( $nlh_visible as $nlh_p ) :
+				if ( null !== $nlh_prev_p && $nlh_p - $nlh_prev_p > 1 ) :
+					?><span class="nlh-pagination__dots" aria-hidden="true">…</span><?php
+				endif;
+				if ( $nlh_p === $paged ) :
+					?><span class="nlh-pagination__btn is-current" aria-current="page"><?php echo absint( $nlh_p ); ?></span><?php
+				else :
+					?><a href="<?php echo $nlh_page_url( $nlh_p ); ?>" class="nlh-pagination__btn"><?php echo absint( $nlh_p ); ?></a><?php
+				endif;
+				$nlh_prev_p = $nlh_p;
+			endforeach;
+			?>
+
+			<?php if ( $paged < $total_pages ) : ?>
+				<a href="<?php echo $nlh_page_url( $paged + 1 ); ?>" class="nlh-pagination__btn nlh-pagination__btn--next">
+					<?php esc_html_e( 'Siguiente', 'native-link-health' ); ?>
+					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M5 2.5L9.5 6.5L5 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</a>
+			<?php else : ?>
+				<span class="nlh-pagination__btn nlh-pagination__btn--next is-disabled" aria-disabled="true">
+					<?php esc_html_e( 'Siguiente', 'native-link-health' ); ?>
+					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M5 2.5L9.5 6.5L5 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				</span>
+			<?php endif; ?>
+		</div>
+	</nav>
+	<?php endif; ?>
 </div>

@@ -19,10 +19,11 @@ class NLH_SEO_Audit {
 	 * @return array
 	 */
 	public function audit_orphan_pages(): array {
-		$posts       = $this->get_public_posts();
-		$all_ids     = wp_list_pluck( $posts, 'ID' );
-		$front_page  = (int) get_option( 'page_on_front' );
-		$linked_ids  = array();
+		$posts      = $this->get_public_posts();
+		$all_ids    = wp_list_pluck( $posts, 'ID' );
+		$front_page = (int) get_option( 'page_on_front' );
+		$posts_page = (int) get_option( 'page_for_posts' );
+		$linked_ids = $this->get_nav_menu_linked_ids();
 
 		foreach ( $posts as $post ) {
 			foreach ( $this->extract_attribute_values( $post->post_content, 'A', 'href' ) as $href ) {
@@ -34,7 +35,16 @@ class NLH_SEO_Audit {
 			}
 		}
 
-		$orphans = array_values( array_diff( $all_ids, array_unique( $linked_ids ), array( $front_page ) ) );
+		// A page is only an orphan if nothing links to it: not content links,
+		// not navigation menus, and it is not the front page or posts page
+		// (which WordPress links to structurally).
+		$orphans = array_values(
+			array_diff(
+				$all_ids,
+				array_unique( $linked_ids ),
+				array_filter( array( $front_page, $posts_page ) )
+			)
+		);
 
 		return $this->result(
 			empty( $orphans ) ? 'pass' : 'warning',
@@ -45,12 +55,188 @@ class NLH_SEO_Audit {
 	}
 
 	/**
-	 * Redirect chain audit placeholder.
+	 * Detects internal links that pass through a redirect chain (two or more hops)
+	 * or whose redirect ends in an error. Probing is bounded and restricted to the
+	 * site's own host (no external hammering, no SSRF), and follows redirects by
+	 * hand so the hop count is real — not "informational only".
+	 *
+	 * Single clean 301 -> 200 redirects are intentionally NOT flagged: one hop is
+	 * fine. We only surface what actually hurts: multi-hop chains and redirects to
+	 * a dead end. This keeps the no-false-positives promise.
 	 *
 	 * @return array
 	 */
 	public function audit_redirect_chains(): array {
-		return $this->result( 'warning', 0, array(), __( 'Redirect chain auditing requires HEAD scan history.', 'native-link-health' ) );
+		/**
+		 * Filters how many distinct internal links the redirect audit probes.
+		 *
+		 * Bounded by default so the audit stays gentle on large sites.
+		 *
+		 * @since 1.3.0
+		 * @param int $limit Maximum URLs probed per run.
+		 */
+		$limit     = max( 1, (int) apply_filters( 'nlh_redirect_chain_scan_limit', 50 ) );
+		$home_host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		$seen      = array();
+		$items     = array();
+		$probed    = 0;
+		$truncated = false;
+
+		foreach ( $this->get_public_posts() as $post ) {
+			foreach ( $this->extract_attribute_values( $post->post_content, 'A', 'href' ) as $href ) {
+				$host = strtolower( (string) wp_parse_url( $href, PHP_URL_HOST ) );
+
+				// Only probe absolute, same-host links once each.
+				if ( '' === $host || $host !== $home_host || isset( $seen[ $href ] ) ) {
+					continue;
+				}
+				$seen[ $href ] = true;
+
+				if ( $probed >= $limit ) {
+					$truncated = true;
+					break 2;
+				}
+				++$probed;
+
+				$chain = $this->trace_redirects( $href );
+
+				if ( $chain['hops'] >= 2 || ( $chain['hops'] >= 1 && $chain['final_code'] >= 400 ) ) {
+					$detail = $chain['final_code'] >= 400
+						? sprintf(
+							/* translators: 1: hop count, 2: final HTTP status code. */
+							__( '%1$d redirect hops, ending in HTTP %2$d.', 'native-link-health' ),
+							(int) $chain['hops'],
+							(int) $chain['final_code']
+						)
+						: sprintf(
+							/* translators: %d: hop count. */
+							__( '%d redirect hops before the final page.', 'native-link-health' ),
+							(int) $chain['hops']
+						);
+
+					$items[] = $this->format_post_item( (int) $post->ID, $href . ' — ' . $detail );
+				}
+			}
+		}
+
+		$message = empty( $items )
+			? __( 'No redirect chains found in your internal links.', 'native-link-health' )
+			: __( 'Internal links that go through multiple redirects (or a dead end) were found. Point them straight at the final URL.', 'native-link-health' );
+
+		if ( $truncated ) {
+			$message .= ' ' . sprintf(
+				/* translators: %d: number of links probed. */
+				__( 'Checked the first %d internal links; raise nlh_redirect_chain_scan_limit to probe more.', 'native-link-health' ),
+				$limit
+			);
+		}
+
+		return $this->result(
+			empty( $items ) ? 'pass' : 'warning',
+			count( $items ),
+			$items,
+			$message
+		);
+	}
+
+	/**
+	 * Follows a URL's redirects one hop at a time (HEAD, GET fallback) up to a
+	 * small cap, returning the hop count and the final status code. Loop-safe.
+	 *
+	 * @param string $url Starting URL (already same-host).
+	 * @return array{hops:int,final_code:int}
+	 */
+	private function trace_redirects( string $url ): array {
+		$args = array(
+			'timeout'     => 8,
+			'redirection' => 0,
+			'user-agent'  => apply_filters(
+				'nlh_user_agent',
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+			),
+		);
+
+		$hops    = 0;
+		$current = $url;
+		$visited = array();
+		$code    = 0;
+
+		for ( $i = 0; $i < 6; $i++ ) {
+			if ( isset( $visited[ $current ] ) ) {
+				break; // Redirect loop — stop counting.
+			}
+			$visited[ $current ] = true;
+
+			$response = wp_remote_head( $current, $args );
+			$code     = (int) wp_remote_retrieve_response_code( $response );
+
+			if ( is_wp_error( $response ) || in_array( $code, array( 400, 403, 405, 501 ), true ) || $code < 100 ) {
+				$response = wp_remote_get( $current, $args );
+				$code     = (int) wp_remote_retrieve_response_code( $response );
+			}
+
+			if ( is_wp_error( $response ) ) {
+				$code = 0;
+				break;
+			}
+
+			if ( ! in_array( $code, array( 301, 302, 303, 307, 308 ), true ) ) {
+				break; // Reached a non-redirect: this is the final code.
+			}
+
+			$location = wp_remote_retrieve_header( $response, 'location' );
+			if ( '' === $location ) {
+				break;
+			}
+
+			// Resolve relative Location headers against the current URL.
+			$next = $this->resolve_location( $current, (string) $location );
+			if ( '' === $next ) {
+				break;
+			}
+
+			++$hops;
+			$current = $next;
+		}
+
+		return array(
+			'hops'       => $hops,
+			'final_code' => $code,
+		);
+	}
+
+	/**
+	 * Resolves a (possibly relative) Location header against the URL it came from.
+	 *
+	 * @param string $base     URL the redirect originated from.
+	 * @param string $location Raw Location header value.
+	 * @return string Absolute URL, or '' if unresolvable.
+	 */
+	private function resolve_location( string $base, string $location ): string {
+		$location = trim( $location );
+
+		if ( '' === $location ) {
+			return '';
+		}
+
+		if ( wp_parse_url( $location, PHP_URL_SCHEME ) ) {
+			return $location;
+		}
+
+		$parts = wp_parse_url( $base );
+		if ( empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
+			return '';
+		}
+
+		$origin = $parts['scheme'] . '://' . $parts['host'] . ( isset( $parts['port'] ) ? ':' . $parts['port'] : '' );
+
+		if ( 0 === strpos( $location, '/' ) ) {
+			return $origin . $location;
+		}
+
+		$path = isset( $parts['path'] ) ? preg_replace( '#/[^/]*$#', '/', $parts['path'] ) : '/';
+
+		return $origin . $path . $location;
 	}
 
 	/**
@@ -93,6 +279,15 @@ class NLH_SEO_Audit {
 			$permalink = get_permalink( $post );
 
 			foreach ( $this->extract_attribute_values( $post->post_content, 'LINK', 'href', array( 'rel' => 'canonical' ) ) as $href ) {
+				// Cross-domain canonicals (syndication, etc.) are intentional and
+				// must not be flagged. Only compare canonicals on the same host.
+				$canonical_host = strtolower( (string) wp_parse_url( $href, PHP_URL_HOST ) );
+				$permalink_host = strtolower( (string) wp_parse_url( $permalink, PHP_URL_HOST ) );
+
+				if ( '' !== $canonical_host && $canonical_host !== $permalink_host ) {
+					continue;
+				}
+
 				if ( untrailingslashit( $href ) !== untrailingslashit( $permalink ) ) {
 					$items[] = $this->format_post_item( (int) $post->ID, $href );
 				}
@@ -147,15 +342,60 @@ class NLH_SEO_Audit {
 	 * @return WP_Post[]
 	 */
 	private function get_public_posts(): array {
-		return get_posts(
-			array(
-				'post_type'      => array( 'post', 'page' ),
-				'post_status'    => 'publish',
-				'posts_per_page' => -1,
-				'orderby'        => 'ID',
-				'order'          => 'ASC',
-			)
-		);
+		$all_posts = array();
+		$paged     = 1;
+
+		do {
+			$posts = get_posts(
+				array(
+					'post_type'      => array( 'post', 'page' ),
+					'post_status'    => 'publish',
+					'posts_per_page' => 100,
+					'paged'          => $paged,
+					'orderby'        => 'ID',
+					'order'          => 'ASC',
+				)
+			);
+
+			$all_posts = array_merge( $all_posts, $posts );
+			++$paged;
+		} while ( count( $posts ) === 100 );
+
+		return $all_posts;
+	}
+
+	/**
+	 * Returns post/page IDs linked from any registered navigation menu.
+	 *
+	 * Pages reachable only through a menu are not orphans, so menu targets
+	 * must be counted as inbound links.
+	 *
+	 * @return int[]
+	 */
+	private function get_nav_menu_linked_ids(): array {
+		$ids = array();
+
+		foreach ( wp_get_nav_menus() as $menu ) {
+			$items = wp_get_nav_menu_items( $menu->term_id );
+
+			if ( ! is_array( $items ) ) {
+				continue;
+			}
+
+			foreach ( $items as $item ) {
+				if ( 'post_type' === $item->type && (int) $item->object_id > 0 ) {
+					$ids[] = (int) $item->object_id;
+				} elseif ( ! empty( $item->url ) ) {
+					$resolved = url_to_postid( $item->url );
+
+					if ( $resolved > 0 ) {
+						$ids[] = $resolved;
+					}
+				}
+			}
+		}
+
+		return $ids;
 	}
 
 	/**

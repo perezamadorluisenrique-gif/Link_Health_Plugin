@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<ruleset name="Native Link Health">
+	<description>WordPress Coding Standards for Native Link Health.</description>
+
+	<!-- Scan the plugin source, excluding third-party and build artifacts. -->
+	<file>.</file>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/languages/*</exclude-pattern>
+	<!-- Test helpers use print/var_export intentionally — different rules apply. -->
+	<exclude-pattern>*/tests/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<!-- WordPress standard. Requires wp-coding-standards/wpcs installed via Composer. -->
+	<rule ref="WordPress">
+		<!-- The plugin uses direct $wpdb queries with prepared statements by design
+		     (custom tables, no WP_List_Table). Schema/table name interpolation is
+		     reviewed manually, so silence the unavoidable interpolation notices. -->
+		<exclude name="WordPress.DB.PreparedSQL.InterpolatedNotPrepared"/>
+		<exclude name="WordPress.DB.DirectDatabaseQuery.DirectQuery"/>
+		<exclude name="WordPress.DB.DirectDatabaseQuery.NoCaching"/>
+
+		<!-- dbDelta() and DROP TABLE in uninstall.php are the correct WP APIs for
+		     schema management. These are always intentional in this plugin. -->
+		<exclude name="WordPress.DB.DirectDatabaseQuery.SchemaChange"/>
+
+		<!-- All AJAX handlers in class-nlh-admin.php verify nonces via the
+		     verify_ajax_request() helper (which calls check_ajax_referer()).
+		     PHPCS cannot trace through method calls, so these are false positives.
+		     NonceVerification.Recommended (GET reads for admin routing) stays active. -->
+		<exclude name="WordPress.Security.NonceVerification.Missing"/>
+
+		<!-- error_log() calls in class-nlh-scanner.php are intentional admin-facing
+		     diagnostic messages (NLH_Link_Graph class not found). They are guarded
+		     by class_exists() checks and are not debug leftovers. -->
+		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_error_log"/>
+
+		<!-- fclose() in class-nlh-export.php: PHP streams used for in-memory CSV
+		     output (php://output). WP_Filesystem is for file reads/writes, not
+		     output buffering. -->
+		<exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_fclose"/>
+
+		<!-- CronInterval warning in native-link-health.php is expected: the cron
+		     interval is defined programmatically via nlh_batch_size_to_interval().
+		     There is no magic number for PHPCS to read. -->
+		<exclude name="WordPress.WP.CronInterval.ChangeDetected"/>
+
+		<!-- UnfinishedPrepare fires as a false positive on complex multi-step
+		     $wpdb->prepare() calls where placeholders are built programmatically
+		     (e.g. IN clauses). Each call has been reviewed manually. -->
+		<exclude name="WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare"/>
+
+		<!-- ReplacementsWrongNumber: class-nlh-scanner.php uses dynamic IN clauses
+		     built at runtime (array_fill + implode). PHPCS only counts the two
+		     literal %d/%s anchors and misses the runtime-generated ones in
+		     $placeholders. These calls are correct. -->
+		<exclude name="WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber"/>
+
+		<!-- SlowDBQuery: meta_key / meta_query usage in the scanner is intentional.
+		     The plugin uses WP_Query with postmeta (e.g. _nlh_last_scan cursor)
+		     as the documented WP approach. Indexes are present. -->
+		<exclude name="WordPress.DB.SlowDBQuery.slow_db_query_meta_key"/>
+		<exclude name="WordPress.DB.SlowDBQuery.slow_db_query_meta_query"/>
+
+		<!-- DisallowShortTernary: the Elvis operator (?:) is used intentionally
+		     throughout for null-coalescing integer defaults (e.g. $code ?: 0)
+		     and string fallbacks (e.g. $title ?: '(no title)'). Each occurrence
+		     is correct — the rule is stylistic and adds no safety in this context. -->
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
+
+		<!-- DisallowSizeFunctionsInLoops: count() appears in loop conditions in
+		     a few places where the list size is bounded and small (< 100 items).
+		     The performance impact is negligible and extraction would hurt
+		     readability more than it helps. -->
+		<exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops"/>
+
+		<!-- UnusedFunctionParameter: occasionally a hook callback must include
+		     a parameter to satisfy the WordPress hook signature even when not
+		     used in the body. Suppressing globally; unused params are removed
+		     whenever they can be. -->
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter"/>
+
+		<!-- ParamCommentFullStop: false positive on WordPress-style extended @param
+		     array $args { @type ... } blocks. The opening "{" is a block delimiter,
+		     not a comment description, so it cannot end with a period by definition. -->
+		<exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
+
+		<!-- ValidClassName.Invalid: class NLH_i18n uses lowercase "i18n" by convention
+		     (mirrors WP's own i18n naming; "I18n" would diverge from the established
+		     public API). Only one class is affected. -->
+		<exclude name="PEAR.NamingConventions.ValidClassName.Invalid"/>
+	</rule>
+
+	<!-- Text domain enforcement. -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="native-link-health"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Minimum supported versions (mirrors the plugin header). -->
+	<config name="minimum_wp_version" value="6.2"/>
+	<config name="testVersion" value="8.0-"/>
+
+	<!-- Prefix enforcement for globals/hooks/functions.
+	     "nlh"/"NLH" are 3-character prefixes — WPCS 3.x flags them as too short.
+	     They are project-internal identifiers, not a distributed library prefix,
+	     so the uniqueness concern does not apply. Suppress the config-level notice. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="nlh"/>
+				<element value="NLH"/>
+			</property>
+		</properties>
+	</rule>
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed">
+		<severity>0</severity>
+	</rule>
+</ruleset>

@@ -91,15 +91,15 @@ class NLH_Rules_Engine {
 			return false;
 		}
 
-		$new_host = preg_replace( '#^https?://#', '', (string) $action['value'] );
+		$new_host      = preg_replace( '#^https?://#', '', (string) $action['value'] );
 		$parts['host'] = $new_host;
-		$new_url = ( isset( $parts['scheme'] ) ? $parts['scheme'] . '://' : 'https://' ) .
+		$new_url       = ( isset( $parts['scheme'] ) ? $parts['scheme'] . '://' : 'https://' ) .
 			$parts['host'] .
 			( isset( $parts['port'] ) ? ':' . $parts['port'] : '' ) .
 			( isset( $parts['path'] ) ? $parts['path'] : '' ) .
 			( isset( $parts['query'] ) ? '?' . $parts['query'] : '' ) .
 			( isset( $parts['fragment'] ) ? '#' . $parts['fragment'] : '' );
-		$updated  = $this->scanner->update_post_link( $post_id, $url, $new_url );
+		$updated       = $this->scanner->update_post_link( $post_id, $url, $new_url );
 
 		if ( $updated ) {
 			$this->log_correction( $post_id, $url, $new_url, 'auto' );

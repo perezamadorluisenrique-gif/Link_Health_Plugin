@@ -62,10 +62,10 @@ class NLH_Export {
 				$output,
 				array(
 					(int) $row->post_id,
-					get_the_title( (int) $row->post_id ),
-					(string) $row->raw_url,
+					$this->escape_csv_field( get_the_title( (int) $row->post_id ) ),
+					$this->escape_csv_field( (string) $row->raw_url ),
 					(int) $row->status_code,
-					(string) $row->error_message,
+					$this->escape_csv_field( (string) $row->error_message ),
 					(string) $row->discovered_at,
 					(string) $row->last_checked_at,
 				)
@@ -74,5 +74,24 @@ class NLH_Export {
 
 		fclose( $output );
 		exit;
+	}
+
+	/**
+	 * Neutralizes CSV formula injection.
+	 *
+	 * Post titles, URLs, and error messages derive from arbitrary post content,
+	 * so a value beginning with =, +, -, @, or a control character (tab/CR) can
+	 * be executed as a formula when the file is opened in Excel/Sheets. Prefix
+	 * such values with a single quote so spreadsheet apps treat them as text.
+	 *
+	 * @param string $value Raw field value.
+	 * @return string Safe field value.
+	 */
+	private function escape_csv_field( string $value ): string {
+		if ( '' !== $value && in_array( $value[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ) {
+			return "'" . $value;
+		}
+
+		return $value;
 	}
 }

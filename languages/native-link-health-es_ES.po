@@ -1,0 +1,1384 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-06-29T02:05:05+02:00\n"
+"PO-Revision-Date: 2026-06-29T02:05:05+02:00\n"
+"Language: \n"
+
+#. Plugin Name of the plugin
+#: native-link-health.php
+#: admin/partials/nlh-dashboard.php:161
+msgid "Native Link Health"
+msgstr "Native Link Health"
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: native-link-health.php
+msgid "https://wordpress.org/plugins/native-link-health/"
+msgstr ""
+
+#. Description of the plugin
+#: native-link-health.php
+msgid "A lightweight broken link scanner and internal-link authority analyzer for WordPress. Runs locally, never crashes your server, and avoids false positives. No cloud, no accounts."
+msgstr "Un analizador ligero de enlaces rotos y de autoridad de enlazado interno para WordPress. Funciona localmente, nunca tumba tu servidor y evita los falsos positivos. Sin nube, sin cuentas."
+
+#. Author of the plugin
+#: native-link-health.php
+msgid "Native Link Health contributors"
+msgstr "Colaboradores de Native Link Health"
+
+#: admin/class-nlh-admin.php:68
+#: admin/class-nlh-admin.php:69
+#: admin/class-nlh-admin.php:92
+#: admin/class-nlh-admin.php:93
+#: admin/class-nlh-admin.php:1618
+msgid "Link Health"
+msgstr "Salud de enlaces"
+
+#: admin/class-nlh-admin.php:76
+#: admin/class-nlh-admin.php:77
+msgid "SEO Audit"
+msgstr "Auditoría SEO"
+
+#: admin/class-nlh-admin.php:84
+#: admin/class-nlh-admin.php:85
+#: admin/partials/nlh-juice.php:62
+msgid "Link Juice"
+msgstr "Link Juice"
+
+#: admin/class-nlh-admin.php:142
+msgid "Scan Settings"
+msgstr "Ajustes de escaneo"
+
+#: admin/class-nlh-admin.php:149
+msgid "Scan Scope"
+msgstr "Alcance del escaneo"
+
+#: admin/class-nlh-admin.php:157
+msgid "Automation"
+msgstr "Automatización"
+
+#: admin/class-nlh-admin.php:164
+msgid "Auto-fix Rules"
+msgstr "Reglas de corrección automática"
+
+#: admin/class-nlh-admin.php:217
+msgid "Recalculating link juice..."
+msgstr "Recalculando link juice…"
+
+#: admin/class-nlh-admin.php:218
+msgid "Link juice recalculated."
+msgstr "Link juice recalculado."
+
+#: admin/class-nlh-admin.php:219
+#: admin/partials/nlh-juice.php:354
+msgid "Loading..."
+msgstr "Cargando…"
+
+#: admin/class-nlh-admin.php:220
+msgid "Updating link..."
+msgstr "Actualizando enlace…"
+
+#: admin/class-nlh-admin.php:221
+msgid "Link updated."
+msgstr "Enlace actualizado."
+
+#: admin/class-nlh-admin.php:222
+#: admin/class-nlh-admin.php:280
+msgid "Request failed."
+msgstr "La solicitud falló."
+
+#: admin/class-nlh-admin.php:223
+msgid "Re-point this link to the new URL?"
+msgstr "¿Reapuntar este enlace a la nueva URL?"
+
+#: admin/class-nlh-admin.php:224
+msgid "No internal pages link here yet."
+msgstr "Ninguna página interna enlaza aquí todavía."
+
+#: admin/class-nlh-admin.php:225
+msgid "This page has no outgoing links."
+msgstr "Esta página no tiene enlaces salientes."
+
+#: admin/class-nlh-admin.php:226
+msgid "Linked from"
+msgstr "Enlazada desde"
+
+#: admin/class-nlh-admin.php:227
+msgid "Links to"
+msgstr "Enlaza a"
+
+#: admin/class-nlh-admin.php:228
+#: admin/partials/nlh-dashboard.php:143
+msgid "New URL"
+msgstr "Nueva URL"
+
+#: admin/class-nlh-admin.php:229
+msgid "Re-point"
+msgstr "Reapuntar"
+
+#: admin/class-nlh-admin.php:230
+msgid "Edit post"
+msgstr "Editar entrada"
+
+#: admin/class-nlh-admin.php:231
+msgid "external"
+msgstr "externo"
+
+#: admin/class-nlh-admin.php:232
+msgid "Flow"
+msgstr "Flujo"
+
+#: admin/class-nlh-admin.php:233
+#: admin/partials/nlh-juice.php:345
+#: admin/partials/nlh-juice.php:437
+msgid "Manage links"
+msgstr "Gestionar enlaces"
+
+#: admin/class-nlh-admin.php:234
+msgid "Receives juice from"
+msgstr "Recibe juice de"
+
+#: admin/class-nlh-admin.php:235
+msgid "Passes juice to"
+msgstr "Pasa juice a"
+
+#: admin/class-nlh-admin.php:236
+msgid "Nothing links here"
+msgstr "Nada enlaza aquí"
+
+#: admin/class-nlh-admin.php:237
+msgid "Links to nothing"
+msgstr "No enlaza a nada"
+
+#. translators: %d: count of additional items not shown.
+#: admin/class-nlh-admin.php:239
+#, php-format
+msgid "+%d more"
+msgstr "+%d más"
+
+#: admin/class-nlh-admin.php:240
+msgid "Show site overview"
+msgstr "Mostrar vista general del sitio"
+
+#: admin/class-nlh-admin.php:241
+msgid "Hide site overview"
+msgstr "Ocultar vista general del sitio"
+
+#: admin/class-nlh-admin.php:242
+msgid "Bigger, brighter nodes hold more authority. Click a page to focus on what links to and from it."
+msgstr "Los nodos más grandes y brillantes tienen más autoridad. Haz clic en una página para centrarte en lo que enlaza hacia y desde ella."
+
+#. translators: 1: number of pages shown, 2: total page count.
+#: admin/class-nlh-admin.php:244
+#, php-format
+msgid "Showing the top %1$d of %2$d pages by authority."
+msgstr "Mostrando las %1$d páginas con más autoridad de %2$d."
+
+#: admin/class-nlh-admin.php:245
+#: admin/partials/nlh-juice.php:136
+#: admin/partials/nlh-juice.php:307
+msgid "Orphan"
+msgstr "Huérfana"
+
+#: admin/class-nlh-admin.php:246
+#: admin/partials/nlh-juice.php:137
+#: admin/partials/nlh-juice.php:310
+msgid "Dead end"
+msgstr "Sin salida"
+
+#: admin/class-nlh-admin.php:247
+#: admin/partials/nlh-juice.php:56
+#: admin/partials/nlh-juice.php:138
+#: admin/partials/nlh-juice.php:313
+msgid "Diluted"
+msgstr "Diluida"
+
+#: admin/class-nlh-admin.php:248
+#: admin/partials/nlh-juice.php:135
+#: admin/partials/nlh-juice.php:337
+msgid "Healthy"
+msgstr "Saludable"
+
+#: admin/class-nlh-admin.php:249
+#: admin/partials/nlh-juice.php:139
+msgid "Has broken links"
+msgstr "Tiene enlaces rotos"
+
+#: admin/class-nlh-admin.php:250
+#: admin/partials/nlh-juice.php:124
+msgid "Reset view"
+msgstr "Restablecer vista"
+
+#: admin/class-nlh-admin.php:251
+#: admin/class-nlh-admin.php:497
+msgid "Broken links"
+msgstr "Enlaces rotos"
+
+#: admin/class-nlh-admin.php:252
+msgid "No broken links found."
+msgstr "No se encontraron enlaces rotos."
+
+#: admin/class-nlh-admin.php:277
+msgid "Working..."
+msgstr "Trabajando…"
+
+#: admin/class-nlh-admin.php:278
+msgid "Scan queued."
+msgstr "Escaneo en cola."
+
+#: admin/class-nlh-admin.php:279
+msgid "Ignore this URL permanently?"
+msgstr "¿Ignorar esta URL permanentemente?"
+
+#: admin/class-nlh-admin.php:281
+#: admin/class-nlh-admin.php:1297
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: admin/class-nlh-admin.php:284
+#: admin/partials/nlh-dashboard.php:133
+msgid "History"
+msgstr "Historial"
+
+#: admin/class-nlh-admin.php:285
+msgid "Hide History"
+msgstr "Ocultar historial"
+
+#: admin/class-nlh-admin.php:286
+msgid "No history recorded."
+msgstr "No hay historial registrado."
+
+#: admin/class-nlh-admin.php:287
+msgid "Running audit..."
+msgstr "Ejecutando auditoría…"
+
+#: admin/class-nlh-admin.php:288
+msgid "SEO audit complete."
+msgstr "Auditoría SEO completada."
+
+#. translators: 1: scanned post count, 2: total post count.
+#: admin/class-nlh-admin.php:290
+#, php-format
+msgid "Scanned %1$d of %2$d posts."
+msgstr "Escaneadas %1$d de %2$d entradas."
+
+#: admin/class-nlh-admin.php:293
+msgid "Broken"
+msgstr "Roto"
+
+#: admin/class-nlh-admin.php:294
+msgid "Fixed"
+msgstr "Corregido"
+
+#: admin/class-nlh-admin.php:295
+#: admin/partials/nlh-dashboard.php:113
+#: admin/partials/nlh-dashboard.php:240
+msgid "Regression"
+msgstr "Regresión"
+
+#: admin/class-nlh-admin.php:296
+msgid "Ignored"
+msgstr "Ignorado"
+
+#: admin/class-nlh-admin.php:297
+#: admin/class-nlh-admin.php:507
+msgid "Orphan pages"
+msgstr "Páginas huérfanas"
+
+#: admin/class-nlh-admin.php:298
+msgid "Redirect chains"
+msgstr "Cadenas de redirección"
+
+#: admin/class-nlh-admin.php:299
+msgid "Mixed content"
+msgstr "Contenido mixto"
+
+#: admin/class-nlh-admin.php:300
+msgid "Invalid canonicals"
+msgstr "Canónicas inválidas"
+
+#: admin/class-nlh-admin.php:301
+msgid "Redundant links"
+msgstr "Enlaces redundantes"
+
+#: admin/class-nlh-admin.php:302
+msgid "Today"
+msgstr "Hoy"
+
+#: admin/class-nlh-admin.php:303
+msgid "Yesterday"
+msgstr "Ayer"
+
+#: admin/class-nlh-admin.php:304
+msgid "This Week"
+msgstr "Esta semana"
+
+#: admin/class-nlh-admin.php:305
+msgid "Last Week"
+msgstr "Semana pasada"
+
+#: admin/class-nlh-admin.php:306
+msgid "This Month"
+msgstr "Este mes"
+
+#: admin/class-nlh-admin.php:307
+msgid "Older"
+msgstr "Más antiguo"
+
+#: admin/class-nlh-admin.php:308
+msgid "link"
+msgstr "enlace"
+
+#: admin/class-nlh-admin.php:309
+msgid "links"
+msgstr "enlaces"
+
+#: admin/class-nlh-admin.php:310
+msgid "Request timed out. The scan may have too many links to check."
+msgstr "La solicitud agotó el tiempo de espera. El escaneo puede tener demasiados enlaces que comprobar."
+
+#. translators: %d: post ID.
+#: admin/class-nlh-admin.php:314
+#, php-format
+msgid "An earlier scan was interrupted at post %d. Resume scanning?"
+msgstr "Un escaneo anterior se interrumpió en la entrada %d. ¿Reanudar el escaneo?"
+
+#: admin/class-nlh-admin.php:327
+#: admin/class-nlh-admin.php:354
+#: admin/class-nlh-admin.php:367
+#: admin/class-nlh-admin.php:409
+msgid "You do not have permission to access this page."
+msgstr "No tienes permiso para acceder a esta página."
+
+#: admin/class-nlh-admin.php:536
+msgid "URLs Checked"
+msgstr "URLs comprobadas"
+
+#: admin/class-nlh-admin.php:541
+msgid "Broken Links"
+msgstr "Enlaces rotos"
+
+#: admin/class-nlh-admin.php:546
+msgid "Avg Batch Time"
+msgstr "Tiempo medio por lote"
+
+#: admin/class-nlh-admin.php:551
+msgid "Peak Memory"
+msgstr "Memoria máxima"
+
+#: admin/class-nlh-admin.php:573
+msgid "The background scanner runs every 15 minutes and processes 5 posts per cycle, so it never spikes your server."
+msgstr "El escáner en segundo plano se ejecuta cada 15 minutos y procesa 5 entradas por ciclo, así que nunca sobrecarga tu servidor."
+
+#: admin/class-nlh-admin.php:587
+#: includes/class-nlh-activator.php:26
+msgid "Every 15 minutes"
+msgstr "Cada 15 minutos"
+
+#: admin/class-nlh-admin.php:588
+msgid "Hourly"
+msgstr "Cada hora"
+
+#: admin/class-nlh-admin.php:588
+#: admin/class-nlh-admin.php:589
+#: admin/class-nlh-admin.php:590
+#: includes/class-nlh-pro.php:168
+msgid "Pro"
+msgstr "Pro"
+
+#: admin/class-nlh-admin.php:589
+msgid "Daily"
+msgstr "Diariamente"
+
+#: admin/class-nlh-admin.php:590
+msgid "Weekly"
+msgstr "Semanalmente"
+
+#: admin/class-nlh-admin.php:592
+#: admin/class-nlh-admin.php:667
+#: admin/class-nlh-admin.php:724
+msgid "Available in Pro"
+msgstr "Disponible en Pro"
+
+#: admin/class-nlh-admin.php:593
+msgid "The free tier uses a fixed 15 minute cron interval."
+msgstr "La versión gratuita usa un intervalo de cron fijo de 15 minutos."
+
+#: admin/class-nlh-admin.php:625
+msgid "Additional post types to scan"
+msgstr "Tipos de contenido adicionales a escanear"
+
+#: admin/class-nlh-admin.php:626
+msgid "Posts and pages are always scanned. Add more content types below."
+msgstr "Las entradas y páginas siempre se escanean. Añade más tipos de contenido abajo."
+
+#: admin/class-nlh-admin.php:637
+msgid "Media (attachments)"
+msgstr "Medios (adjuntos)"
+
+#: admin/class-nlh-admin.php:644
+msgid "Scan approved comment content for broken links"
+msgstr "Escanear el contenido de comentarios aprobados en busca de enlaces rotos"
+
+#: admin/class-nlh-admin.php:649
+msgid "Scan navigation menu link URLs"
+msgstr "Escanear las URLs de los menús de navegación"
+
+#: admin/class-nlh-admin.php:666
+msgid ""
+"example.com\n"
+"*.example.org"
+msgstr ""
+"example.com\n"
+"*.example.org"
+
+#: admin/class-nlh-admin.php:668
+msgid "Domain ignore lists are reserved for Native Link Health Pro."
+msgstr "Las listas de dominios ignorados están reservadas para Native Link Health Pro."
+
+#: admin/class-nlh-admin.php:709
+msgid "Optional JSON list of auto-fix rules applied during scans. Each rule has \"conditions\" and an \"action\" (e.g. replace one domain with another). These rewrite post content automatically — leave empty to disable."
+msgstr "Lista JSON opcional de reglas de corrección automática aplicadas durante los escaneos. Cada regla tiene «conditions» y una «action» (p. ej. reemplazar un dominio por otro). Estas reescriben el contenido de las entradas automáticamente; déjalo vacío para desactivarlas."
+
+#: admin/class-nlh-admin.php:725
+msgid "Email alerts for newly broken links are reserved for Native Link Health Pro."
+msgstr "Las alertas por correo de nuevos enlaces rotos están reservadas para Native Link Health Pro."
+
+#: admin/class-nlh-admin.php:787
+#: admin/class-nlh-admin.php:1203
+msgid "Missing URL data."
+msgstr "Faltan datos de la URL."
+
+#: admin/class-nlh-admin.php:792
+#: admin/class-nlh-admin.php:1208
+msgid "URL was not found in post content."
+msgstr "No se encontró la URL en el contenido de la entrada."
+
+#: admin/class-nlh-admin.php:818
+msgid "URL corrected and re-checked."
+msgstr "URL corregida y vuelta a comprobar."
+
+#: admin/class-nlh-admin.php:840
+msgid "Missing re-check data."
+msgstr "Faltan datos para la recomprobación."
+
+#: admin/class-nlh-admin.php:863
+msgid "Missing ignore data."
+msgstr "Faltan datos para ignorar."
+
+#: admin/class-nlh-admin.php:890
+msgid "Record not found."
+msgstr "Registro no encontrado."
+
+#: admin/class-nlh-admin.php:918
+msgid "URL ignored."
+msgstr "URL ignorada."
+
+#: admin/class-nlh-admin.php:933
+#: admin/class-nlh-admin.php:1234
+#: admin/class-nlh-admin.php:1398
+#: includes/class-nlh-export.php:23
+msgid "Insufficient permissions."
+msgstr "Permisos insuficientes."
+
+#. translators: 1: scanned count, 2: total count.
+#: admin/class-nlh-admin.php:954
+#, php-format
+msgid "Manual scan progress: %1$d of %2$d posts."
+msgstr "Progreso del escaneo manual: %1$d de %2$d entradas."
+
+#. translators: %d: scanned post count.
+#: admin/class-nlh-admin.php:962
+#, php-format
+msgid "Manual scan complete. Posts scanned: %d."
+msgstr "Escaneo manual completado. Entradas escaneadas: %d."
+
+#: admin/class-nlh-admin.php:987
+msgid "Missing correction pattern."
+msgstr "Falta el patrón de corrección."
+
+#. translators: %d: corrected link count.
+#: admin/class-nlh-admin.php:1024
+#, php-format
+msgid "Corrected %d links."
+msgstr "Corregidos %d enlaces."
+
+#: admin/class-nlh-admin.php:1072
+msgid "Missing timeline data."
+msgstr "Faltan datos de la cronología."
+
+#. translators: 1: node count, 2: edge count.
+#: admin/class-nlh-admin.php:1114
+#, php-format
+msgid "Recalculated %1$d pages and %2$d internal links."
+msgstr "Recalculadas %1$d páginas y %2$d enlaces internos."
+
+#: admin/class-nlh-admin.php:1138
+msgid "Missing parameters."
+msgstr "Faltan parámetros."
+
+#: admin/class-nlh-admin.php:1163
+msgid "Missing post."
+msgstr "Falta la entrada."
+
+#: admin/class-nlh-admin.php:1221
+msgid "Link updated. Recalculate to refresh scores."
+msgstr "Enlace actualizado. Recalcula para actualizar las puntuaciones."
+
+#: admin/class-nlh-admin.php:1255
+msgid "Upgrade to Pro"
+msgstr "Actualizar a Pro"
+
+#: admin/class-nlh-admin.php:1387
+msgid "Server error: "
+msgstr "Error del servidor: "
+
+#: admin/class-nlh-admin.php:1466
+msgid "Never"
+msgstr "Nunca"
+
+#: admin/class-nlh-admin.php:1467
+msgid "Not scheduled"
+msgstr "No programado"
+
+#. translators: %s: post title.
+#: admin/partials/nlh-dashboard.php:26
+#, php-format
+msgid "Comment on “%s”"
+msgstr "Comentario en «%s»"
+
+#. translators: %s: post title.
+#: admin/partials/nlh-dashboard.php:27
+msgid "(comment)"
+msgstr "(comentario)"
+
+#: admin/partials/nlh-dashboard.php:29
+msgid "Comment"
+msgstr "Comentario"
+
+#: admin/partials/nlh-dashboard.php:31
+msgid "Navigation menu"
+msgstr "Menú de navegación"
+
+#: admin/partials/nlh-dashboard.php:33
+msgid "Menu"
+msgstr "Menú"
+
+#: admin/partials/nlh-dashboard.php:36
+#: admin/partials/nlh-juice.php:319
+#: admin/partials/nlh-juice.php:420
+#: admin/partials/nlh-juice.php:430
+msgid "(no title)"
+msgstr "(sin título)"
+
+#. translators: %d: impact score.
+#: admin/partials/nlh-dashboard.php:107
+#, php-format
+msgid "Impact %d"
+msgstr "Impacto %d"
+
+#. translators: %s: discovered datetime.
+#: admin/partials/nlh-dashboard.php:120
+#, php-format
+msgid "Found %s"
+msgstr "Encontrado %s"
+
+#: admin/partials/nlh-dashboard.php:129
+msgid "Edit URL"
+msgstr "Editar URL"
+
+#: admin/partials/nlh-dashboard.php:130
+msgid "Re-check"
+msgstr "Volver a comprobar"
+
+#: admin/partials/nlh-dashboard.php:132
+msgid "Ignore"
+msgstr "Ignorar"
+
+#: admin/partials/nlh-dashboard.php:146
+msgid "Save & Correct"
+msgstr "Guardar y corregir"
+
+#: admin/partials/nlh-dashboard.php:147
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: admin/partials/nlh-dashboard.php:166
+msgid "Scan mode"
+msgstr "Modo de escaneo"
+
+#: admin/partials/nlh-dashboard.php:168
+msgid "Quick Scan"
+msgstr "Escaneo rápido"
+
+#: admin/partials/nlh-dashboard.php:169
+msgid "Full Scan"
+msgstr "Escaneo completo"
+
+#: admin/partials/nlh-dashboard.php:173
+msgid "Run Scan Now"
+msgstr "Ejecutar escaneo ahora"
+
+#. translators: 1: last scan datetime, 2: next scan datetime, 3: posts scanned count.
+#: admin/partials/nlh-dashboard.php:193
+#, php-format
+msgid "Last scan cycle: %1$s | Next scheduled: %2$s | Posts scanned: %3$d"
+msgstr "Último ciclo de escaneo: %1$s | Próximo programado: %2$s | Entradas escaneadas: %3$d"
+
+#: admin/partials/nlh-dashboard.php:209
+msgid "Error Type"
+msgstr "Tipo de error"
+
+#: admin/partials/nlh-dashboard.php:211
+#: admin/partials/nlh-dashboard.php:238
+msgid "All"
+msgstr "Todos"
+
+#: admin/partials/nlh-dashboard.php:212
+msgid "4xx"
+msgstr "4xx"
+
+#: admin/partials/nlh-dashboard.php:213
+msgid "5xx"
+msgstr "5xx"
+
+#: admin/partials/nlh-dashboard.php:214
+msgid "Missing anchor"
+msgstr "Ancla faltante"
+
+#: admin/class-nlh-admin.php:1311
+#: admin/partials/nlh-dashboard.php:215
+msgid "DNS"
+msgstr "DNS"
+
+#: admin/class-nlh-admin.php:1310
+#: admin/partials/nlh-dashboard.php:216
+msgid "SSL"
+msgstr "SSL"
+
+#: admin/partials/nlh-dashboard.php:217
+msgid "Timeout / connection"
+msgstr "Tiempo de espera / conexión"
+
+#: admin/partials/nlh-dashboard.php:221
+msgid "Search"
+msgstr "Buscar"
+
+#: admin/partials/nlh-dashboard.php:222
+msgid "URL or post title"
+msgstr "URL o título de la entrada"
+
+#: admin/partials/nlh-dashboard.php:228
+msgid "Group By"
+msgstr "Agrupar por"
+
+#: admin/partials/nlh-dashboard.php:230
+msgid "No grouping"
+msgstr "Sin agrupar"
+
+#: admin/partials/nlh-dashboard.php:231
+msgid "Group by domain"
+msgstr "Agrupar por dominio"
+
+#: admin/partials/nlh-dashboard.php:232
+msgid "Group by error type"
+msgstr "Agrupar por tipo de error"
+
+#: admin/partials/nlh-dashboard.php:233
+msgid "Group by post"
+msgstr "Agrupar por entrada"
+
+#: admin/partials/nlh-dashboard.php:234
+msgid "Chronological"
+msgstr "Cronológico"
+
+#: admin/partials/nlh-dashboard.php:237
+msgid "Regression filter"
+msgstr "Filtro de regresión"
+
+#: admin/partials/nlh-dashboard.php:239
+msgid "New"
+msgstr "Nuevo"
+
+#: admin/partials/nlh-dashboard.php:247
+msgid "Correction Suggestions"
+msgstr "Sugerencias de corrección"
+
+#. translators: %d: affected URL count.
+#: admin/partials/nlh-dashboard.php:256
+#, php-format
+msgid "%d affected URLs"
+msgstr "%d URLs afectadas"
+
+#: admin/partials/nlh-dashboard.php:263
+msgid "Replacement"
+msgstr "Reemplazo"
+
+#: admin/partials/nlh-dashboard.php:264
+msgid "Replacement domain or URL"
+msgstr "Dominio o URL de reemplazo"
+
+#: admin/partials/nlh-dashboard.php:266
+msgid "Approve All"
+msgstr "Aprobar todo"
+
+#: admin/partials/nlh-dashboard.php:290
+msgid "No broken links recorded."
+msgstr "No hay enlaces rotos registrados."
+
+#. translators: %d: group count.
+#: admin/partials/nlh-dashboard.php:302
+#, php-format
+msgid "%d links"
+msgstr "%d enlaces"
+
+#: admin/partials/nlh-dashboard.php:335
+msgid "&laquo;"
+msgstr "&laquo;"
+
+#: admin/partials/nlh-dashboard.php:336
+msgid "&raquo;"
+msgstr "&raquo;"
+
+#: admin/partials/nlh-juice.php:53
+msgid "All pages"
+msgstr "Todas las páginas"
+
+#: admin/partials/nlh-juice.php:54
+msgid "Orphans"
+msgstr "Huérfanas"
+
+#: admin/partials/nlh-juice.php:55
+msgid "Dead ends"
+msgstr "Sin salida"
+
+#. translators: %s: human-readable time difference.
+#: admin/partials/nlh-juice.php:69
+#, php-format
+msgid "Last calculated %s ago"
+msgstr "Calculado por última vez hace %s"
+
+#: admin/partials/nlh-juice.php:77
+msgid "Recalculate"
+msgstr "Recalcular"
+
+#: admin/partials/nlh-juice.php:83
+msgid "How internal links pass authority (\"link juice\") between your pages. Scores are a PageRank-style share of your site's total internal authority — calculated entirely offline from your content, with no external requests."
+msgstr "Cómo los enlaces internos transmiten autoridad («link juice») entre tus páginas. Las puntuaciones son una parte, al estilo PageRank, de la autoridad interna total de tu sitio, calculada completamente sin conexión a partir de tu contenido y sin solicitudes externas."
+
+#: admin/partials/nlh-juice.php:92
+msgid "Your content changed since the last calculation, so the scores, diagram and recommendations below may be out of date."
+msgstr "Tu contenido cambió desde el último cálculo, así que las puntuaciones, el diagrama y las recomendaciones de abajo pueden estar desactualizados."
+
+#: admin/partials/nlh-juice.php:96
+#: admin/partials/nlh-juice.php:109
+msgid "Recalculate now"
+msgstr "Recalcular ahora"
+
+#: admin/partials/nlh-juice.php:106
+msgid "No link data yet"
+msgstr "Aún no hay datos de enlaces"
+
+#: admin/partials/nlh-juice.php:107
+msgid "Run a full scan from the Link Health dashboard, or click Recalculate to build the internal link map now."
+msgstr "Ejecuta un escaneo completo desde el panel de Salud de enlaces, o haz clic en Recalcular para construir el mapa de enlaces internos ahora."
+
+#: admin/partials/nlh-juice.php:120
+msgid "Site authority map"
+msgstr "Mapa de autoridad del sitio"
+
+#: admin/partials/nlh-juice.php:122
+msgid "See how authority flows through your pages before reviewing the numbers."
+msgstr "Observa cómo fluye la autoridad por tus páginas antes de revisar los números."
+
+#: admin/partials/nlh-juice.php:128
+msgid "Bigger nodes hold more authority. Click a node to highlight its connections; drag to pan; use +/− buttons to zoom."
+msgstr "Los nodos más grandes tienen más autoridad. Haz clic en un nodo para resaltar sus conexiones; arrastra para desplazarte; usa los botones +/− para hacer zoom."
+
+#: admin/partials/nlh-juice.php:129
+msgid "Graph view"
+msgstr "Vista del grafo"
+
+#: admin/partials/nlh-juice.php:130
+msgid "Force Graph"
+msgstr "Grafo de fuerzas"
+
+#: admin/partials/nlh-juice.php:131
+msgid "Concentric"
+msgstr "Concéntrico"
+
+#: admin/partials/nlh-juice.php:132
+msgid "Scatter"
+msgstr "Dispersión"
+
+#: admin/partials/nlh-juice.php:134
+msgid "Map legend"
+msgstr "Leyenda del mapa"
+
+#: admin/partials/nlh-juice.php:149
+msgid "Page-level juice data"
+msgstr "Datos de juice por página"
+
+#: admin/partials/nlh-juice.php:151
+msgid "Review which pages receive, keep or dilute internal authority."
+msgstr "Revisa qué páginas reciben, conservan o diluyen la autoridad interna."
+
+#: admin/partials/nlh-juice.php:157
+msgid "Total published pages with link authority data."
+msgstr "Total de páginas publicadas con datos de autoridad de enlaces."
+
+#: admin/partials/nlh-juice.php:160
+msgid "Pages analyzed"
+msgstr "Páginas analizadas"
+
+#: admin/partials/nlh-juice.php:165
+msgid "Global health of your internal link authority (0-100). Higher is better."
+msgstr "Salud global de la autoridad de tu enlazado interno (0-100). Cuanto más alto, mejor."
+
+#: admin/partials/nlh-juice.php:170
+msgid "Authority Health"
+msgstr "Salud de la autoridad"
+
+#: admin/partials/nlh-juice.php:177
+msgid "Orphans (no inbound)"
+msgstr "Huérfanas (sin entrantes)"
+
+#: admin/partials/nlh-juice.php:181
+msgid "Pages with inbound links but no internal outbound links. Authority stops here."
+msgstr "Páginas con enlaces entrantes pero sin enlaces internos salientes. La autoridad se detiene aquí."
+
+#: admin/partials/nlh-juice.php:184
+msgid "Dead ends (no outbound)"
+msgstr "Sin salida (sin salientes)"
+
+#. translators: %d: outbound link count threshold.
+#: admin/partials/nlh-juice.php:189
+#, php-format
+msgid "Pages with more than %d outbound links. Link juice spread too thin."
+msgstr "Páginas con más de %d enlaces salientes. El link juice se reparte demasiado."
+
+#. translators: %d: dilution link threshold.
+#: admin/partials/nlh-juice.php:196
+#, php-format
+msgid "Diluted (>%d links)"
+msgstr "Diluidas (>%d enlaces)"
+
+#: admin/partials/nlh-juice.php:205
+msgid "Broken outbound links detected in the link map. These leak authority and hurt UX."
+msgstr "Enlaces salientes rotos detectados en el mapa de enlaces. Fugan autoridad y perjudican la experiencia de usuario."
+
+#. translators: %d: number of affected pages.
+#: admin/partials/nlh-juice.php:219
+#, php-format
+msgid "Broken links (%d pages)"
+msgstr "Enlaces rotos (%d páginas)"
+
+#: admin/partials/nlh-juice.php:223
+msgid "No broken links"
+msgstr "Sin enlaces rotos"
+
+#. translators: 1: 4xx count, 2: 5xx count, 3: timeout count.
+#: admin/partials/nlh-juice.php:232
+#, php-format
+msgid "%1$d 4xx · %2$d 5xx · %3$d timeouts"
+msgstr "%1$d 4xx · %2$d 5xx · %3$d tiempos de espera"
+
+#: admin/partials/nlh-juice.php:266
+msgid "Page"
+msgstr "Página"
+
+#: admin/partials/nlh-juice.php:271
+msgid "Link juice"
+msgstr "Link juice"
+
+#: admin/partials/nlh-juice.php:276
+msgid "Inbound"
+msgstr "Entrantes"
+
+#: admin/partials/nlh-juice.php:281
+msgid "Outbound"
+msgstr "Salientes"
+
+#: admin/partials/nlh-juice.php:284
+msgid "Status"
+msgstr "Estado"
+
+#: admin/partials/nlh-juice.php:285
+msgid "Actions"
+msgstr "Acciones"
+
+#: admin/partials/nlh-juice.php:291
+msgid "No pages match this filter."
+msgstr "Ninguna página coincide con este filtro."
+
+#. translators: %s: percentage.
+#: admin/partials/nlh-juice.php:323
+#, php-format
+msgid "%s of total internal authority"
+msgstr "%s de la autoridad interna total"
+
+#: admin/partials/nlh-juice.php:332
+msgid "internal links"
+msgstr "enlaces internos"
+
+#: admin/partials/nlh-juice.php:332
+msgid "int."
+msgstr "int."
+
+#: admin/partials/nlh-juice.php:348
+msgid "Edit"
+msgstr "Editar"
+
+#: admin/partials/nlh-juice.php:402
+msgid "Recommended next steps"
+msgstr "Próximos pasos recomendados"
+
+#: admin/partials/nlh-juice.php:404
+msgid "Fix these pages first to improve how authority flows through your site."
+msgstr "Corrige primero estas páginas para mejorar cómo fluye la autoridad por tu sitio."
+
+#: admin/partials/nlh-juice.php:426
+msgid "Link from:"
+msgstr "Enlazar desde:"
+
+#: admin/partials/nlh-juice.php:426
+msgid "Link to:"
+msgstr "Enlazar a:"
+
+#: admin/partials/nlh-juice.php:429
+msgid "Topically related"
+msgstr "Relacionada temáticamente"
+
+#: admin/partials/nlh-juice.php:429
+msgid "High-authority page"
+msgstr "Página de alta autoridad"
+
+#: admin/partials/nlh-juice.php:440
+msgid "Edit this page"
+msgstr "Editar esta página"
+
+#: admin/partials/nlh-seo-dashboard.php:15
+msgid "Native Link Health SEO Audit"
+msgstr "Auditoría SEO de Native Link Health"
+
+#: admin/partials/nlh-seo-dashboard.php:21
+msgid "Run SEO Audit"
+msgstr "Ejecutar auditoría SEO"
+
+#: admin/partials/nlh-settings.php:14
+msgid "Native Link Health Settings"
+msgstr "Ajustes de Native Link Health"
+
+#: admin/partials/nlh-settings.php:20
+msgid "Save Changes"
+msgstr "Guardar cambios"
+
+#: admin/partials/nlh-settings.php:27
+msgid "CSV Export"
+msgstr "Exportar CSV"
+
+#: admin/partials/nlh-settings.php:28
+msgid "Download the current broken-link report as a CSV file."
+msgstr "Descarga el informe actual de enlaces rotos como archivo CSV."
+
+#: admin/partials/nlh-settings.php:29
+msgid "Export CSV"
+msgstr "Exportar CSV"
+
+#: includes/class-nlh-export.php:44
+msgid "Post ID"
+msgstr "ID de entrada"
+
+#: includes/class-nlh-export.php:45
+msgid "Post Title"
+msgstr "Título de la entrada"
+
+#: includes/class-nlh-export.php:46
+msgid "Broken URL"
+msgstr "URL rota"
+
+#: includes/class-nlh-export.php:47
+msgid "Status Code"
+msgstr "Código de estado"
+
+#: includes/class-nlh-export.php:48
+msgid "Error"
+msgstr "Error"
+
+#: includes/class-nlh-export.php:49
+msgid "Discovered"
+msgstr "Descubierto"
+
+#: includes/class-nlh-export.php:50
+msgid "Last Checked"
+msgstr "Última comprobación"
+
+#: includes/class-nlh-link-recommendations.php:99
+msgid "Authority is trapped here"
+msgstr "La autoridad queda atrapada aquí"
+
+#: includes/class-nlh-link-recommendations.php:100
+msgid "This page receives internal authority but does not link out to any other page, so its \"juice\" stays trapped. Add a few internal links from it to related pages to share that authority."
+msgstr "Esta página recibe autoridad interna pero no enlaza a ninguna otra página, así que su «juice» queda atrapado. Añade algunos enlaces internos desde ella hacia páginas relacionadas para compartir esa autoridad."
+
+#: includes/class-nlh-link-recommendations.php:118
+msgid "No internal links point here"
+msgstr "Ningún enlace interno apunta aquí"
+
+#: includes/class-nlh-link-recommendations.php:119
+msgid "No other page links to this one, so it receives no internal authority and is harder for visitors and search engines to find. Add a link to it from a related page below."
+msgstr "Ninguna otra página enlaza a esta, así que no recibe autoridad interna y es más difícil de encontrar para los visitantes y los buscadores. Añade un enlace hacia ella desde una página relacionada de abajo."
+
+#: includes/class-nlh-link-recommendations.php:133
+msgid "Authority is spread too thin"
+msgstr "La autoridad se reparte demasiado"
+
+#. translators: %d: number of outbound links.
+#: includes/class-nlh-link-recommendations.php:136
+#, php-format
+msgid "This page has %d outgoing links, so each one passes only a tiny share of authority. Review them in \"Manage links\" and keep the ones that matter most."
+msgstr "Esta página tiene %d enlaces salientes, así que cada uno transmite solo una pequeña parte de autoridad. Revísalos en «Gestionar enlaces» y conserva los que más importan."
+
+#: includes/class-nlh-scanner.php:801
+msgid "Unknown domain"
+msgstr "Dominio desconocido"
+
+#. translators: %d: post ID.
+#: includes/class-nlh-scanner.php:884
+#, php-format
+msgid "Post #%d"
+msgstr "Entrada n.º %d"
+
+#. translators: %s: domain name.
+#: includes/class-nlh-scanner.php:944
+#, php-format
+msgid "Multiple broken links point to %s."
+msgstr "Varios enlaces rotos apuntan a %s."
+
+#. translators: %s: URL path prefix.
+#: includes/class-nlh-scanner.php:957
+#, php-format
+msgid "Repeated broken path pattern: %s."
+msgstr "Patrón de ruta rota repetido: %s."
+
+#: includes/class-nlh-scanner.php:1060
+msgid "This URL cannot be checked (blocked, internal system endpoint, or invalid)."
+msgstr "Esta URL no se puede comprobar (bloqueada, endpoint interno del sistema o inválida)."
+
+#: includes/class-nlh-scanner.php:1080
+msgid "Could not verify (rate limited or bot-blocked); retry scheduled."
+msgstr "No se pudo verificar (limitada por tasa o bloqueada para bots); reintento programado."
+
+#: includes/class-nlh-scanner.php:1819
+msgid "Server errors (5xx)"
+msgstr "Errores del servidor (5xx)"
+
+#: includes/class-nlh-scanner.php:1820
+msgid "Client errors (4xx)"
+msgstr "Errores del cliente (4xx)"
+
+#: includes/class-nlh-scanner.php:1821
+msgid "Missing anchors"
+msgstr "Anclas faltantes"
+
+#: includes/class-nlh-scanner.php:1822
+msgid "DNS failures"
+msgstr "Fallos de DNS"
+
+#: includes/class-nlh-scanner.php:1823
+msgid "SSL errors"
+msgstr "Errores de SSL"
+
+#: includes/class-nlh-scanner.php:1824
+msgid "Timeouts &amp; connection errors"
+msgstr "Tiempos de espera y errores de conexión"
+
+#: includes/class-nlh-seo-audit.php:53
+msgid "No orphan pages found."
+msgstr "No se encontraron páginas huérfanas."
+
+#: includes/class-nlh-seo-audit.php:53
+msgid "Pages without internal inbound links were found."
+msgstr "Se encontraron páginas sin enlaces internos entrantes."
+
+#: includes/class-nlh-seo-audit.php:249
+msgid "Site is not served over HTTPS, so mixed content was not checked."
+msgstr "El sitio no se sirve sobre HTTPS, así que no se comprobó el contenido mixto."
+
+#: includes/class-nlh-seo-audit.php:266
+msgid "No mixed content references found."
+msgstr "No se encontraron referencias de contenido mixto."
+
+#: includes/class-nlh-seo-audit.php:266
+msgid "HTTP media references were found on an HTTPS site."
+msgstr "Se encontraron referencias a medios HTTP en un sitio HTTPS."
+
+#: includes/class-nlh-seo-audit.php:301
+msgid "No invalid canonical links found in content."
+msgstr "No se encontraron enlaces canónicos inválidos en el contenido."
+
+#: includes/class-nlh-seo-audit.php:301
+msgid "Canonical links that differ from the post permalink were found."
+msgstr "Se encontraron enlaces canónicos que difieren del enlace permanente de la entrada."
+
+#. translators: 1: URL, 2: occurrence count.
+#: includes/class-nlh-seo-audit.php:322
+#, php-format
+msgid "%1$s appears %2$d times."
+msgstr "%1$s aparece %2$d veces."
+
+#: includes/class-nlh-seo-audit.php:335
+msgid "No redundant links found."
+msgstr "No se encontraron enlaces redundantes."
+
+#: includes/class-nlh-seo-audit.php:335
+msgid "Repeated links were found on individual pages."
+msgstr "Se encontraron enlaces repetidos en páginas individuales."
+
+#: admin/class-nlh-admin.php:1312
+msgid "Connection"
+msgstr "Conexión"
+
+#: admin/class-nlh-admin.php:1313
+msgid "Anchor"
+msgstr "Ancla"
+
+#: admin/class-nlh-admin.php:1326
+msgid "No HTTP status code: the secure (HTTPS) connection failed — the site's SSL/TLS certificate could not be negotiated, so the server never sent a response."
+msgstr "Sin código de estado HTTP: la conexión segura (HTTPS) falló — no se pudo negociar el certificado SSL/TLS del sitio, así que el servidor nunca envió una respuesta."
+
+#: admin/class-nlh-admin.php:1327
+msgid "No HTTP status code: the domain name could not be resolved to a server, so no server was ever reached."
+msgstr "Sin código de estado HTTP: no se pudo resolver el nombre de dominio a un servidor, así que nunca se llegó a contactar ningún servidor."
+
+#: admin/class-nlh-admin.php:1328
+msgid "No HTTP status code: the server did not return a valid response (connection refused, reset, empty reply, or timed out)."
+msgstr "Sin código de estado HTTP: el servidor no devolvió una respuesta válida (conexión rechazada, reiniciada, respuesta vacía o agotó el tiempo de espera)."
+
+#: admin/class-nlh-admin.php:1329
+msgid "The page loads fine, but the #anchor this link points to does not exist on the target page — so there is no HTTP error, just a missing section."
+msgstr "La página carga bien, pero el #ancla al que apunta este enlace no existe en la página de destino — así que no hay error HTTP, solo una sección que falta."
+
+#: admin/class-nlh-admin.php:1330
+msgid "No HTTP status code: the link could not be reached, so the server never returned a response to classify."
+msgstr "Sin código de estado HTTP: no se pudo contactar el enlace, así que el servidor nunca devolvió una respuesta que clasificar."
+
+#. translators: %s: human-readable duration, e.g. "2m 30s".
+#: admin/class-nlh-admin.php:292
+#, php-format
+msgid "About %s remaining."
+msgstr ""
+
+#: admin/class-nlh-admin.php:462
+msgid "Excellent"
+msgstr ""
+
+#: admin/class-nlh-admin.php:465
+msgid "Good"
+msgstr ""
+
+#: admin/class-nlh-admin.php:468
+msgid "Needs work"
+msgstr ""
+
+#: admin/class-nlh-admin.php:471
+msgid "Poor"
+msgstr ""
+
+#. translators: %d: score 0-100.
+#: admin/class-nlh-admin.php:479
+#, php-format
+msgid "Link Health Score: %d out of 100."
+msgstr ""
+
+#. translators: %d: score 0-100.
+#: admin/class-nlh-admin.php:479
+msgid "Link Health Score not yet available."
+msgstr ""
+
+#: admin/class-nlh-admin.php:485
+msgid "Not scanned yet"
+msgstr ""
+
+#: admin/class-nlh-admin.php:489
+msgid "Link Health Score"
+msgstr ""
+
+#: admin/class-nlh-admin.php:491
+msgid "A single read on your site: broken-link detection combined with internal-link authority. Drill into any module below."
+msgstr ""
+
+#: admin/class-nlh-admin.php:502
+msgid "Authority score"
+msgstr ""
+
+#: admin/class-nlh-admin.php:512
+msgid "Run SEO audit"
+msgstr ""
+
+#: admin/class-nlh-admin.php:1600
+msgid "Scanning…"
+msgstr ""
+
+#: admin/class-nlh-admin.php:1601
+#: admin/class-nlh-admin.php:1655
+msgid "Scan Now"
+msgstr ""
+
+#: admin/class-nlh-admin.php:1602
+#: admin/class-nlh-admin.php:1695
+msgid "Scan complete."
+msgstr ""
+
+#: admin/class-nlh-admin.php:1603
+msgid "Scan failed."
+msgstr ""
+
+#. translators: %s: human-readable time since last scan (e.g. "5 minutes").
+#: admin/class-nlh-admin.php:1643
+#, php-format
+msgid "Last scanned: %s ago."
+msgstr ""
+
+#: admin/class-nlh-admin.php:1648
+msgid "This post has not been scanned yet."
+msgstr ""
+
+#: admin/class-nlh-admin.php:1661
+msgid "View all broken links →"
+msgstr ""
+
+#: admin/class-nlh-admin.php:1681
+msgid "Invalid post."
+msgstr ""
+
+#: admin/class-nlh-admin.php:1717
+msgid "Native Link Health is active!"
+msgstr ""
+
+#: admin/class-nlh-admin.php:1718
+msgid "Your first scan will start automatically via WP-Cron. To scan immediately,"
+msgstr ""
+
+#: admin/class-nlh-admin.php:1720
+msgid "open the dashboard"
+msgstr ""
+
+#: admin/class-nlh-admin.php:1722
+msgid "and click \"Run Scan Now\"."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php:203
+msgid "Scanning is gentle by design: a few links at a time, 100% on your own server. No cloud, no accounts, and it never spikes your site. Editing a post? Use “Scan Now” in the editor sidebar for an instant check."
+msgstr ""
+
+#: admin/partials/nlh-juice.php:174
+msgid "Pages with zero inbound links from your post/page content. Navigation-menu links are ignored here, so this can differ from the SEO Audit orphan count (which also counts menus)."
+msgstr ""
+
+#: admin/partials/nlh-seo-dashboard.php:25
+msgid "Note: this audit treats a page as an orphan only when nothing links to it — not your content, and not your navigation menus. The Link Juice module reports orphans by content links alone, so its orphan count is usually higher."
+msgstr ""
+
+#: includes/class-nlh-freemius.php:110
+msgid "Native Link Health:"
+msgstr ""
+
+#: includes/class-nlh-freemius.php:111
+msgid "Licensing is enabled but the Freemius SDK and credentials are not configured yet. Add the SDK to /vendor/freemius/ and set NLH_FREEMIUS_PRODUCT_ID and NLH_FREEMIUS_PUBLIC_KEY."
+msgstr ""
+
+#: includes/class-nlh-pro.php:38
+msgid "Bulk fix &amp; find-and-replace"
+msgstr ""
+
+#: includes/class-nlh-pro.php:39
+msgid "Replace a broken or moved URL everywhere on your site in one safe pass — using the same no-regex HTML engine, never touching your database directly."
+msgstr ""
+
+#: includes/class-nlh-pro.php:43
+msgid "301 redirect management"
+msgstr ""
+
+#: includes/class-nlh-pro.php:44
+msgid "Turn detected redirect chains into clean one-hop 301s, and create redirects for removed pages without leaving the dashboard."
+msgstr ""
+
+#: includes/class-nlh-pro.php:48
+msgid "Email alerts &amp; digests"
+msgstr ""
+
+#: includes/class-nlh-pro.php:49
+msgid "Get notified the moment a new broken link is confirmed, plus a scheduled health digest — so a quiet site never rots unnoticed."
+msgstr ""
+
+#: includes/class-nlh-pro.php:53
+msgid "One-click internal linking"
+msgstr ""
+
+#: includes/class-nlh-pro.php:54
+msgid "Accept an internal-link recommendation and insert it safely at block level — no copy-pasting into the editor."
+msgstr ""
+
+#: includes/class-nlh-pro.php:58
+msgid "Health trends &amp; reports"
+msgstr ""
+
+#: includes/class-nlh-pro.php:59
+msgid "Track your Link Health Score over time and export branded PDF/CSV reports on a schedule."
+msgstr ""
+
+#: includes/class-nlh-pro.php:63
+msgid "Multisite network dashboard"
+msgstr ""
+
+#: includes/class-nlh-pro.php:64
+msgid "Monitor link health across every site in a network from one screen — the agency tier."
+msgstr ""
+
+#: includes/class-nlh-pro.php:176
+msgid "Learn more"
+msgstr ""
+
+#: includes/class-nlh-scanner.php:285
+msgid "Post not found or not scannable."
+msgstr ""
+
+#. translators: 1: hop count, 2: final HTTP status code.
+#: includes/class-nlh-seo-audit.php:107
+#, php-format
+msgid "%1$d redirect hops, ending in HTTP %2$d."
+msgstr ""
+
+#. translators: %d: hop count.
+#: includes/class-nlh-seo-audit.php:113
+#, php-format
+msgid "%d redirect hops before the final page."
+msgstr ""
+
+#: includes/class-nlh-seo-audit.php:123
+msgid "No redirect chains found in your internal links."
+msgstr ""
+
+#: includes/class-nlh-seo-audit.php:124
+msgid "Internal links that go through multiple redirects (or a dead end) were found. Point them straight at the final URL."
+msgstr ""
+
+#. translators: %d: number of links probed.
+#: includes/class-nlh-seo-audit.php:129
+#, php-format
+msgid "Checked the first %d internal links; raise nlh_redirect_chain_scan_limit to probe more."
+msgstr ""
+
+#. translators: 1: post ID, 2: error message.
+#: admin/class-nlh-admin.php:312
+#, php-format
+msgid "Scan failed at post %1$d: %2$s. You can reload and try again."
+msgstr ""

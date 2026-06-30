@@ -1,6 +1,27 @@
 (function () {
 	'use strict';
 
+	// Wall-clock start of the active full scan, used to estimate time remaining.
+	var scanStartedAt = 0;
+
+	function formatDuration(seconds) {
+		seconds = Math.max(0, Math.round(seconds));
+
+		if (seconds < 60) {
+			return seconds + 's';
+		}
+
+		var minutes = Math.floor(seconds / 60);
+		var rem = seconds % 60;
+
+		if (minutes < 60) {
+			return rem ? minutes + 'm ' + rem + 's' : minutes + 'm';
+		}
+
+		var hours = Math.floor(minutes / 60);
+		return hours + 'h ' + (minutes % 60) + 'm';
+	}
+
 	function ajaxPost(data, timeoutMs) {
 		timeoutMs = timeoutMs || 120000; // default 2 minutes per chunk.
 
@@ -84,18 +105,37 @@
 		row.remove();
 	}
 
-	function renderStatusBadge(statusCode) {
+	function renderStatusBadge(statusCode, errorType) {
 		var code = parseInt(statusCode, 10) || 0;
 		var className = 'nlh-status-unknown';
-		var label = code > 0 ? String(code) : nlh_ajax.i18n.unknown;
+		var label = nlh_ajax.i18n.unknown;
+		var title = '';
 
-		if (code >= 400 && code < 500) {
-			className = 'nlh-status-4xx';
-		} else if (code >= 500) {
+		if (code >= 500) {
 			className = 'nlh-status-5xx';
+			label = String(code);
+		} else if (code >= 400) {
+			className = 'nlh-status-4xx';
+			label = String(code);
+		} else if (code > 0) {
+			label = String(code);
+		} else {
+			// No HTTP status: show the classified transport error type and
+			// explain via tooltip why there is no status code.
+			var badges = nlh_ajax.i18n.transportBadges || {};
+			var tips = nlh_ajax.i18n.transportTooltips || {};
+
+			if (errorType && badges[errorType]) {
+				className = 'nlh-status-conn';
+				label = badges[errorType];
+			}
+
+			title = tips[errorType] || tips.unknown || '';
 		}
 
-		return '<span class="nlh-status-badge ' + className + '">' + escapeHtml(label) + '</span>';
+		var titleAttr = title ? ' title="' + escapeHtml(title) + '"' : '';
+
+		return '<span class="nlh-status-badge ' + className + '"' + titleAttr + '>' + escapeHtml(label) + '</span>';
 	}
 
 	function shortenUrl(url) {
@@ -118,6 +158,10 @@
 			row.dataset.recordId = data.record_id;
 		}
 
+		if (typeof data.error_type !== 'undefined') {
+			row.dataset.errorType = data.error_type;
+		}
+
 		if (urlLink) {
 			urlLink.href = url;
 			urlLink.title = url;
@@ -125,7 +169,7 @@
 		}
 
 		if (statusBadge) {
-			statusBadge.outerHTML = renderStatusBadge(data.status_code);
+			statusBadge.outerHTML = renderStatusBadge(data.status_code, data.error_type);
 		}
 
 		if (errorCell) {
@@ -387,7 +431,22 @@
 
 		progress.hidden = false;
 		fill.style.width = percent + '%';
-		text.textContent = nlh_ajax.i18n.progress.replace('%1$d', scanned).replace('%2$d', total);
+
+		var label = nlh_ajax.i18n.progress.replace('%1$d', scanned).replace('%2$d', total);
+
+		// Estimate time remaining from the average per-post rate so far. Only shown
+		// once there is a real sample and while work remains.
+		if (scanStartedAt && scanned > 0 && total > 0 && !result.done && nlh_ajax.i18n.eta) {
+			var elapsed = (Date.now() - scanStartedAt) / 1000;
+			var perPost = elapsed / scanned;
+			var remaining = perPost * (total - scanned);
+
+			if (isFinite(remaining) && remaining > 0) {
+				label += ' ' + nlh_ajax.i18n.eta.replace('%s', formatDuration(remaining));
+			}
+		}
+
+		text.textContent = label;
 	}
 
 	function runScanChunk(mode, offset, button) {
@@ -423,7 +482,7 @@
 		}).catch(function (error) {
 			var msg;
 			if (mode === 'full' && offset > 0) {
-				msg = nlh_ajax.i18n.scanError.replace('%s', error.message).replace('%d', offset);
+				msg = nlh_ajax.i18n.scanError.replace('%1$d', offset).replace('%2$s', error.message);
 			} else {
 				msg = error.message;
 			}
@@ -776,6 +835,7 @@
 			// Clear any stale resume offset on a fresh scan.
 			try { sessionStorage.removeItem('nlh_scan_offset'); } catch (e) {}
 
+			scanStartedAt = Date.now();
 			setButtonBusy(button, true);
 			runScanChunk(mode, 0, button).finally(function () {
 				setButtonBusy(button, false);
@@ -815,6 +875,7 @@
 			return;
 		}
 
+		scanStartedAt = Date.now();
 		setButtonBusy(button, true);
 		var modeField = runNowForm.querySelector('[name="scan_mode"]');
 		var mode = modeField ? modeField.value : 'full';

@@ -17,13 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 		settings_fields( 'nlh_settings' );
 		do_settings_sections( 'nlh-settings' );
-		submit_button(
-			__( 'Save Changes', 'native-link-health' ),
-			'primary',
-			'submit',
-			true,
-			array( 'disabled' => 'disabled' )
-		);
+		submit_button( __( 'Save Changes', 'native-link-health' ) );
 		?>
 	</form>
 
@@ -34,4 +28,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p><?php esc_html_e( 'Download the current broken-link report as a CSV file.', 'native-link-health' ); ?></p>
 		<button type="submit" class="button button-secondary"><?php esc_html_e( 'Export CSV', 'native-link-health' ); ?></button>
 	</form>
+
+	<?php
+	// Upsells render only when the monetization layer is enabled (Freemius on);
+	// otherwise nothing is shown — no dead "Available in Pro" inputs.
+	NLH_Pro::upsell_card( 'email_notifications' );
+	NLH_Pro::upsell_card( 'multisite' );
+
+	/**
+	 * Extension point: the Pro plugin renders its real settings (scheduling,
+	 * email config, network options) here.
+	 *
+	 * @since 1.3.0
+	 */
+	do_action( 'nlh_settings_after' );
+	?>
 </div>
