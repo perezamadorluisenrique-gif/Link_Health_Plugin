@@ -1,15 +1,16 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
+"Project-Id-Version: Native Link Health 1.3.2\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/native-link-health\n"
 "Last-Translator: \n"
-"Language-Team: \n"
+"Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-06-29T02:05:05+02:00\n"
-"PO-Revision-Date: 2026-06-29T02:05:05+02:00\n"
-"Language: \n"
+"PO-Revision-Date: 2026-07-01T00:00:00+02:00\n"
+"Language: es_ES\n"
+"X-Domain: native-link-health\n"
 
 #. Plugin Name of the plugin
 #: native-link-health.php
@@ -21,7 +22,7 @@ msgstr "Native Link Health"
 #. Author URI of the plugin
 #: native-link-health.php
 msgid "https://wordpress.org/plugins/native-link-health/"
-msgstr ""
+msgstr "https://wordpress.org/plugins/native-link-health/"
 
 #. Description of the plugin
 #: native-link-health.php
@@ -1174,211 +1175,211 @@ msgstr "Sin código de estado HTTP: no se pudo contactar el enlace, así que el 
 #: admin/class-nlh-admin.php:292
 #, php-format
 msgid "About %s remaining."
-msgstr ""
+msgstr "Quedan aproximadamente %s."
 
 #: admin/class-nlh-admin.php:462
 msgid "Excellent"
-msgstr ""
+msgstr "Excelente"
 
 #: admin/class-nlh-admin.php:465
 msgid "Good"
-msgstr ""
+msgstr "Buena"
 
 #: admin/class-nlh-admin.php:468
 msgid "Needs work"
-msgstr ""
+msgstr "Necesita mejoras"
 
 #: admin/class-nlh-admin.php:471
 msgid "Poor"
-msgstr ""
+msgstr "Deficiente"
 
 #. translators: %d: score 0-100.
 #: admin/class-nlh-admin.php:479
 #, php-format
 msgid "Link Health Score: %d out of 100."
-msgstr ""
+msgstr "Puntuación de salud de enlaces: %d de 100."
 
 #. translators: %d: score 0-100.
 #: admin/class-nlh-admin.php:479
 msgid "Link Health Score not yet available."
-msgstr ""
+msgstr "La puntuación de salud de enlaces aún no está disponible."
 
 #: admin/class-nlh-admin.php:485
 msgid "Not scanned yet"
-msgstr ""
+msgstr "Aún no escaneado"
 
 #: admin/class-nlh-admin.php:489
 msgid "Link Health Score"
-msgstr ""
+msgstr "Puntuación de salud de enlaces"
 
 #: admin/class-nlh-admin.php:491
 msgid "A single read on your site: broken-link detection combined with internal-link authority. Drill into any module below."
-msgstr ""
+msgstr "Una sola lectura de tu sitio: detección de enlaces rotos combinada con la autoridad del enlazado interno. Profundiza en cualquier módulo de abajo."
 
 #: admin/class-nlh-admin.php:502
 msgid "Authority score"
-msgstr ""
+msgstr "Puntuación de autoridad"
 
 #: admin/class-nlh-admin.php:512
 msgid "Run SEO audit"
-msgstr ""
+msgstr "Ejecutar auditoría SEO"
 
 #: admin/class-nlh-admin.php:1600
 msgid "Scanning…"
-msgstr ""
+msgstr "Escaneando…"
 
 #: admin/class-nlh-admin.php:1601
 #: admin/class-nlh-admin.php:1655
 msgid "Scan Now"
-msgstr ""
+msgstr "Escanear ahora"
 
 #: admin/class-nlh-admin.php:1602
 #: admin/class-nlh-admin.php:1695
 msgid "Scan complete."
-msgstr ""
+msgstr "Escaneo completado."
 
 #: admin/class-nlh-admin.php:1603
 msgid "Scan failed."
-msgstr ""
+msgstr "El escaneo falló."
 
 #. translators: %s: human-readable time since last scan (e.g. "5 minutes").
 #: admin/class-nlh-admin.php:1643
 #, php-format
 msgid "Last scanned: %s ago."
-msgstr ""
+msgstr "Último escaneo: hace %s."
 
 #: admin/class-nlh-admin.php:1648
 msgid "This post has not been scanned yet."
-msgstr ""
+msgstr "Esta entrada aún no ha sido escaneada."
 
 #: admin/class-nlh-admin.php:1661
 msgid "View all broken links →"
-msgstr ""
+msgstr "Ver todos los enlaces rotos →"
 
 #: admin/class-nlh-admin.php:1681
 msgid "Invalid post."
-msgstr ""
+msgstr "Entrada no válida."
 
 #: admin/class-nlh-admin.php:1717
 msgid "Native Link Health is active!"
-msgstr ""
+msgstr "¡Native Link Health está activo!"
 
 #: admin/class-nlh-admin.php:1718
 msgid "Your first scan will start automatically via WP-Cron. To scan immediately,"
-msgstr ""
+msgstr "Tu primer escaneo comenzará automáticamente a través de WP-Cron. Para escanear de inmediato,"
 
 #: admin/class-nlh-admin.php:1720
 msgid "open the dashboard"
-msgstr ""
+msgstr "abre el panel"
 
 #: admin/class-nlh-admin.php:1722
 msgid "and click \"Run Scan Now\"."
-msgstr ""
+msgstr "y haz clic en «Ejecutar escaneo ahora»."
 
 #: admin/partials/nlh-dashboard.php:203
 msgid "Scanning is gentle by design: a few links at a time, 100% on your own server. No cloud, no accounts, and it never spikes your site. Editing a post? Use “Scan Now” in the editor sidebar for an instant check."
-msgstr ""
+msgstr "El escaneo es suave por diseño: unos pocos enlaces a la vez, 100% en tu propio servidor. Sin nube, sin cuentas, y nunca sobrecarga tu sitio. ¿Estás editando una entrada? Usa «Escanear ahora» en la barra lateral del editor para una comprobación instantánea."
 
 #: admin/partials/nlh-juice.php:174
 msgid "Pages with zero inbound links from your post/page content. Navigation-menu links are ignored here, so this can differ from the SEO Audit orphan count (which also counts menus)."
-msgstr ""
+msgstr "Páginas sin enlaces entrantes desde el contenido de tus entradas o páginas. Los enlaces de menús de navegación se ignoran aquí, así que esto puede diferir del recuento de huérfanas de la Auditoría SEO (que también cuenta los menús)."
 
 #: admin/partials/nlh-seo-dashboard.php:25
 msgid "Note: this audit treats a page as an orphan only when nothing links to it — not your content, and not your navigation menus. The Link Juice module reports orphans by content links alone, so its orphan count is usually higher."
-msgstr ""
+msgstr "Nota: esta auditoría considera huérfana una página solo cuando nada enlaza a ella — ni tu contenido ni tus menús de navegación. El módulo Link Juice reporta huérfanas solo por enlaces de contenido, así que su recuento suele ser más alto."
 
 #: includes/class-nlh-freemius.php:110
 msgid "Native Link Health:"
-msgstr ""
+msgstr "Native Link Health:"
 
 #: includes/class-nlh-freemius.php:111
 msgid "Licensing is enabled but the Freemius SDK and credentials are not configured yet. Add the SDK to /vendor/freemius/ and set NLH_FREEMIUS_PRODUCT_ID and NLH_FREEMIUS_PUBLIC_KEY."
-msgstr ""
+msgstr "La licencia está activada, pero el SDK de Freemius y las credenciales aún no están configurados. Añade el SDK en /vendor/freemius/ y define NLH_FREEMIUS_PRODUCT_ID y NLH_FREEMIUS_PUBLIC_KEY."
 
 #: includes/class-nlh-pro.php:38
 msgid "Bulk fix &amp; find-and-replace"
-msgstr ""
+msgstr "Corrección masiva y buscar-y-reemplazar"
 
 #: includes/class-nlh-pro.php:39
 msgid "Replace a broken or moved URL everywhere on your site in one safe pass — using the same no-regex HTML engine, never touching your database directly."
-msgstr ""
+msgstr "Reemplaza una URL rota o movida en todo tu sitio en una sola pasada segura — usando el mismo motor HTML sin regex, sin tocar tu base de datos directamente."
 
 #: includes/class-nlh-pro.php:43
 msgid "301 redirect management"
-msgstr ""
+msgstr "Gestión de redirecciones 301"
 
 #: includes/class-nlh-pro.php:44
 msgid "Turn detected redirect chains into clean one-hop 301s, and create redirects for removed pages without leaving the dashboard."
-msgstr ""
+msgstr "Convierte las cadenas de redirección detectadas en 301 limpias de un solo salto, y crea redirecciones para páginas eliminadas sin salir del panel."
 
 #: includes/class-nlh-pro.php:48
 msgid "Email alerts &amp; digests"
-msgstr ""
+msgstr "Alertas y resúmenes por correo"
 
 #: includes/class-nlh-pro.php:49
 msgid "Get notified the moment a new broken link is confirmed, plus a scheduled health digest — so a quiet site never rots unnoticed."
-msgstr ""
+msgstr "Recibe una notificación en cuanto se confirme un nuevo enlace roto, además de un resumen de salud programado — para que un sitio tranquilo nunca se deteriore sin que lo notes."
 
 #: includes/class-nlh-pro.php:53
 msgid "One-click internal linking"
-msgstr ""
+msgstr "Enlazado interno con un clic"
 
 #: includes/class-nlh-pro.php:54
 msgid "Accept an internal-link recommendation and insert it safely at block level — no copy-pasting into the editor."
-msgstr ""
+msgstr "Acepta una recomendación de enlace interno e insértala de forma segura a nivel de bloque — sin copiar y pegar en el editor."
 
 #: includes/class-nlh-pro.php:58
 msgid "Health trends &amp; reports"
-msgstr ""
+msgstr "Tendencias e informes de salud"
 
 #: includes/class-nlh-pro.php:59
 msgid "Track your Link Health Score over time and export branded PDF/CSV reports on a schedule."
-msgstr ""
+msgstr "Sigue la evolución de tu puntuación de salud de enlaces con el tiempo y exporta informes PDF/CSV personalizados de forma programada."
 
 #: includes/class-nlh-pro.php:63
 msgid "Multisite network dashboard"
-msgstr ""
+msgstr "Panel de red multisitio"
 
 #: includes/class-nlh-pro.php:64
 msgid "Monitor link health across every site in a network from one screen — the agency tier."
-msgstr ""
+msgstr "Supervisa la salud de los enlaces en todos los sitios de una red desde una sola pantalla — el nivel para agencias."
 
 #: includes/class-nlh-pro.php:176
 msgid "Learn more"
-msgstr ""
+msgstr "Saber más"
 
 #: includes/class-nlh-scanner.php:285
 msgid "Post not found or not scannable."
-msgstr ""
+msgstr "Entrada no encontrada o no escaneable."
 
 #. translators: 1: hop count, 2: final HTTP status code.
 #: includes/class-nlh-seo-audit.php:107
 #, php-format
 msgid "%1$d redirect hops, ending in HTTP %2$d."
-msgstr ""
+msgstr "%1$d saltos de redirección, terminando en HTTP %2$d."
 
 #. translators: %d: hop count.
 #: includes/class-nlh-seo-audit.php:113
 #, php-format
 msgid "%d redirect hops before the final page."
-msgstr ""
+msgstr "%d saltos de redirección antes de la página final."
 
 #: includes/class-nlh-seo-audit.php:123
 msgid "No redirect chains found in your internal links."
-msgstr ""
+msgstr "No se encontraron cadenas de redirección en tus enlaces internos."
 
 #: includes/class-nlh-seo-audit.php:124
 msgid "Internal links that go through multiple redirects (or a dead end) were found. Point them straight at the final URL."
-msgstr ""
+msgstr "Se encontraron enlaces internos que pasan por varias redirecciones (o terminan sin salida). Apúntalos directamente a la URL final."
 
 #. translators: %d: number of links probed.
 #: includes/class-nlh-seo-audit.php:129
 #, php-format
 msgid "Checked the first %d internal links; raise nlh_redirect_chain_scan_limit to probe more."
-msgstr ""
+msgstr "Se comprobaron los primeros %d enlaces internos; aumenta nlh_redirect_chain_scan_limit para comprobar más."
 
 #. translators: 1: post ID, 2: error message.
 #: admin/class-nlh-admin.php:312
 #, php-format
 msgid "Scan failed at post %1$d: %2$s. You can reload and try again."
-msgstr ""
+msgstr "El escaneo falló en la entrada %1$d: %2$s. Puedes recargar e intentarlo de nuevo."

@@ -4,7 +4,7 @@ Tags: broken-link-checker, link-checker, internal-links, seo, maintenance
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 8.0
-Stable tag: 1.3.0
+Stable tag: 1.3.2
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,16 @@ No. All scanning and analysis runs on your server. Nothing is sent anywhere.
 4. Settings page with scan scope (post types, comments, menus) and auto-fix rules.
 
 == Changelog ==
+
+= 1.3.2 =
+* Fixed false-positive "broken" results on Cloudflare-protected sites: JS bot-challenge pages ("Just a moment...") are now detected and treated as "could not verify" instead of being flagged as broken.
+* Fixed internationalized domain name (IDN) links being silently skipped when the server environment can't convert them to ASCII; they are now surfaced as a clear error instead of disappearing from scan results.
+* Dashboard: added a banner showing scan progress until the first full scan completes.
+* Dashboard: added explanatory tooltips to status, impact, source, and regression badges.
+
+= 1.3.1 =
+* Added an automated test suite covering the anti-false-positive scanning logic and URL-parsing helpers.
+* Added a WordPress Coding Standards ruleset for the codebase (development-only, no functional change).
 
 = 1.3.0 =
 * Faster first value: the background scanner now prioritises recently-modified and never-scanned content first, and the full-scan progress bar shows a real time-remaining estimate. Scan a single post instantly from the editor sidebar.
