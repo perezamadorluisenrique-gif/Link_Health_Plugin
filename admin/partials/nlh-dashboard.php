@@ -96,13 +96,14 @@ $render_card = function ( $row ) {
 					<?php echo esc_html( $display_url ); ?>
 				</a>
 				<div class="nlh-card-meta">
-					<?php if ( $source_label ) :
+					<?php
+					if ( $source_label ) :
 						$source_tooltips = array(
 							'comment' => __( 'This broken link was found inside a comment, not in post content.', 'native-link-health' ),
 							'menu'    => __( 'This broken link was found in a navigation menu item.', 'native-link-health' ),
 						);
-						$source_tip = isset( $source_tooltips[ $source_type ] ) ? $source_tooltips[ $source_type ] : '';
-					?>
+						$source_tip      = isset( $source_tooltips[ $source_type ] ) ? $source_tooltips[ $source_type ] : '';
+						?>
 						<span class="nlh-source-badge nlh-source-<?php echo esc_attr( $source_type ); ?>"<?php echo $source_tip ? ' title="' . esc_attr( $source_tip ) . '"' : ''; ?>><?php echo esc_html( $source_label ); ?></span>
 					<?php endif; ?>
 					<?php echo wp_kses_post( $this->get_status_badge( $status_code, $error_type ) ); ?>
@@ -113,7 +114,7 @@ $render_card = function ( $row ) {
 						'medium'   => __( 'Medium impact (25–59): worth fixing, but lower priority than high-impact links.', 'native-link-health' ),
 						'low'      => __( 'Low impact (<25): minor broken link with little effect on authority or traffic.', 'native-link-health' ),
 					);
-					$impact_tip = $impact_tips[ $impact_class ] ?? '';
+					$impact_tip  = $impact_tips[ $impact_class ] ?? '';
 					?>
 					<span class="nlh-impact-pill nlh-impact-<?php echo esc_attr( $impact_class ); ?>"<?php echo $impact_tip ? ' title="' . esc_attr( $impact_tip ) . '"' : ''; ?>>
 						<?php
@@ -360,18 +361,18 @@ $render_card = function ( $row ) {
 	<?php endif; ?>
 
 	<?php if ( $total_pages > 1 ) : ?>
-	<?php
-	$nlh_page_url = static fn( int $p ): string => esc_url( add_query_arg( 'paged', $p ) );
+		<?php
+		$nlh_page_url = static fn( int $p ): string => esc_url( add_query_arg( 'paged', $p ) );
 
-	$nlh_visible = array();
-	for ( $i = 1; $i <= $total_pages; $i++ ) {
-		if ( 1 === $i || $total_pages === $i || abs( $i - $paged ) <= 1 ) {
-			$nlh_visible[] = $i;
+		$nlh_visible = array();
+		for ( $i = 1; $i <= $total_pages; $i++ ) {
+			if ( 1 === $i || $total_pages === $i || abs( $i - $paged ) <= 1 ) {
+				$nlh_visible[] = $i;
+			}
 		}
-	}
-	$nlh_visible = array_unique( $nlh_visible );
-	sort( $nlh_visible );
-	?>
+		$nlh_visible = array_unique( $nlh_visible );
+		sort( $nlh_visible );
+		?>
 	<nav class="nlh-pagination" aria-label="<?php esc_attr_e( 'Navegación de páginas', 'native-link-health' ); ?>">
 		<span class="nlh-pagination__counter">
 			<?php
@@ -388,7 +389,7 @@ $render_card = function ( $row ) {
 		</span>
 		<div class="nlh-pagination__controls">
 			<?php if ( $paged > 1 ) : ?>
-				<a href="<?php echo $nlh_page_url( $paged - 1 ); ?>" class="nlh-pagination__btn nlh-pagination__btn--prev">
+				<a href="<?php echo $nlh_page_url( $paged - 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url() is applied inside the $nlh_page_url closure above. ?>" class="nlh-pagination__btn nlh-pagination__btn--prev">
 					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M8 2.5L3.5 6.5L8 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
 					<?php esc_html_e( 'Anterior', 'native-link-health' ); ?>
 				</a>
@@ -403,19 +404,25 @@ $render_card = function ( $row ) {
 			$nlh_prev_p = null;
 			foreach ( $nlh_visible as $nlh_p ) :
 				if ( null !== $nlh_prev_p && $nlh_p - $nlh_prev_p > 1 ) :
-					?><span class="nlh-pagination__dots" aria-hidden="true">…</span><?php
+					?>
+					<span class="nlh-pagination__dots" aria-hidden="true">…</span>
+					<?php
 				endif;
 				if ( $nlh_p === $paged ) :
-					?><span class="nlh-pagination__btn is-current" aria-current="page"><?php echo absint( $nlh_p ); ?></span><?php
+					?>
+					<span class="nlh-pagination__btn is-current" aria-current="page"><?php echo absint( $nlh_p ); ?></span>
+					<?php
 				else :
-					?><a href="<?php echo $nlh_page_url( $nlh_p ); ?>" class="nlh-pagination__btn"><?php echo absint( $nlh_p ); ?></a><?php
+					?>
+					<a href="<?php echo $nlh_page_url( $nlh_p ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url() is applied inside the $nlh_page_url closure above. ?>" class="nlh-pagination__btn"><?php echo absint( $nlh_p ); ?></a>
+					<?php
 				endif;
 				$nlh_prev_p = $nlh_p;
 			endforeach;
 			?>
 
 			<?php if ( $paged < $total_pages ) : ?>
-				<a href="<?php echo $nlh_page_url( $paged + 1 ); ?>" class="nlh-pagination__btn nlh-pagination__btn--next">
+				<a href="<?php echo $nlh_page_url( $paged + 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url() is applied inside the $nlh_page_url closure above. ?>" class="nlh-pagination__btn nlh-pagination__btn--next">
 					<?php esc_html_e( 'Siguiente', 'native-link-health' ); ?>
 					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M5 2.5L9.5 6.5L5 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
 				</a>

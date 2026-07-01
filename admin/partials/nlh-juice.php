@@ -462,7 +462,7 @@ $nlh_filters = array(
 				</span>
 				<div class="nlh-pagination__controls">
 					<?php if ( $paged > 1 ) : ?>
-						<a href="<?php echo $nlh_juice_page_url( $paged - 1 ); ?>" class="nlh-pagination__btn nlh-pagination__btn--prev">
+						<a href="<?php echo $nlh_juice_page_url( $paged - 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url() is applied inside the $nlh_juice_url/$nlh_juice_page_url closures above. ?>" class="nlh-pagination__btn nlh-pagination__btn--prev">
 							<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M8 2.5L3.5 6.5L8 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
 							<?php esc_html_e( 'Anterior', 'native-link-health' ); ?>
 						</a>
@@ -477,19 +477,25 @@ $nlh_filters = array(
 					$nlh_prev_p = null;
 					foreach ( $nlh_visible as $nlh_p ) :
 						if ( null !== $nlh_prev_p && $nlh_p - $nlh_prev_p > 1 ) :
-							?><span class="nlh-pagination__dots" aria-hidden="true">…</span><?php
+							?>
+							<span class="nlh-pagination__dots" aria-hidden="true">…</span>
+							<?php
 						endif;
 						if ( $nlh_p === $paged ) :
-							?><span class="nlh-pagination__btn is-current" aria-current="page"><?php echo absint( $nlh_p ); ?></span><?php
+							?>
+							<span class="nlh-pagination__btn is-current" aria-current="page"><?php echo absint( $nlh_p ); ?></span>
+							<?php
 						else :
-							?><a href="<?php echo $nlh_juice_page_url( $nlh_p ); ?>" class="nlh-pagination__btn"><?php echo absint( $nlh_p ); ?></a><?php
+							?>
+							<a href="<?php echo $nlh_juice_page_url( $nlh_p ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url() is applied inside the $nlh_juice_url/$nlh_juice_page_url closures above. ?>" class="nlh-pagination__btn"><?php echo absint( $nlh_p ); ?></a>
+							<?php
 						endif;
 						$nlh_prev_p = $nlh_p;
 					endforeach;
 					?>
 
 					<?php if ( $paged < $total_pages ) : ?>
-						<a href="<?php echo $nlh_juice_page_url( $paged + 1 ); ?>" class="nlh-pagination__btn nlh-pagination__btn--next">
+						<a href="<?php echo $nlh_juice_page_url( $paged + 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url() is applied inside the $nlh_juice_url/$nlh_juice_page_url closures above. ?>" class="nlh-pagination__btn nlh-pagination__btn--next">
 							<?php esc_html_e( 'Siguiente', 'native-link-health' ); ?>
 							<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M5 2.5L9.5 6.5L5 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
 						</a>

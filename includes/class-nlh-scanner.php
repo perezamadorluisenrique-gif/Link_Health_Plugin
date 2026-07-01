@@ -754,7 +754,7 @@ class NLH_Scanner {
 		if ( ! is_array( $ignored ) ) {
 			$ignored = array();
 		}
-		$counters  = array(
+		$counters         = array(
 			'checked'       => 0,
 			'broken'        => 0,
 			'skipped_valid' => 0,
@@ -1301,7 +1301,8 @@ class NLH_Scanner {
 	/**
 	 * Extracts valid absolute links from post content.
 	 *
-	 * @param string $content Post content.
+	 * @param string   $content           Post content.
+	 * @param string[] $idn_unverifiable  By-ref accumulator for IDN hostnames that could not be converted to ASCII.
 	 * @return string[]
 	 */
 	private function extract_urls( string $content, array &$idn_unverifiable = array() ): array {
