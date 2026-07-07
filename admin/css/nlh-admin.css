@@ -544,6 +544,13 @@
 	color: #8a4b00;
 }
 
+/* Most recent automatic check was soft/rate-limited/bot-blocked: the status
+   badge above may be stale — this doesn't confirm and doesn't clear it. */
+.nlh-status-unverified {
+	background: #fff4e5;
+	color: #8a4b00;
+}
+
 /* Badges carrying an explanatory tooltip hint they are hoverable. */
 .nlh-status-badge[title],
 .nlh-impact-pill[title],

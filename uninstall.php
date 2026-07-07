@@ -53,11 +53,13 @@ $transient_fail_timeout_prefix   = $wpdb->esc_like( '_transient_timeout_nlh_fail
 $transient_broken_counts_prefix  = $wpdb->esc_like( '_transient_nlh_broken_counts_' ) . '%';
 $transient_broken_counts_timeout = $wpdb->esc_like( '_transient_timeout_nlh_broken_counts_' ) . '%';
 $last_ok_option_prefix           = $wpdb->esc_like( 'nlh_last_ok_' ) . '%';
+$last_soft_option_prefix         = $wpdb->esc_like( 'nlh_last_soft_' ) . '%';
 
 $wpdb->query(
 	$wpdb->prepare(
 		"DELETE FROM {$wpdb->options}
 		WHERE option_name LIKE %s
+		OR option_name LIKE %s
 		OR option_name LIKE %s
 		OR option_name LIKE %s
 		OR option_name LIKE %s
@@ -74,6 +76,7 @@ $wpdb->query(
 		$transient_fail_timeout_prefix,
 		$transient_broken_counts_prefix,
 		$transient_broken_counts_timeout,
-		$last_ok_option_prefix
+		$last_ok_option_prefix,
+		$last_soft_option_prefix
 	)
 );

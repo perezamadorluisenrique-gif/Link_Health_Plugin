@@ -108,7 +108,7 @@ class NLH_Admin {
 			'nlh_scan_batch_size',
 			array(
 				'type'              => 'integer',
-				'sanitize_callback' => array( $this, 'sanitize_absint' ),
+				'sanitize_callback' => array( $this, 'sanitize_batch_size' ),
 				'default'           => NLH_BATCH_SIZE,
 			)
 		);
@@ -148,6 +148,14 @@ class NLH_Admin {
 			'nlh_scan_scope',
 			__( 'Scan Scope', 'native-link-health' ),
 			array( $this, 'render_scan_scope_field' ),
+			'nlh-settings',
+			'nlh_scan_settings'
+		);
+
+		add_settings_field(
+			'nlh_scan_batch_size',
+			__( 'Batch Size', 'native-link-health' ),
+			array( $this, 'render_batch_size_field' ),
 			'nlh-settings',
 			'nlh_scan_settings'
 		);
@@ -418,6 +426,45 @@ class NLH_Admin {
 	}
 
 	/**
+	 * Tallies broken records, splitting off those that have been unverifiable
+	 * (soft/could-not-verify) for longer than the grace period.
+	 *
+	 * Long-unverifiable links (e.g. a site permanently behind a Cloudflare
+	 * challenge) are real records but cannot be confirmed broken, so they are
+	 * excluded from the headline broken count and the Health Score instead of
+	 * depressing them forever. They still render in the list, flagged with the
+	 * "Unverified since" badge. Nothing is auto-deleted.
+	 *
+	 * @return array{total:int,confirmed:int,unverifiable:int}
+	 */
+	private function get_broken_counts(): array {
+		global $wpdb;
+
+		$errors_table = $wpdb->prefix . 'nlh_link_errors';
+		$rows         = $wpdb->get_results( "SELECT url_hash, post_id, source_type FROM {$errors_table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+		$total        = is_array( $rows ) ? count( $rows ) : 0;
+		$unverifiable = 0;
+		$cutoff       = time() - $this->scanner->get_unverified_grace_period();
+
+		foreach ( (array) $rows as $row ) {
+			$source_type = isset( $row->source_type ) ? (string) $row->source_type : 'post';
+			$suffix      = $this->scanner->state_key_suffix( $source_type, (int) $row->post_id );
+			$soft_since  = get_option( 'nlh_last_soft_' . (string) $row->url_hash . '_' . $suffix, false );
+
+			if ( false !== $soft_since && (int) $soft_since > 0 && (int) $soft_since < $cutoff ) {
+				++$unverifiable;
+			}
+		}
+
+		return array(
+			'total'        => $total,
+			'confirmed'    => max( 0, $total - $unverifiable ),
+			'unverifiable' => $unverifiable,
+		);
+	}
+
+	/**
 	 * Outputs the unified "Link Health Score" hero: a single headline number that
 	 * blends broken-link detection with internal-link authority, plus drill-down
 	 * cards into each module (broken links, authority, SEO audit).
@@ -432,8 +479,8 @@ class NLH_Admin {
 	public function render_health_overview(): void {
 		global $wpdb;
 
-		$errors_table = $wpdb->prefix . 'nlh_link_errors';
-		$broken_total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$errors_table}" );
+		$counts       = $this->get_broken_counts();
+		$broken_total = $counts['confirmed'];
 
 		$metrics      = get_option( 'nlh_scan_metrics', array() );
 		$urls_checked = is_array( $metrics ) ? (int) ( $metrics['total_urls_checked'] ?? 0 ) : 0;
@@ -658,6 +705,27 @@ class NLH_Admin {
 	}
 
 	/**
+	 * Renders the batch-size number field.
+	 *
+	 * @return void
+	 */
+	public function render_batch_size_field(): void {
+		$size = $this->scanner->get_batch_size();
+		?>
+		<input type="number" id="nlh_scan_batch_size" name="nlh_scan_batch_size" class="small-text" min="1" max="100" step="1" value="<?php echo esc_attr( (string) $size ); ?>">
+		<p class="description">
+			<?php
+			printf(
+				/* translators: %d: default batch size constant. */
+				esc_html__( 'Number of posts scanned per cron cycle (1-100). Defaults to %d.', 'native-link-health' ),
+				(int) NLH_BATCH_SIZE
+			);
+			?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Renders the ignored domains textarea.
 	 *
 	 * Unregistered since 1.2.0. Redundant with the live ignore list
@@ -739,6 +807,25 @@ class NLH_Admin {
 	 */
 	public function sanitize_absint( $value ): int {
 		return absint( $value );
+	}
+
+	/**
+	 * Sanitizes the scan batch-size setting.
+	 *
+	 * Clamped to 1-100 so a stray 0 or an absurdly large value can't stall the
+	 * cron batch or make a single run scan the whole site (see get_batch_size()).
+	 *
+	 * @param mixed $value Raw submitted value.
+	 * @return int
+	 */
+	public function sanitize_batch_size( $value ): int {
+		$size = absint( $value );
+
+		if ( $size < 1 || $size > 100 ) {
+			$size = NLH_BATCH_SIZE;
+		}
+
+		return $size;
 	}
 
 	/**

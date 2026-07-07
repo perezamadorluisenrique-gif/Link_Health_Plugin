@@ -4,7 +4,7 @@ Tags: broken-link-checker, link-checker, internal-links, seo, maintenance
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 8.0
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,12 @@ No. All scanning and analysis runs on your server. Nothing is sent anywhere.
 4. Settings page with scan scope (post types, comments, menus) and auto-fix rules.
 
 == Changelog ==
+
+= 1.3.3 =
+* Persistently soft-blocked links (Cloudflare challenge, rate limiting) now have their recorded status refreshed to "could not verify" instead of keeping a stale error, and are excluded from the broken-link count and Health Score once unverifiable for longer than 30 days (filterable via `nlh_unverified_grace_period`). Nothing is auto-deleted.
+* Added a Batch Size field on the Settings page: `nlh_scan_batch_size` now actually controls how many posts the cron batch scans per cycle (falls back to the default of 5 when unset or out of range).
+* `recheck_url()` now uses the same source-scoped state-key suffix as the batch scanner, so manual re-checks on comment/menu records no longer collide with post records sharing the same URL.
+* Added Spanish translations for the new "unverified since" / "checked" dashboard badges.
 
 = 1.3.2 =
 * Fixed false-positive "broken" results on Cloudflare-protected sites: JS bot-challenge pages ("Just a moment...") are now detected and treated as "could not verify" instead of being flagged as broken.

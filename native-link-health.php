@@ -3,7 +3,7 @@
  * Plugin Name:       Native Link Health
  * Plugin URI:        https://wordpress.org/plugins/native-link-health/
  * Description:       A lightweight broken link scanner and internal-link authority analyzer for WordPress. Runs locally, never crashes your server, and avoids false positives. No cloud, no accounts.
- * Version:           1.3.2
+ * Version:           1.3.3
  * Requires at least: 6.2
  * Requires PHP:      8.0
  * Author:            Native Link Health contributors
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'NLH_VERSION', '1.3.2' );
+define( 'NLH_VERSION', '1.3.3' );
 define( 'NLH_DB_VERSION', '2.3' );
 define( 'NLH_BATCH_SIZE', 5 );
 define( 'NLH_PLUGIN_FILE', __FILE__ );

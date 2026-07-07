@@ -1383,3 +1383,34 @@ msgstr "Se comprobaron los primeros %d enlaces internos; aumenta nlh_redirect_ch
 #, php-format
 msgid "Scan failed at post %1$d: %2$s. You can reload and try again."
 msgstr "El escaneo falló en la entrada %1$d: %2$s. Puedes recargar e intentarlo de nuevo."
+
+#: admin/class-nlh-admin.php:157
+msgid "Batch Size"
+msgstr "Tamaño del lote"
+
+#. translators: %d: default batch size constant.
+#: admin/class-nlh-admin.php:720
+#, php-format
+msgid "Number of posts scanned per cron cycle (1-100). Defaults to %d."
+msgstr "Número de entradas escaneadas por ciclo de cron (1-100). Por defecto: %d."
+
+#: includes/class-nlh-scanner.php:526
+#: includes/class-nlh-scanner.php:1157
+msgid "Could not verify (anti-bot challenge or rate limit)."
+msgstr "No se pudo verificar (desafío anti-bot o límite de peticiones)."
+
+#: admin/partials/nlh-dashboard.php:115
+msgid "The most recent automatic check could not get a clear answer (rate limited or bot-blocked). The status shown reflects that last check, not a confirmed broken/working state."
+msgstr "La comprobación automática más reciente no obtuvo una respuesta clara (límite de peticiones o bloqueo anti-bot). El estado mostrado refleja esa última comprobación, no un estado de roto/funcional confirmado."
+
+#. translators: %s: last unverified-check datetime.
+#: admin/partials/nlh-dashboard.php:119
+#, php-format
+msgid "Unverified since %s"
+msgstr "Sin verificar desde %s"
+
+#. translators: %s: last-checked datetime.
+#: admin/partials/nlh-dashboard.php:160
+#, php-format
+msgid "Checked %s"
+msgstr "Comprobado %s"

@@ -453,7 +453,7 @@ class NLH_Scanner {
 	 * @param int    $post_id     Owning post id (0 for menus).
 	 * @return string
 	 */
-	private function state_key_suffix( string $source_type, int $post_id ): string {
+	public function state_key_suffix( string $source_type, int $post_id ): string {
 		return 'post' === $source_type ? (string) $post_id : $source_type . '_' . $post_id;
 	}
 
@@ -514,6 +514,36 @@ class NLH_Scanner {
 		if ( 429 === $code || in_array( $code, $this->get_soft_status_codes(), true ) || $this->is_bot_challenge_response( $response, $code ) ) {
 			++$counters['retries'];
 			set_transient( $transient_retry, true, HOUR_IN_SECONDS );
+
+			// A soft/challenge result neither confirms nor clears an existing
+			// broken record, but it IS a check that just happened. Touch
+			// last_checked_at AND refresh the stored status/message to the real
+			// "could not verify" state: leaving the old (possibly stale, now
+			// factually wrong) error in place makes the dashboard lie about why
+			// the link is flagged. The row stays on the books, but as an honest
+			// "unverifiable" instead of a frozen hard error. The %d update below
+			// is a no-op when no broken record exists (soft never creates one).
+			$soft_message = __( 'Could not verify (anti-bot challenge or rate limit).', 'native-link-health' );
+			$wpdb->update(
+				$table,
+				array(
+					'status_code'     => $code ?: 0,
+					'error_message'   => sanitize_text_field( $soft_message ),
+					'last_checked_at' => current_time( 'mysql', true ),
+				),
+				array(
+					'post_id'     => $post_id,
+					'url_hash'    => $url_hash,
+					'source_type' => $source_type,
+				),
+				array( '%d', '%s', '%s' ),
+				array( '%d', '%s', '%s' )
+			);
+			// Stamp when the unverifiable streak began (preserved across repeated
+			// soft checks, cleared on the next hard ok/broken confirmation) so the
+			// dashboard's "Unverified since" is meaningful and long-unverifiable
+			// records can be excluded from the broken count / health score.
+			$this->mark_unverified_since( $url_hash, $state_suffix );
 			return;
 		}
 
@@ -567,6 +597,9 @@ class NLH_Scanner {
 
 			// Prevent stale OK cache — re-check this URL sooner.
 			delete_transient( 'nlh_ok_' . $url_hash );
+
+			// A hard confirmation supersedes any earlier soft/could-not-verify flag.
+			delete_option( 'nlh_last_soft_' . $url_hash . '_' . $state_suffix );
 
 			// Navigation links are sitewide and high-impact; posts are scored by
 			// authority; comments (post_id holds the comment id) carry no weight.
@@ -628,6 +661,7 @@ class NLH_Scanner {
 			delete_transient( 'nlh_fail_' . $url_hash . '_' . $state_suffix );
 			set_transient( $transient_ok, true, 2 * DAY_IN_SECONDS );
 			update_option( 'nlh_last_ok_' . $url_hash . '_' . $state_suffix, time(), false );
+			delete_option( 'nlh_last_soft_' . $url_hash . '_' . $state_suffix );
 
 			// If this URL was previously recorded broken, log the recovery so the
 			// timeline reflects cron-detected fixes too.
@@ -1035,10 +1069,12 @@ class NLH_Scanner {
 	 * @return WP_Post[]
 	 */
 	private function get_batch_posts(): array {
+		$batch_size = $this->get_batch_size();
+
 		$posts = get_posts(
 			array(
 				'post_type'      => $this->get_scan_post_types(),
-				'posts_per_page' => NLH_BATCH_SIZE,
+				'posts_per_page' => $batch_size,
 				'post_status'    => 'publish',
 				'meta_query'     => array(
 					array(
@@ -1051,11 +1087,11 @@ class NLH_Scanner {
 			)
 		);
 
-		if ( count( $posts ) >= NLH_BATCH_SIZE ) {
+		if ( count( $posts ) >= $batch_size ) {
 			return $posts;
 		}
 
-		$remaining = NLH_BATCH_SIZE - count( $posts );
+		$remaining = $batch_size - count( $posts );
 		$scanned   = get_posts(
 			array(
 				'post_type'      => $this->get_scan_post_types(),
@@ -1085,6 +1121,11 @@ class NLH_Scanner {
 		$url      = esc_url_raw( $url );
 		$url_hash = md5( $url );
 
+		// Re-check is post-only (the dashboard hides it for comment/menu rows), but
+		// key state options through state_key_suffix() so they stay identical to the
+		// batch scanner's keys — future-proofing against a comment/menu re-check.
+		$state_suffix = $this->state_key_suffix( 'post', $post_id );
+
 		// Apply the same safety gate as the batch scanner: reject non-http(s)
 		// schemes, the site's own root, and localhost/private hosts (SSRF).
 		if ( ! $this->is_scannable_url( $url ) ) {
@@ -1106,7 +1147,27 @@ class NLH_Scanner {
 		// or 401/403 bot-blocks) and Cloudflare-style challenges mean "could not
 		// verify", not "broken". Without this, a manual re-check would wrongly flag.
 		if ( 429 === $code || in_array( $code, $this->get_soft_status_codes(), true ) || $this->is_bot_challenge_response( $response, $code ) ) {
-			set_transient( 'nlh_retry_' . $url_hash . '_' . $post_id, true, HOUR_IN_SECONDS );
+			set_transient( 'nlh_retry_' . $url_hash . '_' . $state_suffix, true, HOUR_IN_SECONDS );
+
+			if ( $record_id > 0 ) {
+				// Refresh the stale (now factually wrong) status/message on the
+				// record to the real "could not verify" state so the dashboard
+				// stops implying an old hard error, and stamp the unverifiable
+				// streak start (preserved, not bumped, so its age is meaningful).
+				$soft_message = __( 'Could not verify (anti-bot challenge or rate limit).', 'native-link-health' );
+				$wpdb->update(
+					$table,
+					array(
+						'status_code'     => $code ?: 0,
+						'error_message'   => sanitize_text_field( $soft_message ),
+						'last_checked_at' => current_time( 'mysql', true ),
+					),
+					array( 'id' => $record_id ),
+					array( '%d', '%s', '%s' ),
+					array( '%d' )
+				);
+				$this->mark_unverified_since( $url_hash, $state_suffix );
+			}
 
 			return array(
 				'status'      => 'rate_limited',
@@ -1153,8 +1214,9 @@ class NLH_Scanner {
 				$replace_formats = array_merge( array( '%d' ), $replace_formats );
 			}
 
-			$event_type = false === get_option( 'nlh_last_ok_' . $url_hash . '_' . $post_id, false ) ? 'broken' : 'regression';
-			delete_option( 'nlh_last_ok_' . $url_hash . '_' . $post_id );
+			$event_type = false === get_option( 'nlh_last_ok_' . $url_hash . '_' . $state_suffix, false ) ? 'broken' : 'regression';
+			delete_option( 'nlh_last_ok_' . $url_hash . '_' . $state_suffix );
+			delete_option( 'nlh_last_soft_' . $url_hash . '_' . $state_suffix );
 			$this->record_link_event( $url_hash, $post_id, $event_type, $code ?: 0 );
 			$wpdb->replace( $table, $replace_data, $replace_formats );
 			$saved_record_id = $record_id > 0 ? $record_id : (int) $wpdb->insert_id;
@@ -1170,7 +1232,8 @@ class NLH_Scanner {
 		}
 
 		set_transient( 'nlh_ok_' . $url_hash, true, 2 * DAY_IN_SECONDS );
-		update_option( 'nlh_last_ok_' . $url_hash . '_' . $post_id, time(), false );
+		update_option( 'nlh_last_ok_' . $url_hash . '_' . $state_suffix, time(), false );
+		delete_option( 'nlh_last_soft_' . $url_hash . '_' . $state_suffix );
 		$this->record_link_event( $url_hash, $post_id, 'fixed', $code );
 
 		$this->delete_error_record( $record_id, $post_id, $url_hash );
@@ -1296,6 +1359,7 @@ class NLH_Scanner {
 
 		$last_ok_option = 'nlh_last_ok_' . $url_hash . '_' . $post_id;
 		delete_option( $last_ok_option );
+		delete_option( 'nlh_last_soft_' . $url_hash . '_' . $post_id );
 	}
 
 	/**
@@ -1416,6 +1480,12 @@ class NLH_Scanner {
 
 		if ( $this->is_relative_url( $val ) ) {
 			$val = $this->resolve_relative_url( $val );
+		} elseif ( 0 === strpos( $val, '//' ) ) {
+			// Protocol-relative URL ("//host/path"): resolve the scheme here so
+			// the same absolute value is used for both the scannability check
+			// and the stored/requested URL below — wp_remote_head() rejects a
+			// schemeless URL outright.
+			$val = ( is_ssl() ? 'https:' : 'http:' ) . $val;
 		}
 
 		if ( isset( $val[0] ) && '#' === $val[0] ) {
@@ -1748,6 +1818,7 @@ class NLH_Scanner {
 			);
 			foreach ( $stale_hashes as $stale_hash ) {
 				delete_option( 'nlh_last_ok_' . $stale_hash . '_' . $state_suffix );
+				delete_option( 'nlh_last_soft_' . $stale_hash . '_' . $state_suffix );
 			}
 			$wpdb->delete(
 				$table,
@@ -1780,6 +1851,7 @@ class NLH_Scanner {
 
 		foreach ( $stale_hashes as $stale_hash ) {
 			delete_option( 'nlh_last_ok_' . $stale_hash . '_' . $state_suffix );
+			delete_option( 'nlh_last_soft_' . $stale_hash . '_' . $state_suffix );
 		}
 	}
 
@@ -1998,6 +2070,73 @@ class NLH_Scanner {
 		$threshold = (int) apply_filters( 'nlh_broken_confirm_threshold', 2 );
 
 		return max( 1, $threshold );
+	}
+
+	/**
+	 * Records when a broken record's "could not verify" (soft) streak began.
+	 *
+	 * Unlike the last-checked timestamp, this is written once at the start of the
+	 * streak and left untouched by subsequent soft probes, so its age reflects how
+	 * long the link has been unverifiable. It is cleared on the next hard ok/broken
+	 * confirmation (see check_and_record_url / recheck_url), which restarts the
+	 * streak on the next soft result.
+	 *
+	 * @since 1.3.3
+	 * @param string $url_hash     MD5 of the URL.
+	 * @param string $state_suffix Source-scoped key suffix (state_key_suffix()).
+	 * @return void
+	 */
+	private function mark_unverified_since( string $url_hash, string $state_suffix ): void {
+		$option = 'nlh_last_soft_' . $url_hash . '_' . $state_suffix;
+
+		if ( false === get_option( $option, false ) ) {
+			update_option( $option, time(), false );
+		}
+	}
+
+	/**
+	 * How long a record may stay unverifiable (soft) before it is excluded from
+	 * the broken-link count and the Health Score.
+	 *
+	 * A link that has only ever returned soft results (Cloudflare challenge, 429,
+	 * 999) for longer than this window is treated as "cannot be verified" rather
+	 * than "broken", so a permanently bot-blocked site does not depress the score
+	 * forever. The record is never auto-deleted — it still shows in the dashboard
+	 * flagged as unverifiable.
+	 *
+	 * @since 1.3.3
+	 * @return int Grace period in seconds (minimum 1 day).
+	 */
+	public function get_unverified_grace_period(): int {
+		/**
+		 * Filters the unverifiable grace period, in seconds.
+		 *
+		 * @since 1.3.3
+		 * @param int $seconds Grace period before an unverifiable record is
+		 *                     excluded from the broken count / health score.
+		 */
+		$seconds = (int) apply_filters( 'nlh_unverified_grace_period', 30 * DAY_IN_SECONDS );
+
+		return max( DAY_IN_SECONDS, $seconds );
+	}
+
+	/**
+	 * Number of posts the cron batch scans per cycle.
+	 *
+	 * Reads the admin-configurable nlh_scan_batch_size option, falling back to the
+	 * NLH_BATCH_SIZE constant when unset or out of range (e.g. a stale stored 0).
+	 *
+	 * @since 1.3.3
+	 * @return int Batch size (1..100).
+	 */
+	public function get_batch_size(): int {
+		$size = (int) get_option( 'nlh_scan_batch_size', NLH_BATCH_SIZE );
+
+		if ( $size < 1 || $size > 100 ) {
+			$size = NLH_BATCH_SIZE;
+		}
+
+		return $size;
 	}
 
 	/**

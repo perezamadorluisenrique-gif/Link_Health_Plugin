@@ -1383,3 +1383,34 @@ msgstr ""
 #: includes/class-nlh-seo-audit.php:335
 msgid "Repeated links were found on individual pages."
 msgstr ""
+
+#: admin/class-nlh-admin.php:157
+msgid "Batch Size"
+msgstr ""
+
+#. translators: %d: default batch size constant.
+#: admin/class-nlh-admin.php:720
+#, php-format
+msgid "Number of posts scanned per cron cycle (1-100). Defaults to %d."
+msgstr ""
+
+#: includes/class-nlh-scanner.php:526
+#: includes/class-nlh-scanner.php:1157
+msgid "Could not verify (anti-bot challenge or rate limit)."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php:115
+msgid "The most recent automatic check could not get a clear answer (rate limited or bot-blocked). The status shown reflects that last check, not a confirmed broken/working state."
+msgstr ""
+
+#. translators: %s: last unverified-check datetime.
+#: admin/partials/nlh-dashboard.php:119
+#, php-format
+msgid "Unverified since %s"
+msgstr ""
+
+#. translators: %s: last-checked datetime.
+#: admin/partials/nlh-dashboard.php:160
+#, php-format
+msgid "Checked %s"
+msgstr ""

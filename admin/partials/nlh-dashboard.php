@@ -49,6 +49,10 @@ $render_card = function ( $row ) {
 	$error_type     = $this->scanner->classify_error_type( $status_code, (string) $row->error_message );
 	$severity       = 'low';
 
+	$state_suffix    = $this->scanner->state_key_suffix( $source_type, $post_id );
+	$last_soft       = get_option( 'nlh_last_soft_' . (string) $row->url_hash . '_' . $state_suffix, false );
+	$last_soft_label = $last_soft ? wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (int) $last_soft ) : '';
+
 	if ( $status_code >= 500 ) {
 		$severity = 'critical';
 	} elseif ( $status_code >= 400 ) {
@@ -107,6 +111,17 @@ $render_card = function ( $row ) {
 						<span class="nlh-source-badge nlh-source-<?php echo esc_attr( $source_type ); ?>"<?php echo $source_tip ? ' title="' . esc_attr( $source_tip ) . '"' : ''; ?>><?php echo esc_html( $source_label ); ?></span>
 					<?php endif; ?>
 					<?php echo wp_kses_post( $this->get_status_badge( $status_code, $error_type ) ); ?>
+					<?php if ( $last_soft_label ) : ?>
+						<span class="nlh-status-badge nlh-status-unverified" title="<?php esc_attr_e( 'The most recent automatic check could not get a clear answer (rate limited or bot-blocked). The status shown reflects that last check, not a confirmed broken/working state.', 'native-link-health' ); ?>">
+							<?php
+							printf(
+								/* translators: %s: last unverified-check datetime. */
+								esc_html__( 'Unverified since %s', 'native-link-health' ),
+								esc_html( $last_soft_label )
+							);
+							?>
+						</span>
+					<?php endif; ?>
 					<?php
 					$impact_tips = array(
 						'critical' => __( 'Critical impact (≥85): fixing this link should be your top priority — it affects high-traffic or high-authority pages.', 'native-link-health' ),
@@ -135,6 +150,15 @@ $render_card = function ( $row ) {
 							/* translators: %s: discovered datetime. */
 							esc_html__( 'Found %s', 'native-link-health' ),
 							esc_html( $this->format_mysql_datetime( $row->discovered_at, '-' ) )
+						);
+						?>
+					</span>
+					<span>
+						<?php
+						printf(
+							/* translators: %s: last-checked datetime. */
+							esc_html__( 'Checked %s', 'native-link-health' ),
+							esc_html( $this->format_mysql_datetime( $row->last_checked_at, '-' ) )
 						);
 						?>
 					</span>
