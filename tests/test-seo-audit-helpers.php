@@ -75,5 +75,12 @@ nlh_assert( 'ok', nlh_call_private( $audit, 'classify_length', array( 30, 30, 60
 nlh_assert( 'ok', nlh_call_private( $audit, 'classify_length', array( 60, 30, 60 ) ), 'exactly max -> ok' );
 nlh_assert( 'long', nlh_call_private( $audit, 'classify_length', array( 61, 30, 60 ) ), 'above max -> long' );
 
+echo "\nextract_focus_keyword():\n";
+nlh_assert( 'gardening', nlh_call_private( $audit, 'extract_focus_keyword', array( 'The Best Gardening Guide For Beginners' ) ), 'picks longest non-stopword word, stopwords excluded' );
+nlh_assert( 'jardineria', nlh_call_private( $audit, 'extract_focus_keyword', array( 'Como empezar con la jardineria' ) ), 'Spanish stopwords excluded' );
+nlh_assert( '', nlh_call_private( $audit, 'extract_focus_keyword', array( 'The Guide' ) ), 'all words are stopwords -> empty string' );
+nlh_assert( '', nlh_call_private( $audit, 'extract_focus_keyword', array( '' ) ), 'empty title -> empty string' );
+nlh_assert( '', nlh_call_private( $audit, 'extract_focus_keyword', array( 'php' ) ), 'word under 4 chars is excluded -> empty string' );
+
 echo "\n{$tests} tests, {$failures} failures.\n";
 exit( $failures > 0 ? 1 : 0 );

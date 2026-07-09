@@ -14,6 +14,69 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class NLH_SEO_Audit {
 	/**
+	 * Common stop words (EN + ES) excluded from focus-keyword detection.
+	 *
+	 * Deliberately duplicated from the similar list in
+	 * class-nlh-link-recommendations.php rather than shared, so the two
+	 * classes (link relevance vs. keyword density) can evolve independently.
+	 *
+	 * @var string[]
+	 */
+	private array $stopwords = array(
+		'the',
+		'and',
+		'for',
+		'with',
+		'that',
+		'this',
+		'from',
+		'your',
+		'you',
+		'are',
+		'was',
+		'has',
+		'have',
+		'will',
+		'can',
+		'how',
+		'what',
+		'why',
+		'who',
+		'when',
+		'where',
+		'about',
+		'into',
+		'over',
+		'best',
+		'guide',
+		'los',
+		'las',
+		'una',
+		'unos',
+		'unas',
+		'del',
+		'con',
+		'por',
+		'para',
+		'que',
+		'como',
+		'mas',
+		'pero',
+		'sus',
+		'este',
+		'esta',
+		'esto',
+		'son',
+		'fue',
+		'han',
+		'hay',
+		'sobre',
+		'entre',
+		'cuando',
+		'donde',
+	);
+
+	/**
 	 * Finds published posts/pages with no internal inbound links.
 	 *
 	 * @return array
@@ -358,6 +421,35 @@ class NLH_SEO_Audit {
 		}
 
 		return 'ok';
+	}
+
+	/**
+	 * Auto-detects a "focus keyword" from a post title: the longest word of
+	 * at least 4 characters that is not a common stop word. There is no
+	 * user-facing focus-keyword field in WordPress core, so this is a
+	 * heuristic, not a configured value.
+	 *
+	 * @param string $title Post title.
+	 * @return string Lowercased keyword, or '' if no candidate qualifies.
+	 */
+	private function extract_focus_keyword( string $title ): string {
+		$stop = array_fill_keys( $this->stopwords, true );
+
+		preg_match_all( '/[\p{L}\p{N}]{4,}/u', mb_strtolower( $title ), $matches );
+		$candidates = array_values( array_diff( $matches[0], array_keys( $stop ) ) );
+
+		if ( empty( $candidates ) ) {
+			return '';
+		}
+
+		usort(
+			$candidates,
+			static function ( $a, $b ) {
+				return mb_strlen( $b ) <=> mb_strlen( $a );
+			}
+		);
+
+		return $candidates[0];
 	}
 
 	/**
