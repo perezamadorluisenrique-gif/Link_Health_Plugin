@@ -400,6 +400,129 @@ class NLH_SEO_Audit {
 	}
 
 	/**
+	 * Finds IMG tags missing an alt attribute entirely. alt="" is treated as
+	 * an intentional decorative marker (valid per WCAG) and is NOT flagged —
+	 * only a fully absent alt attribute is.
+	 *
+	 * @return array
+	 */
+	public function audit_missing_alt_text(): array {
+		$items = array();
+
+		foreach ( $this->get_public_posts() as $post ) {
+			foreach ( $this->get_image_tags( $post->post_content ) as $image ) {
+				if ( null === $image['alt'] ) {
+					$items[] = $this->format_post_item( (int) $post->ID, (string) ( $image['src'] ?? '' ) );
+				}
+			}
+		}
+
+		return $this->result(
+			empty( $items ) ? 'pass' : 'warning',
+			count( $items ),
+			$items,
+			empty( $items )
+				? __( 'All images have an alt attribute.', 'native-link-health' )
+				: __( 'Images without an alt attribute were found. Add descriptive alt text, or alt="" for purely decorative images.', 'native-link-health' )
+		);
+	}
+
+	/**
+	 * Finds images whose declared width/height HTML attributes do not match
+	 * their real file dimensions. Only checked for images in this site's own
+	 * media library — external images are skipped (no HTTP fetch).
+	 *
+	 * @return array
+	 */
+	public function audit_image_dimension_mismatch(): array {
+		$items = array();
+
+		foreach ( $this->get_public_posts() as $post ) {
+			foreach ( $this->get_image_tags( $post->post_content ) as $image ) {
+				if ( ! is_string( $image['src'] ) || '' === $image['src'] ) {
+					continue;
+				}
+
+				if ( ! is_numeric( $image['width'] ) || ! is_numeric( $image['height'] ) ) {
+					continue;
+				}
+
+				$file = $this->resolve_local_attachment_file( $image['src'] );
+				if ( '' === $file ) {
+					continue;
+				}
+
+				$size = @getimagesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+				if ( ! is_array( $size ) ) {
+					continue;
+				}
+
+				list( $real_width, $real_height ) = $size;
+
+				if ( (int) $image['width'] !== $real_width || (int) $image['height'] !== $real_height ) {
+					$items[] = $this->format_post_item(
+						(int) $post->ID,
+						sprintf(
+							/* translators: 1: image URL, 2: declared width, 3: declared height, 4: real width, 5: real height. */
+							__( '%1$s declares %2$dx%3$d but the file is %4$dx%5$d.', 'native-link-health' ),
+							$image['src'],
+							(int) $image['width'],
+							(int) $image['height'],
+							$real_width,
+							$real_height
+						)
+					);
+				}
+			}
+		}
+
+		return $this->result(
+			empty( $items ) ? 'pass' : 'warning',
+			count( $items ),
+			$items,
+			empty( $items )
+				? __( 'No image dimension mismatches found.', 'native-link-health' )
+				: __( 'Images with declared width/height that do not match the real file were found.', 'native-link-health' )
+		);
+	}
+
+	/**
+	 * Finds legacy-format (JPG/PNG) images in this site's own media library.
+	 * GIF is excluded (often intentional animation). External images are
+	 * skipped — no HTTP fetch is made to inspect them.
+	 *
+	 * @return array
+	 */
+	public function audit_legacy_image_format(): array {
+		$items = array();
+
+		foreach ( $this->get_public_posts() as $post ) {
+			foreach ( $this->get_image_tags( $post->post_content ) as $image ) {
+				if ( ! is_string( $image['src'] ) || '' === $image['src'] ) {
+					continue;
+				}
+
+				if ( '' === $this->resolve_local_attachment_file( $image['src'] ) ) {
+					continue;
+				}
+
+				if ( $this->is_legacy_image_format( $image['src'] ) ) {
+					$items[] = $this->format_post_item( (int) $post->ID, $image['src'] );
+				}
+			}
+		}
+
+		return $this->result(
+			empty( $items ) ? 'pass' : 'warning',
+			count( $items ),
+			$items,
+			empty( $items )
+				? __( 'No legacy image formats found in your own media.', 'native-link-health' )
+				: __( 'Images in a legacy format (JPG/PNG) were found. Consider converting to WebP or AVIF.', 'native-link-health' )
+		);
+	}
+
+	/**
 	 * Classifies a measured length against a recommended min/max range.
 	 *
 	 * @param int $length Measured length.
@@ -511,6 +634,54 @@ class NLH_SEO_Audit {
 		$ext  = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
 
 		return in_array( $ext, array( 'jpg', 'jpeg', 'png' ), true );
+	}
+
+	/**
+	 * Extracts IMG tags from post content with their alt/src/width/height
+	 * attributes. One WP_HTML_Tag_Processor pass, shared by all three image
+	 * health checks.
+	 *
+	 * @param string $content HTML content.
+	 * @return array<int,array<string,mixed>>
+	 */
+	private function get_image_tags( string $content ): array {
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			return array();
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $content );
+		$images    = array();
+
+		while ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+			$images[] = array(
+				'src'    => $processor->get_attribute( 'src' ),
+				'alt'    => $processor->get_attribute( 'alt' ),
+				'width'  => $processor->get_attribute( 'width' ),
+				'height' => $processor->get_attribute( 'height' ),
+			);
+		}
+
+		return $images;
+	}
+
+	/**
+	 * Resolves an image URL to a local media-library file path, if it is
+	 * one. External/CDN images return ''  — no HTTP fetch is ever made to
+	 * verify them, matching the "no cloud" design of the plugin.
+	 *
+	 * @param string $src Image URL.
+	 * @return string Absolute file path, or '' if not a local attachment.
+	 */
+	private function resolve_local_attachment_file( string $src ): string {
+		$attachment_id = attachment_url_to_postid( $src );
+
+		if ( ! $attachment_id ) {
+			return '';
+		}
+
+		$file = get_attached_file( $attachment_id );
+
+		return ( is_string( $file ) && file_exists( $file ) ) ? $file : '';
 	}
 
 	/**
