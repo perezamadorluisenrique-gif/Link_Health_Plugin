@@ -523,7 +523,14 @@
 			redirect_chains: nlh_ajax.i18n.seoRedirectChains,
 			mixed_content: nlh_ajax.i18n.seoMixedContent,
 			invalid_canonicals: nlh_ajax.i18n.seoInvalidCanonicals,
-			redundant_links: nlh_ajax.i18n.seoRedundantLinks
+			redundant_links: nlh_ajax.i18n.seoRedundantLinks,
+			missing_alt_text: nlh_ajax.i18n.seoMissingAltText,
+			image_dimension_mismatch: nlh_ajax.i18n.seoImageDimensionMismatch,
+			legacy_image_format: nlh_ajax.i18n.seoLegacyImageFormat,
+			title_length: nlh_ajax.i18n.seoTitleLength,
+			meta_description: nlh_ajax.i18n.seoMetaDescription,
+			heading_hierarchy: nlh_ajax.i18n.seoHeadingHierarchy,
+			keyword_density: nlh_ajax.i18n.seoKeywordDensity
 		};
 
 		container.innerHTML = Object.keys(results).map(function (key) {

@@ -307,6 +307,13 @@ class NLH_Admin {
 					'seoMixedContent'      => __( 'Mixed content', 'native-link-health' ),
 					'seoInvalidCanonicals' => __( 'Invalid canonicals', 'native-link-health' ),
 					'seoRedundantLinks'    => __( 'Redundant links', 'native-link-health' ),
+					'seoMissingAltText'    => __( 'Images missing alt text', 'native-link-health' ),
+					'seoImageDimensionMismatch' => __( 'Image dimension mismatches', 'native-link-health' ),
+					'seoLegacyImageFormat' => __( 'Legacy image formats', 'native-link-health' ),
+					'seoTitleLength'       => __( 'Title length', 'native-link-health' ),
+					'seoMetaDescription'   => __( 'Meta description length', 'native-link-health' ),
+					'seoHeadingHierarchy'  => __( 'Heading hierarchy', 'native-link-health' ),
+					'seoKeywordDensity'    => __( 'Keyword density', 'native-link-health' ),
 					'chronoToday'          => __( 'Today', 'native-link-health' ),
 					'chronoYesterday'      => __( 'Yesterday', 'native-link-health' ),
 					'chronoThisWeek'       => __( 'This Week', 'native-link-health' ),
@@ -1144,11 +1151,18 @@ class NLH_Admin {
 
 				$audit   = new NLH_SEO_Audit();
 				$results = array(
-					'orphan_pages'       => $audit->audit_orphan_pages(),
-					'redirect_chains'    => $audit->audit_redirect_chains(),
-					'mixed_content'      => $audit->audit_mixed_content(),
-					'invalid_canonicals' => $audit->audit_invalid_canonicals(),
-					'redundant_links'    => $audit->audit_redundant_links(),
+					'orphan_pages'             => $audit->audit_orphan_pages(),
+					'redirect_chains'          => $audit->audit_redirect_chains(),
+					'mixed_content'            => $audit->audit_mixed_content(),
+					'invalid_canonicals'       => $audit->audit_invalid_canonicals(),
+					'redundant_links'          => $audit->audit_redundant_links(),
+					'missing_alt_text'         => $audit->audit_missing_alt_text(),
+					'image_dimension_mismatch' => $audit->audit_image_dimension_mismatch(),
+					'legacy_image_format'      => $audit->audit_legacy_image_format(),
+					'title_length'             => $audit->audit_title_length(),
+					'meta_description'         => $audit->audit_meta_description(),
+					'heading_hierarchy'        => $audit->audit_heading_hierarchy(),
+					'keyword_density'          => $audit->audit_keyword_density(),
 				);
 
 				set_transient( 'nlh_seo_audit_results', $results, DAY_IN_SECONDS );
