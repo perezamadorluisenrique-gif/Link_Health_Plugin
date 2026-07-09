@@ -4,7 +4,7 @@ Tags: broken-link-checker, link-checker, internal-links, seo, maintenance
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 8.0
-Stable tag: 1.3.3
+Stable tag: 1.4.0
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,11 @@ No. All scanning and analysis runs on your server. Nothing is sent anywhere.
 4. Settings page with scan scope (post types, comments, menus) and auto-fix rules.
 
 == Changelog ==
+
+= 1.4.0 =
+* Added 3 image health checks to the SEO audit: missing alt text, declared-vs-real dimension mismatches, and legacy (JPG/PNG) formats — all free, checked against your own media library only (no external fetches).
+* Added 4 on-page SEO checks to the SEO audit: title length, meta description (excerpt) length, heading hierarchy (multiple H1s / skipped levels), and keyword density (auto-detected from the title) — all free.
+* The SEO audit now runs 12 checks total, all free, none Pro-gated.
 
 = 1.3.3 =
 * Persistently soft-blocked links (Cloudflare challenge, rate limiting) now have their recorded status refreshed to "could not verify" instead of keeping a stale error, and are excluded from the broken-link count and Health Score once unverifiable for longer than 30 days (filterable via `nlh_unverified_grace_period`). Nothing is auto-deleted.
