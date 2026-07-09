@@ -453,6 +453,49 @@ class NLH_SEO_Audit {
 	}
 
 	/**
+	 * Flags multiple-H1 and skipped-level issues in an ordered list of
+	 * heading levels. Ascending back out of a nested section (e.g. H4 then
+	 * H2) is normal document structure and is never flagged — only a
+	 * forward skip while descending (e.g. H2 directly to H4) is.
+	 *
+	 * @param int[] $levels Heading levels (1-6) in document order.
+	 * @return array<int,array<string,int|string>>
+	 */
+	private function find_heading_hierarchy_issues( array $levels ): array {
+		$issues = array();
+
+		$h1_count = count(
+			array_filter(
+				$levels,
+				static function ( $level ) {
+					return 1 === $level;
+				}
+			)
+		);
+
+		if ( $h1_count > 1 ) {
+			$issues[] = array(
+				'type'  => 'multiple_h1',
+				'count' => $h1_count,
+			);
+		}
+
+		$previous = null;
+		foreach ( $levels as $level ) {
+			if ( null !== $previous && $level > $previous + 1 ) {
+				$issues[] = array(
+					'type' => 'skipped_level',
+					'from' => $previous,
+					'to'   => $level,
+				);
+			}
+			$previous = $level;
+		}
+
+		return $issues;
+	}
+
+	/**
 	 * Returns public posts/pages.
 	 *
 	 * @return WP_Post[]

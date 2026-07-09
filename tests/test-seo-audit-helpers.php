@@ -82,5 +82,21 @@ nlh_assert( '', nlh_call_private( $audit, 'extract_focus_keyword', array( 'The G
 nlh_assert( '', nlh_call_private( $audit, 'extract_focus_keyword', array( '' ) ), 'empty title -> empty string' );
 nlh_assert( '', nlh_call_private( $audit, 'extract_focus_keyword', array( 'php' ) ), 'word under 4 chars is excluded -> empty string' );
 
+echo "\nfind_heading_hierarchy_issues():\n";
+nlh_assert( array(), nlh_call_private( $audit, 'find_heading_hierarchy_issues', array( array( 2, 3, 2, 3 ) ) ), 'clean hierarchy -> no issues' );
+nlh_assert(
+	array( array( 'type' => 'multiple_h1', 'count' => 2 ) ),
+	nlh_call_private( $audit, 'find_heading_hierarchy_issues', array( array( 1, 2, 1, 2 ) ) ),
+	'two H1s -> multiple_h1 issue'
+);
+nlh_assert(
+	array( array( 'type' => 'skipped_level', 'from' => 2, 'to' => 4 ) ),
+	nlh_call_private( $audit, 'find_heading_hierarchy_issues', array( array( 2, 4 ) ) ),
+	'H2 directly to H4 -> skipped_level issue'
+);
+nlh_assert( array(), nlh_call_private( $audit, 'find_heading_hierarchy_issues', array( array( 4, 2, 3 ) ) ), 'ascending back out (H4 to H2) is not a skip' );
+nlh_assert( array(), nlh_call_private( $audit, 'find_heading_hierarchy_issues', array( array() ) ), 'no headings -> no issues' );
+nlh_assert( array(), nlh_call_private( $audit, 'find_heading_hierarchy_issues', array( array( 1 ) ) ), 'single H1 -> no issues' );
+
 echo "\n{$tests} tests, {$failures} failures.\n";
 exit( $failures > 0 ? 1 : 0 );
