@@ -337,6 +337,30 @@ class NLH_SEO_Audit {
 	}
 
 	/**
+	 * Classifies a measured length against a recommended min/max range.
+	 *
+	 * @param int $length Measured length.
+	 * @param int $min    Recommended minimum.
+	 * @param int $max    Recommended maximum.
+	 * @return string 'missing', 'short', 'long', or 'ok'.
+	 */
+	private function classify_length( int $length, int $min, int $max ): string {
+		if ( 0 === $length ) {
+			return 'missing';
+		}
+
+		if ( $length < $min ) {
+			return 'short';
+		}
+
+		if ( $length > $max ) {
+			return 'long';
+		}
+
+		return 'ok';
+	}
+
+	/**
 	 * Returns public posts/pages.
 	 *
 	 * @return WP_Post[]
