@@ -98,5 +98,13 @@ nlh_assert( array(), nlh_call_private( $audit, 'find_heading_hierarchy_issues', 
 nlh_assert( array(), nlh_call_private( $audit, 'find_heading_hierarchy_issues', array( array() ) ), 'no headings -> no issues' );
 nlh_assert( array(), nlh_call_private( $audit, 'find_heading_hierarchy_issues', array( array( 1 ) ) ), 'single H1 -> no issues' );
 
+echo "\nis_legacy_image_format():\n";
+nlh_assert( true, nlh_call_private( $audit, 'is_legacy_image_format', array( 'https://example.com/wp-content/uploads/2026/07/photo.jpg' ) ), '.jpg -> legacy' );
+nlh_assert( true, nlh_call_private( $audit, 'is_legacy_image_format', array( 'https://example.com/uploads/logo.PNG' ) ), '.PNG (uppercase) -> legacy' );
+nlh_assert( true, nlh_call_private( $audit, 'is_legacy_image_format', array( '/uploads/photo.jpeg?ver=2' ) ), '.jpeg with query string -> legacy' );
+nlh_assert( false, nlh_call_private( $audit, 'is_legacy_image_format', array( '/uploads/animation.gif' ) ), '.gif -> not legacy (often intentional animation)' );
+nlh_assert( false, nlh_call_private( $audit, 'is_legacy_image_format', array( '/uploads/photo.webp' ) ), '.webp -> not legacy' );
+nlh_assert( false, nlh_call_private( $audit, 'is_legacy_image_format', array( '/uploads/photo' ) ), 'no extension -> not legacy' );
+
 echo "\n{$tests} tests, {$failures} failures.\n";
 exit( $failures > 0 ? 1 : 0 );

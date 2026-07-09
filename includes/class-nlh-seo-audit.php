@@ -496,6 +496,24 @@ class NLH_SEO_Audit {
 	}
 
 	/**
+	 * Checks whether an image URL has a legacy raster extension (JPG/PNG).
+	 * GIF is deliberately excluded — it is frequently used intentionally for
+	 * animation, not as a static-photo format choice.
+	 *
+	 * Uses plain parse_url() rather than wp_parse_url() so this stays a pure
+	 * function testable without WordPress loaded.
+	 *
+	 * @param string $src Image URL.
+	 * @return bool
+	 */
+	private function is_legacy_image_format( string $src ): bool {
+		$path = (string) parse_url( $src, PHP_URL_PATH ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$ext  = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+
+		return in_array( $ext, array( 'jpg', 'jpeg', 'png' ), true );
+	}
+
+	/**
 	 * Returns public posts/pages.
 	 *
 	 * @return WP_Post[]
