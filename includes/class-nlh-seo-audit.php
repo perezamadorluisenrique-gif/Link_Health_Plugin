@@ -646,6 +646,82 @@ class NLH_SEO_Audit {
 	}
 
 	/**
+	 * Flags posts whose auto-detected title keyword is either absent from
+	 * the body content, or overused within it. WordPress core has no
+	 * user-facing "focus keyword" field, so the keyword is heuristically
+	 * detected from the title (see extract_focus_keyword()). Only these two
+	 * actionable states are flagged — informational density values for
+	 * every post are not listed, to keep the check noise-free.
+	 *
+	 * @return array
+	 */
+	public function audit_keyword_density(): array {
+		/**
+		 * Filters the keyword density percentage above which a post is
+		 * flagged as possible keyword stuffing.
+		 *
+		 * @since 1.4.0
+		 * @param float $max_density Maximum density percentage.
+		 */
+		$max_density = (float) apply_filters( 'nlh_seo_keyword_density_max', 3.0 );
+
+		$items = array();
+
+		foreach ( $this->get_public_posts() as $post ) {
+			$keyword = $this->extract_focus_keyword( $post->post_title );
+
+			if ( '' === $keyword ) {
+				continue;
+			}
+
+			$text  = wp_strip_all_tags( strip_shortcodes( $post->post_content ) );
+			$words = preg_split( '/\s+/u', trim( $text ), -1, PREG_SPLIT_NO_EMPTY );
+
+			$word_count = is_array( $words ) ? count( $words ) : 0;
+
+			// Too short to measure meaningfully — skip rather than risk a
+			// noisy density figure on a stub page.
+			if ( $word_count < 20 ) {
+				continue;
+			}
+
+			$occurrences = preg_match_all( '/\b' . preg_quote( $keyword, '/' ) . '\b/iu', $text );
+			$density     = ( $occurrences / $word_count ) * 100;
+
+			if ( 0 === $occurrences ) {
+				$items[] = $this->format_post_item(
+					(int) $post->ID,
+					sprintf(
+						/* translators: %s: focus keyword auto-detected from the title. */
+						__( 'Title keyword "%s" does not appear anywhere in the content.', 'native-link-health' ),
+						$keyword
+					)
+				);
+			} elseif ( $density > $max_density ) {
+				$items[] = $this->format_post_item(
+					(int) $post->ID,
+					sprintf(
+						/* translators: 1: focus keyword, 2: occurrence count, 3: density percentage. */
+						__( 'Keyword "%1$s" appears %2$d times (%3$s%% density) — consider reducing repetition.', 'native-link-health' ),
+						$keyword,
+						(int) $occurrences,
+						number_format_i18n( $density, 1 )
+					)
+				);
+			}
+		}
+
+		return $this->result(
+			empty( $items ) ? 'pass' : 'warning',
+			count( $items ),
+			$items,
+			empty( $items )
+				? __( 'No keyword density issues found.', 'native-link-health' )
+				: __( 'Titles whose detected keyword is missing from the content, or overused within it, were found.', 'native-link-health' )
+		);
+	}
+
+	/**
 	 * Classifies a measured length against a recommended min/max range.
 	 *
 	 * @param int $length Measured length.
