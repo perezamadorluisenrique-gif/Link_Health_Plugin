@@ -617,6 +617,35 @@ class NLH_SEO_Audit {
 	}
 
 	/**
+	 * Flags multiple-H1 and skipped-heading-level issues in post content.
+	 * Does NOT flag "no H1 in content" — themes typically render the post
+	 * title as the page's H1 outside post_content, so a missing H1 inside
+	 * the content body is normal on most WordPress sites.
+	 *
+	 * @return array
+	 */
+	public function audit_heading_hierarchy(): array {
+		$items = array();
+
+		foreach ( $this->get_public_posts() as $post ) {
+			$issues = $this->find_heading_hierarchy_issues( $this->get_heading_levels( $post->post_content ) );
+
+			foreach ( $issues as $issue ) {
+				$items[] = $this->format_post_item( (int) $post->ID, $this->describe_heading_issue( $issue ) );
+			}
+		}
+
+		return $this->result(
+			empty( $items ) ? 'pass' : 'warning',
+			count( $items ),
+			$items,
+			empty( $items )
+				? __( 'No heading hierarchy issues found.', 'native-link-health' )
+				: __( 'Heading structure issues (multiple H1s or skipped levels) were found.', 'native-link-health' )
+		);
+	}
+
+	/**
 	 * Classifies a measured length against a recommended min/max range.
 	 *
 	 * @param int $length Measured length.
@@ -820,6 +849,54 @@ class NLH_SEO_Audit {
 			__( '%1$d characters — longer than the recommended maximum of %2$d.', 'native-link-health' ),
 			$length,
 			$max
+		);
+	}
+
+	/**
+	 * Extracts H1-H6 heading levels from post content in document order.
+	 *
+	 * @param string $content HTML content.
+	 * @return int[]
+	 */
+	private function get_heading_levels( string $content ): array {
+		if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+			return array();
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $content );
+		$levels    = array();
+
+		while ( $processor->next_tag() ) {
+			$tag = $processor->get_tag();
+
+			if ( is_string( $tag ) && 1 === preg_match( '/^H([1-6])$/', $tag, $matches ) ) {
+				$levels[] = (int) $matches[1];
+			}
+		}
+
+		return $levels;
+	}
+
+	/**
+	 * Builds the detail message for one heading-hierarchy issue.
+	 *
+	 * @param array $issue Issue array from find_heading_hierarchy_issues().
+	 * @return string
+	 */
+	private function describe_heading_issue( array $issue ): string {
+		if ( 'multiple_h1' === $issue['type'] ) {
+			return sprintf(
+				/* translators: %d: number of H1 headings found. */
+				__( '%d H1 headings found in the content — there should be only one.', 'native-link-health' ),
+				(int) $issue['count']
+			);
+		}
+
+		return sprintf(
+			/* translators: 1: heading level before the skip, 2: heading level after the skip. */
+			__( 'Heading level skipped: H%1$d is followed directly by H%2$d.', 'native-link-health' ),
+			(int) $issue['from'],
+			(int) $issue['to']
 		);
 	}
 
