@@ -1414,3 +1414,137 @@ msgstr "Sin verificar desde %s"
 #, php-format
 msgid "Checked %s"
 msgstr "Comprobado %s"
+
+#: includes/class-nlh-seo-audit.php:425
+msgid "All images have an alt attribute."
+msgstr "Todas las imágenes tienen un atributo alt."
+
+#: includes/class-nlh-seo-audit.php:426
+msgid "Images without an alt attribute were found. Add descriptive alt text, or alt=\"\" for purely decorative images."
+msgstr "Se encontraron imágenes sin atributo alt. Añade texto alternativo descriptivo, o alt=\"\" para imágenes puramente decorativas."
+
+#. translators: 1: image URL, 2: declared width, 3: declared height, 4: real width, 5: real height.
+#: includes/class-nlh-seo-audit.php:467
+#, php-format
+msgid "%1$s declares %2$dx%3$d but the file is %4$dx%5$d."
+msgstr "%1$s declara %2$dx%3$d pero el archivo es %4$dx%5$d."
+
+#: includes/class-nlh-seo-audit.php:484
+msgid "No image dimension mismatches found."
+msgstr "No se encontraron discrepancias de dimensiones de imagen."
+
+#: includes/class-nlh-seo-audit.php:485
+msgid "Images with declared width/height that do not match the real file were found."
+msgstr "Se encontraron imágenes cuyo ancho/alto declarado no coincide con el archivo real."
+
+#: includes/class-nlh-seo-audit.php:520
+msgid "No legacy image formats found in your own media."
+msgstr "No se encontraron formatos de imagen obsoletos en tus propios medios."
+
+#: includes/class-nlh-seo-audit.php:521
+msgid "Images in a legacy format (JPG/PNG) were found. Consider converting to WebP or AVIF."
+msgstr "Se encontraron imágenes en un formato obsoleto (JPG/PNG). Considera convertirlas a WebP o AVIF."
+
+#: includes/class-nlh-seo-audit.php:565
+msgid "All titles are within the recommended length."
+msgstr "Todos los títulos están dentro de la longitud recomendada."
+
+#: includes/class-nlh-seo-audit.php:566
+msgid "Titles outside the recommended length range were found."
+msgstr "Se encontraron títulos fuera del rango de longitud recomendado."
+
+#: includes/class-nlh-seo-audit.php:614
+msgid "All excerpts (used as meta descriptions by most themes) are within the recommended length."
+msgstr "Todos los extractos (usados como meta descripción por la mayoría de temas) están dentro de la longitud recomendada."
+
+#: includes/class-nlh-seo-audit.php:615
+msgid "Excerpts outside the recommended meta-description length range were found."
+msgstr "Se encontraron extractos fuera del rango de longitud recomendado para meta descripciones."
+
+#: includes/class-nlh-seo-audit.php:643
+msgid "No heading hierarchy issues found."
+msgstr "No se encontraron problemas de jerarquía de encabezados."
+
+#: includes/class-nlh-seo-audit.php:644
+msgid "Heading structure issues (multiple H1s or skipped levels) were found."
+msgstr "Se encontraron problemas de estructura de encabezados (varios H1 o niveles saltados)."
+
+#. translators: %s: focus keyword auto-detected from the title.
+#: includes/class-nlh-seo-audit.php:696
+#, php-format
+msgid "Title keyword \"%s\" does not appear anywhere in the content."
+msgstr "La palabra clave del título «%s» no aparece en ningún lugar del contenido."
+
+#. translators: 1: focus keyword, 2: occurrence count, 3: density percentage.
+#: includes/class-nlh-seo-audit.php:705
+#, php-format
+msgid "Keyword \"%1$s\" appears %2$d times (%3$s%% density) — consider reducing repetition."
+msgstr "La palabra clave «%1$s» aparece %2$d veces (%3$s%% de densidad) — considera reducir la repetición."
+
+#: includes/class-nlh-seo-audit.php:719
+msgid "No keyword density issues found."
+msgstr "No se encontraron problemas de densidad de palabras clave."
+
+#: includes/class-nlh-seo-audit.php:720
+msgid "Titles whose detected keyword is missing from the content, or overused within it, were found."
+msgstr "Se encontraron títulos cuya palabra clave detectada falta en el contenido, o se usa en exceso en él."
+
+#: includes/class-nlh-seo-audit.php:910
+msgid "Title is empty."
+msgstr "El título está vacío."
+
+#: includes/class-nlh-seo-audit.php:911
+msgid "Excerpt (used as the meta description by most themes) is empty."
+msgstr "El extracto (usado como meta descripción por la mayoría de temas) está vacío."
+
+#. translators: 1: current length, 2: minimum recommended length.
+#: includes/class-nlh-seo-audit.php:917
+#, php-format
+msgid "%1$d characters — shorter than the recommended minimum of %2$d."
+msgstr "%1$d caracteres — más corto que el mínimo recomendado de %2$d."
+
+#. translators: 1: current length, 2: maximum recommended length.
+#: includes/class-nlh-seo-audit.php:925
+#, php-format
+msgid "%1$d characters — longer than the recommended maximum of %2$d."
+msgstr "%1$d caracteres — más largo que el máximo recomendado de %2$d."
+
+#. translators: %d: number of H1 headings found.
+#: includes/class-nlh-seo-audit.php:966
+#, php-format
+msgid "%d H1 headings found in the content — there should be only one."
+msgstr "Se encontraron %d encabezados H1 en el contenido — debería haber solo uno."
+
+#. translators: 1: heading level before the skip, 2: heading level after the skip.
+#: includes/class-nlh-seo-audit.php:973
+#, php-format
+msgid "Heading level skipped: H%1$d is followed directly by H%2$d."
+msgstr "Nivel de encabezado saltado: H%1$d está seguido directamente por H%2$d."
+
+#: admin/class-nlh-admin.php:310
+msgid "Images missing alt text"
+msgstr "Imágenes sin texto alternativo"
+
+#: admin/class-nlh-admin.php:311
+msgid "Image dimension mismatches"
+msgstr "Discrepancias de dimensiones de imagen"
+
+#: admin/class-nlh-admin.php:312
+msgid "Legacy image formats"
+msgstr "Formatos de imagen obsoletos"
+
+#: admin/class-nlh-admin.php:313
+msgid "Title length"
+msgstr "Longitud del título"
+
+#: admin/class-nlh-admin.php:314
+msgid "Meta description length"
+msgstr "Longitud de la meta descripción"
+
+#: admin/class-nlh-admin.php:315
+msgid "Heading hierarchy"
+msgstr "Jerarquía de encabezados"
+
+#: admin/class-nlh-admin.php:316
+msgid "Keyword density"
+msgstr "Densidad de palabras clave"
