@@ -523,6 +523,100 @@ class NLH_SEO_Audit {
 	}
 
 	/**
+	 * Flags post titles outside the recommended search-snippet length range.
+	 *
+	 * @return array
+	 */
+	public function audit_title_length(): array {
+		/**
+		 * Filters the minimum recommended title length, in characters.
+		 *
+		 * @since 1.4.0
+		 * @param int $min Minimum length.
+		 */
+		$min = max( 1, (int) apply_filters( 'nlh_seo_title_min_length', 30 ) );
+
+		/**
+		 * Filters the maximum recommended title length, in characters.
+		 *
+		 * @since 1.4.0
+		 * @param int $max Maximum length.
+		 */
+		$max = max( $min, (int) apply_filters( 'nlh_seo_title_max_length', 60 ) );
+
+		$items = array();
+
+		foreach ( $this->get_public_posts() as $post ) {
+			$length = $this->mb_len( $post->post_title );
+			$state  = $this->classify_length( $length, $min, $max );
+
+			if ( 'ok' === $state ) {
+				continue;
+			}
+
+			$items[] = $this->format_post_item( (int) $post->ID, $this->describe_length_issue( $state, $length, $min, $max, 'title' ) );
+		}
+
+		return $this->result(
+			empty( $items ) ? 'pass' : 'warning',
+			count( $items ),
+			$items,
+			empty( $items )
+				? __( 'All titles are within the recommended length.', 'native-link-health' )
+				: __( 'Titles outside the recommended length range were found.', 'native-link-health' )
+		);
+	}
+
+	/**
+	 * Flags excerpts (used by most themes/plugins as the meta description)
+	 * outside the recommended search-snippet length range. WordPress core
+	 * renders no <meta name="description"> tag without an SEO plugin, so
+	 * this measures the excerpt rather than claiming a literal meta tag.
+	 *
+	 * @return array
+	 */
+	public function audit_meta_description(): array {
+		/**
+		 * Filters the minimum recommended excerpt/meta-description length.
+		 *
+		 * @since 1.4.0
+		 * @param int $min Minimum length, in characters.
+		 */
+		$min = max( 1, (int) apply_filters( 'nlh_seo_meta_description_min_length', 50 ) );
+
+		/**
+		 * Filters the maximum recommended excerpt/meta-description length.
+		 *
+		 * @since 1.4.0
+		 * @param int $max Maximum length, in characters.
+		 */
+		$max = max( $min, (int) apply_filters( 'nlh_seo_meta_description_max_length', 160 ) );
+
+		$items = array();
+
+		foreach ( $this->get_public_posts() as $post ) {
+			$excerpt = wp_strip_all_tags( get_the_excerpt( $post ) );
+			$length  = $this->mb_len( $excerpt );
+			$state   = $this->classify_length( $length, $min, $max );
+
+			if ( 'ok' === $state ) {
+				continue;
+			}
+
+			$items[] = $this->format_post_item( (int) $post->ID, $this->describe_length_issue( $state, $length, $min, $max, 'excerpt' ) );
+		}
+
+		return $this->result(
+			empty( $items ) ? 'pass' : 'warning',
+			count( $items ),
+			$items,
+			empty( $items )
+				? __( 'All excerpts (used as meta descriptions by most themes) are within the recommended length.', 'native-link-health' )
+				: __( 'Excerpts outside the recommended meta-description length range were found.', 'native-link-health' )
+		);
+	}
+
+	/**
 	 * Classifies a measured length against a recommended min/max range.
 	 *
 	 * @param int $length Measured length.
@@ -682,6 +776,51 @@ class NLH_SEO_Audit {
 		$file = get_attached_file( $attachment_id );
 
 		return ( is_string( $file ) && file_exists( $file ) ) ? $file : '';
+	}
+
+	/**
+	 * Multi-byte-safe string length, falling back to strlen() if the mbstring
+	 * extension is unavailable.
+	 *
+	 * @param string $text Text to measure.
+	 * @return int
+	 */
+	private function mb_len( string $text ): int {
+		return function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text );
+	}
+
+	/**
+	 * Builds the detail message for a title/meta-description length issue.
+	 *
+	 * @param string $state  Result of classify_length(): 'missing', 'short', or 'long'.
+	 * @param int    $length Measured length.
+	 * @param int    $min    Recommended minimum.
+	 * @param int    $max    Recommended maximum.
+	 * @param string $field  'title' or 'excerpt' — selects the "missing" copy.
+	 * @return string
+	 */
+	private function describe_length_issue( string $state, int $length, int $min, int $max, string $field ): string {
+		if ( 'missing' === $state ) {
+			return 'title' === $field
+				? __( 'Title is empty.', 'native-link-health' )
+				: __( 'Excerpt (used as the meta description by most themes) is empty.', 'native-link-health' );
+		}
+
+		if ( 'short' === $state ) {
+			return sprintf(
+				/* translators: 1: current length, 2: minimum recommended length. */
+				__( '%1$d characters — shorter than the recommended minimum of %2$d.', 'native-link-health' ),
+				$length,
+				$min
+			);
+		}
+
+		return sprintf(
+			/* translators: 1: current length, 2: maximum recommended length. */
+			__( '%1$d characters — longer than the recommended maximum of %2$d.', 'native-link-health' ),
+			$length,
+			$max
+		);
 	}
 
 	/**
