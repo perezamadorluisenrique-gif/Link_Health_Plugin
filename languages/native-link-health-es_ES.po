@@ -1548,3 +1548,63 @@ msgstr "Jerarquía de encabezados"
 #: admin/class-nlh-admin.php:316
 msgid "Keyword density"
 msgstr "Densidad de palabras clave"
+
+#: admin/partials/nlh-help.php
+msgid "How to use Native Link Health"
+msgstr "Cómo usar Native Link Health"
+
+#: admin/partials/nlh-help.php
+msgid "A quick reference for what each screen does and how the free and Pro features fit together."
+msgstr "Una referencia rápida sobre qué hace cada pantalla y cómo encajan las funciones gratuitas y Pro."
+
+#: admin/partials/nlh-help.php
+msgid "Overview"
+msgstr "Resumen"
+
+#: admin/partials/nlh-help.php
+msgid "Native Link Health scans your site for broken links and tracks how authority flows between your own pages, entirely on your own server. The Link Health Score blends two things: 60% how many broken links are currently unresolved, and 40% how well internal authority (Link Juice) flows through your content. A lower score means more broken links, more isolated pages, or both."
+msgstr "Native Link Health escanea tu sitio en busca de enlaces rotos y analiza cómo fluye la autoridad entre tus propias páginas, todo en tu propio servidor. La Puntuación de salud de enlaces combina dos cosas: 60% cuántos enlaces rotos siguen sin resolver, y 40% qué tan bien fluye la autoridad interna (Link Juice) por tu contenido. Una puntuación más baja significa más enlaces rotos, más páginas aisladas, o ambas cosas."
+
+#: admin/partials/nlh-help.php
+msgid "Dashboard — broken links"
+msgstr "Panel principal — enlaces rotos"
+
+#: admin/partials/nlh-help.php
+msgid "The scanner runs automatically every 15 minutes, checking a few posts at a time so it never slows down your site. Use \"Scan Now\" to check everything immediately instead of waiting. Broken links appear in the list with their error type and impact score."
+msgstr "El escáner se ejecuta automáticamente cada 15 minutos, revisando unas pocas entradas a la vez para no ralentizar tu sitio. Usa «Escanear ahora» para revisarlo todo de inmediato en lugar de esperar. Los enlaces rotos aparecen en la lista con su tipo de error y su puntuación de impacto."
+
+#: admin/partials/nlh-help.php
+msgid "Correction Suggestions groups broken links by domain and lets you fix every matching URL at once — it only shows patterns detected automatically from what is already broken."
+msgstr "«Sugerencias de corrección» agrupa los enlaces rotos por dominio y te permite corregir todas las URLs de un patrón a la vez — solo muestra patrones detectados automáticamente a partir de lo que ya está roto."
+
+#: admin/partials/nlh-help.php
+msgid "Bulk Fix & Find-Replace works differently: it lets you replace any URL, anywhere in your content, whether or not it is currently flagged as broken."
+msgstr "«Bulk Fix & Find-Replace» funciona de forma distinta: te permite reemplazar cualquier URL, en cualquier parte de tu contenido, esté o no marcada como rota actualmente."
+
+#: admin/partials/nlh-help.php
+msgid "Runs 12 checks against your published content: orphan pages, redirect chains and dead-end redirects, mixed content, invalid canonical tags, and redundant links; missing image alt text, image dimension mismatches, and legacy image formats; and title length, meta description length, heading hierarchy, and keyword density. All 12 checks are free. Results are cached for a day — run the audit again any time to refresh them."
+msgstr "Ejecuta 12 comprobaciones sobre tu contenido publicado: páginas huérfanas, cadenas de redirección y redirecciones sin destino final, contenido mixto, etiquetas canónicas inválidas y enlaces redundantes; texto alternativo de imagen ausente, discrepancias en las dimensiones de imagen y formatos de imagen antiguos; y longitud del título, longitud de la meta descripción, jerarquía de encabezados y densidad de palabra clave. Las 12 comprobaciones son gratuitas. Los resultados se guardan en caché durante un día — puedes volver a ejecutar la auditoría cuando quieras para actualizarlos."
+
+#: admin/partials/nlh-help.php
+msgid "Maps how authority flows between your own pages through internal links, entirely offline with no external requests. The site graph shows your most-linked pages as larger nodes; click a node to see its connections. Pages are flagged as Orphans (nothing links to them), Dead Ends (they receive links but link out to nothing), or Diluted (they link out to too many pages, spreading their authority thin). Recommendations suggest which pages to link together first."
+msgstr "Mapea cómo fluye la autoridad entre tus propias páginas a través de los enlaces internos, completamente sin conexión y sin peticiones externas. El mapa del sitio muestra tus páginas más enlazadas como nodos más grandes; haz clic en un nodo para ver sus conexiones. Las páginas se marcan como Huérfanas (nada enlaza a ellas), Sin salida (reciben enlaces pero no enlazan a nada) o Diluidas (enlazan a demasiadas páginas, repartiendo su autoridad). «Próximos pasos recomendados» sugiere qué páginas enlazar primero entre sí."
+
+#: admin/partials/nlh-help.php
+msgid "Insert Link lets you add a suggested link directly from a recommendation card without leaving this page."
+msgstr "«Insert Link» te permite añadir un enlace sugerido directamente desde una tarjeta de recomendación sin salir de esta página."
+
+#: admin/partials/nlh-help.php
+msgid "Settings (this page)"
+msgstr "Ajustes (esta página)"
+
+#: admin/partials/nlh-help.php
+msgid "Scan Scope controls which content types get scanned beyond posts and pages — turn on Media, Comments, or Navigation Menus here. Batch Size controls how many items the background scanner checks every 15 minutes; lower it on a slow host, raise it on a fast one. Auto-fix Rules let you define JSON rules that automatically rewrite known-bad domains whenever the scanner runs."
+msgstr "«Alcance del escaneo» controla qué tipos de contenido se escanean además de entradas y páginas — actívalo aquí para Medios, Comentarios o Menús de navegación. «Tamaño del lote» controla cuántos elementos revisa el escáner en segundo plano cada 15 minutos; redúcelo en un hosting lento, auméntalo en uno rápido. «Reglas de corrección automática» te permiten definir reglas en JSON que reescriben automáticamente dominios rotos conocidos cada vez que se ejecuta el escáner."
+
+#: admin/partials/nlh-help.php
+msgid "Bulk Fix & Find-Replace, Redirect Manager, and Email Notifications add manual bulk editing, 301/302 redirect management, and broken-link email alerts."
+msgstr "«Bulk Fix & Find-Replace», «Redirect Manager» y «Email Notifications» añaden edición masiva manual, gestión de redirecciones 301/302 y alertas por correo de enlaces rotos."
+
+#: admin/partials/nlh-dashboard.php
+msgid "Detected automatically from your broken links — approve a suggestion to fix every matching URL at once."
+msgstr "Detectado automáticamente a partir de tus enlaces rotos — aprueba una sugerencia para corregir todas las URLs de ese patrón a la vez."

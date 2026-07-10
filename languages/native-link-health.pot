@@ -1548,3 +1548,63 @@ msgstr ""
 #: admin/class-nlh-admin.php:316
 msgid "Keyword density"
 msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "How to use Native Link Health"
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "A quick reference for what each screen does and how the free and Pro features fit together."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Overview"
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Native Link Health scans your site for broken links and tracks how authority flows between your own pages, entirely on your own server. The Link Health Score blends two things: 60% how many broken links are currently unresolved, and 40% how well internal authority (Link Juice) flows through your content. A lower score means more broken links, more isolated pages, or both."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Dashboard — broken links"
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "The scanner runs automatically every 15 minutes, checking a few posts at a time so it never slows down your site. Use \"Scan Now\" to check everything immediately instead of waiting. Broken links appear in the list with their error type and impact score."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Correction Suggestions groups broken links by domain and lets you fix every matching URL at once — it only shows patterns detected automatically from what is already broken."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Bulk Fix & Find-Replace works differently: it lets you replace any URL, anywhere in your content, whether or not it is currently flagged as broken."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Runs 12 checks against your published content: orphan pages, redirect chains and dead-end redirects, mixed content, invalid canonical tags, and redundant links; missing image alt text, image dimension mismatches, and legacy image formats; and title length, meta description length, heading hierarchy, and keyword density. All 12 checks are free. Results are cached for a day — run the audit again any time to refresh them."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Maps how authority flows between your own pages through internal links, entirely offline with no external requests. The site graph shows your most-linked pages as larger nodes; click a node to see its connections. Pages are flagged as Orphans (nothing links to them), Dead Ends (they receive links but link out to nothing), or Diluted (they link out to too many pages, spreading their authority thin). Recommendations suggest which pages to link together first."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Insert Link lets you add a suggested link directly from a recommendation card without leaving this page."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Settings (this page)"
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Scan Scope controls which content types get scanned beyond posts and pages — turn on Media, Comments, or Navigation Menus here. Batch Size controls how many items the background scanner checks every 15 minutes; lower it on a slow host, raise it on a fast one. Auto-fix Rules let you define JSON rules that automatically rewrite known-bad domains whenever the scanner runs."
+msgstr ""
+
+#: admin/partials/nlh-help.php
+msgid "Bulk Fix & Find-Replace, Redirect Manager, and Email Notifications add manual bulk editing, 301/302 redirect management, and broken-link email alerts."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Detected automatically from your broken links — approve a suggestion to fix every matching URL at once."
+msgstr ""
