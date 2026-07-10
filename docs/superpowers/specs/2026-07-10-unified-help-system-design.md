@@ -61,6 +61,14 @@ No new branching logic — this is static template content, not worth a `tests/t
 - `wp-verify`-style pass: load Settings, expand/collapse all 5 panels, confirm zero console errors, confirm the existing form/CSV export/Pro card still render unchanged below the new section.
 - Switch the site locale to es_ES, reload, confirm every new string is translated — not a repeat of the must-fix bug this design exists to avoid.
 
+## Addendum (2026-07-10): Dashboard clarifying copy
+
+User direction mid-implementation: the Dashboard's ambiguity between "Correction Suggestions" (core, auto-detected) and "Bulk Fix & Find-Replace" (Pro, manual — injected via the `nlh_dashboard_tools` action from `native-link-health-pro`) must be fixed in-context on the Dashboard itself, not only documented in the Settings help accordion.
+
+Verified via source: `admin/partials/nlh-dashboard.php:308-333` renders "Correction Suggestions" with **no explanatory copy** — straight from `<h2>` into suggestion cards. Pro's "Bulk Fix & Find-Replace" widget (`native-link-health-pro/includes/class-nlhp-bulk-fix.php`, out of scope — separate plugin) already has its own one-line description under its heading. The fix is to bring Correction Suggestions up to the same standard: add one `<p class="description">` line under the `<h2>` at line 310, explaining it's auto-detected from broken links and fixes every matching URL at once. This is core-only, one new translatable string, no dependency on whether Pro is installed — it reads correctly whether or not the Bulk Fix widget renders below it.
+
+This does not touch `native-link-health-pro`.
+
 ## Out of scope
 
 - Fixing the Link Juice disabled-Insert-button bug and the foreign admin-notice pollution — separate must-fix/should-fix items in `docs/frontend-review-2026-07-10.md`.
