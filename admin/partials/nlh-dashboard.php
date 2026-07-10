@@ -308,6 +308,7 @@ $render_card = function ( $row ) {
 	<?php if ( ! empty( $suggestions ) ) : ?>
 		<div class="nlh-suggestions-section">
 			<h2><?php esc_html_e( 'Correction Suggestions', 'native-link-health' ); ?></h2>
+			<p class="description"><?php esc_html_e( 'Detected automatically from your broken links — approve a suggestion to fix every matching URL at once.', 'native-link-health' ); ?></p>
 			<?php foreach ( $suggestions as $suggestion ) : ?>
 				<div class="nlh-suggestion-card" data-pattern="<?php echo esc_attr( (string) $suggestion['pattern'] ); ?>" data-type="<?php echo esc_attr( (string) $suggestion['type'] ); ?>">
 					<div>
