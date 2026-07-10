@@ -4,7 +4,7 @@ Tags: broken-link-checker, link-checker, internal-links, seo, maintenance
 Requires at least: 6.2
 Tested up to: 6.8
 Requires PHP: 8.0
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,10 @@ No. All scanning and analysis runs on your server. Nothing is sent anywhere.
 4. Settings page with scan scope (post types, comments, menus) and auto-fix rules.
 
 == Changelog ==
+
+= 1.5.0 =
+* Added a unified "How to use Native Link Health" help section to the Settings page — a collapsible reference covering all 4 screens and what the free vs Pro features do.
+* Clarified the Dashboard's "Correction Suggestions" with a one-line description distinguishing it from the Pro Bulk Fix & Find-Replace tool.
 
 = 1.4.0 =
 * Added 3 image health checks to the SEO audit: missing alt text, declared-vs-real dimension mismatches, and legacy (JPG/PNG) formats — all free, checked against your own media library only (no external fetches).

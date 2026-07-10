@@ -71,6 +71,7 @@ The plugin is part of a multi-plugin suite. Licensing is **Freemius**, but it sh
 - **Unified Link Health Score**: `NLH_Admin::render_health_overview()` renders the dashboard cover — one headline blending broken-link detection (60%) with the authority `calculate_health_score()` (40%), a band label, and drill-down cards into broken links / authority / orphans / SEO. Falls back to detection-only when the graph was never computed.
 - **Prioritization**: `get_batch_posts()` orders never-scanned posts by `modified DESC` (fresh/just-edited content first), then fills remaining slots with the stalest re-checks.
 - **First-value UX**: per-post "Scan Now" meta box (`scan_post_now()` + `nlh_scan_post` AJAX), a real ETA on the full-scan progress bar (`nlh-admin.js`), and a "gentle, 100% local, no cloud" positioning note on the dashboard.
+- **Unified help (since 1.5.0)**: `admin/partials/nlh-help.php` renders a `<details>`/`<summary>` accordion (no JS) at the top of the Settings page — Overview, Dashboard, SEO Audit, Link Juice, and Settings panels, each covering free behavior and labeling Pro-only features with the existing `.nlh-pro-badge` class. The Dashboard's "Correction Suggestions" heading also gained a one-line description distinguishing it from Pro's Bulk Fix & Find-Replace tool.
 
 ## Translation
 
