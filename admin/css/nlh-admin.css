@@ -1693,3 +1693,66 @@
 	}
 	.nlh-recs-list { grid-template-columns: 1fr; }
 }
+
+/* ------------------------------------------------------------------ *
+ * Unified help accordion (Settings page)
+ * ------------------------------------------------------------------ */
+
+.nlh-help {
+	margin: 16px 0 24px;
+}
+
+.nlh-help-intro {
+	color: #50575e;
+	margin: 4px 0 12px;
+}
+
+.nlh-help-panel {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	margin-bottom: 8px;
+}
+
+.nlh-help-panel summary {
+	cursor: pointer;
+	font-weight: 600;
+	list-style: none;
+	padding: 12px 16px;
+}
+
+.nlh-help-panel summary::-webkit-details-marker {
+	display: none;
+}
+
+.nlh-help-panel summary::before {
+	content: "\25B8";
+	display: inline-block;
+	margin-right: 8px;
+	transition: transform 0.15s ease-in-out;
+}
+
+.nlh-help-panel[open] summary::before {
+	transform: rotate(90deg);
+}
+
+.nlh-help-panel-body {
+	border-top: 1px solid #dcdcde;
+	color: #3c434a;
+	line-height: 1.6;
+	padding: 12px 16px 16px;
+}
+
+.nlh-help-panel-body p {
+	margin: 0 0 10px;
+}
+
+.nlh-help-panel-body p:last-child {
+	margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.nlh-help-panel summary::before {
+		transition: none;
+	}
+}

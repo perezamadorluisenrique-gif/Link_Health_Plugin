@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap nlh-wrap">
 	<h1><?php esc_html_e( 'Native Link Health Settings', 'native-link-health' ); ?></h1>
 
+	<?php include NLH_PLUGIN_DIR . 'admin/partials/nlh-help.php'; ?>
+
 	<form action="options.php" method="post" class="nlh-settings-form">
 		<?php
 		settings_fields( 'nlh_settings' );
