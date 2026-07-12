@@ -183,3 +183,26 @@ touched.
    `native-link-health/` is absent, but the "install this dependency" UI link will point
    at the wp.org slug. Harmless today (the slug is core's real target), worth remembering
    if the core plugin is ever renamed.
+
+---
+
+## Addendum — recommendations applied (same day, follow-up session)
+
+- **Live end-to-end verification** replaced the unrunnable PHPUnit suite: a script loading
+  the real `wp-load.php` (XAMPP MySQL started for the run) exercised the new
+  `allow_target_host()` against `wp_validate_redirect()`, loaded the es_ES `.mo` through
+  `load_textdomain()` and verified singular + plural (n=1, n=5) translations via the real
+  `__()`/`_n()` stack, and confirmed the multisite activation structure —
+  **12/12 checks passed**. Confidence flag §5.3 is resolved for the fix's logic (the
+  PHPUnit files remain to be run in a suite-equipped environment).
+- **Pro version bumped to 1.1.0** (`7cd66ad`) — header, `NLHP_VERSION`, translation-file
+  metadata, recompiled `.mo`, AGENTS.md. Resolves the open product decision by versioning
+  the post-1.0.0 feature growth; `NLHP_DB_VERSION` unchanged.
+- **wp-cli could not be installed** to re-run the real `make-pot` (downloading the phar was
+  blocked by session policy). Confidence flag §5.2 stands: re-run `wp i18n make-pot` when
+  wp-cli is available; content parity was already verified by extraction diff.
+- **REST API and JS-i18n stances confirmed as final**: admin-ajax stays (no current
+  external consumer); the `wp_localize_script` + numbered-placeholder pattern stays
+  (sanctioned, reorder-safe, and `wp.i18n` JSON generation needs wp-cli).
+- Both repos pushed to GitHub by owner request (core → `Link_Health_Plugin`, Pro → new
+  private repo) — see the repo hosting note in the project vault.
