@@ -2,11 +2,11 @@
 
 ## Overview
 
-A WordPress plugin (v1.3.3, DB schema **2.3**) that scans posts/pages — and, opt-in, CPTs/media/comments/navigation menus — for broken links using `WP_HTML_Tag_Processor` and incremental WP Cron (5 posts every 15 min). Also includes an SEO audit module and a **Link Juice** module (internal link map + PageRank authority analysis). **Requires PHP 8.0+ and WordPress 6.2+.**
+A WordPress plugin (v1.5.0, DB schema **2.3**) that scans posts/pages — and, opt-in, CPTs/media/comments/navigation menus — for broken links using `WP_HTML_Tag_Processor` and incremental WP Cron (5 posts every 15 min). Also includes an SEO audit module and a **Link Juice** module (internal link map + PageRank authority analysis). **Requires PHP 8.0+ and WordPress 6.2+.**
 
 ## Entry point
 
-- `native-link-health.php` — defines constants (`NLH_VERSION` (1.3.3), `NLH_BATCH_SIZE=5`, `NLH_DB_VERSION=2.3`, plus `NLH_PLUGIN_FILE`/`BASENAME`/`DIR`/`URL`/`TEXT_DOMAIN`/`UPGRADE_URL`), loads all classes, boots the plugin. Also hooks `NLH_Activator::maybe_upgrade` on `admin_init` so existing installs get new schema (e.g. the v2.1 link-map tables, the v2.3 `source_type` column) without reactivation. Registers `delete_comment` → `nlh_cleanup_deleted_comment` alongside `deleted_post` cleanup.
+- `native-link-health.php` — defines constants (`NLH_VERSION` (1.5.0), `NLH_BATCH_SIZE=5`, `NLH_DB_VERSION=2.3`, plus `NLH_PLUGIN_FILE`/`BASENAME`/`DIR`/`URL`/`TEXT_DOMAIN`/`UPGRADE_URL`), loads all classes, boots the plugin. Also hooks `NLH_Activator::maybe_upgrade` on `admin_init` so existing installs get new schema (e.g. the v2.1 link-map tables, the v2.3 `source_type` column) without reactivation. Registers `delete_comment` → `nlh_cleanup_deleted_comment` alongside `deleted_post` cleanup.
 - `nlh_bootstrap()` is called **immediately** (not on `plugins_loaded`). Hooks scanner to `nlh_run_batch` cron, `save_post`, and `deleted_post`. The `save_post` handler (`handle_post_saved`) temporarily unhooks itself during `update_post_link()` to avoid re-scan loops.
 - Global function `nlh_update_post_link( $post_id, $old_url, $new_url ): bool` wraps `NLH_Scanner::update_post_link()`.
 
@@ -75,4 +75,4 @@ The plugin is part of a multi-plugin suite. Licensing is **Freemius**, but it sh
 
 ## Translation
 
-POT file at `languages/native-link-health.pot` (318 msgid entries, no plurals; regenerate with `wp i18n make-pot` after changing any string). A complete **Spanish (es_ES)** translation ships: `languages/native-link-health-es_ES.po` (+ compiled `.mo`). Regenerate the `.mo` after editing the `.po` with `wp i18n make-mo languages/native-link-health-es_ES.po`. Keep all three in sync when strings change. Text domain: `native-link-health`. (A handful of placeholder strings still lack `/* translators: */` comments — `make-pot` warns about them.)
+POT file at `languages/native-link-health.pot` (362 msgid entries, no plurals; regenerate with `wp i18n make-pot` after changing any string). A complete **Spanish (es_ES)** translation ships: `languages/native-link-health-es_ES.po` (+ compiled `.mo`). Regenerate the `.mo` after editing the `.po` with `wp i18n make-mo languages/native-link-health-es_ES.po`. Keep all three in sync when strings change. Text domain: `native-link-health`. (A 2026-07-12 static check found every placeholder string carries a `/* translators: */` comment within two lines of its gettext call; confirm with `make-pot` warnings on the next regeneration — wp-cli is not installed on this machine.)
