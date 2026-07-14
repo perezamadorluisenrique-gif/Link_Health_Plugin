@@ -1,0 +1,18 @@
+# Files and directories excluded from the distributed plugin ZIP / WP.org SVN.
+# Consumed by `wp dist-archive` and the WordPress.org deploy tooling.
+
+# Version control and dev tooling
+.git
+.gitignore
+.distignore
+.superpowers
+phpcs.xml.dist
+
+# Development documentation (readme.txt is the user-facing one)
+AGENTS.md
+docs
+tests
+
+# The Freemius SDK is added by the owner for the commercial build only;
+# the placeholder README must not ship on WordPress.org.
+vendor

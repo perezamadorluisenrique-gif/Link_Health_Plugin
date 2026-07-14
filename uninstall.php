@@ -41,6 +41,8 @@ delete_option( '_transient_nlh_suggestions' );
 delete_option( '_transient_timeout_nlh_suggestions' );
 delete_option( '_transient_nlh_seo_audit_results' );
 delete_option( '_transient_timeout_nlh_seo_audit_results' );
+delete_option( '_transient_nlh_manual_scan_active' );
+delete_option( '_transient_timeout_nlh_manual_scan_active' );
 
 delete_post_meta_by_key( '_nlh_last_scan' );
 

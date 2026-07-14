@@ -398,13 +398,13 @@ $render_card = function ( $row ) {
 		$nlh_visible = array_unique( $nlh_visible );
 		sort( $nlh_visible );
 		?>
-	<nav class="nlh-pagination" aria-label="<?php esc_attr_e( 'Navegación de páginas', 'native-link-health' ); ?>">
+	<nav class="nlh-pagination" aria-label="<?php esc_attr_e( 'Page navigation', 'native-link-health' ); ?>">
 		<span class="nlh-pagination__counter">
 			<?php
 			echo wp_kses(
 				sprintf(
 					/* translators: 1: current page number, 2: total pages */
-					__( 'Página %1$s de %2$s', 'native-link-health' ),
+					__( 'Page %1$s of %2$s', 'native-link-health' ),
 					'<strong>' . absint( $paged ) . '</strong>',
 					'<strong>' . absint( $total_pages ) . '</strong>'
 				),
@@ -416,12 +416,12 @@ $render_card = function ( $row ) {
 			<?php if ( $paged > 1 ) : ?>
 				<a href="<?php echo $nlh_page_url( $paged - 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url() is applied inside the $nlh_page_url closure above. ?>" class="nlh-pagination__btn nlh-pagination__btn--prev">
 					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M8 2.5L3.5 6.5L8 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-					<?php esc_html_e( 'Anterior', 'native-link-health' ); ?>
+					<?php esc_html_e( 'Previous', 'native-link-health' ); ?>
 				</a>
 			<?php else : ?>
 				<span class="nlh-pagination__btn nlh-pagination__btn--prev is-disabled" aria-disabled="true">
 					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M8 2.5L3.5 6.5L8 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-					<?php esc_html_e( 'Anterior', 'native-link-health' ); ?>
+					<?php esc_html_e( 'Previous', 'native-link-health' ); ?>
 				</span>
 			<?php endif; ?>
 
@@ -448,12 +448,12 @@ $render_card = function ( $row ) {
 
 			<?php if ( $paged < $total_pages ) : ?>
 				<a href="<?php echo $nlh_page_url( $paged + 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url() is applied inside the $nlh_page_url closure above. ?>" class="nlh-pagination__btn nlh-pagination__btn--next">
-					<?php esc_html_e( 'Siguiente', 'native-link-health' ); ?>
+					<?php esc_html_e( 'Next', 'native-link-health' ); ?>
 					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M5 2.5L9.5 6.5L5 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
 				</a>
 			<?php else : ?>
 				<span class="nlh-pagination__btn nlh-pagination__btn--next is-disabled" aria-disabled="true">
-					<?php esc_html_e( 'Siguiente', 'native-link-health' ); ?>
+					<?php esc_html_e( 'Next', 'native-link-health' ); ?>
 					<svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M5 2.5L9.5 6.5L5 10.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
 				</span>
 			<?php endif; ?>

@@ -884,9 +884,10 @@
 
 		scanStartedAt = Date.now();
 		setButtonBusy(button, true);
-		var modeField = runNowForm.querySelector('[name="scan_mode"]');
-		var mode = modeField ? modeField.value : 'full';
-		runScanChunk(mode, offset, button).finally(function () {
+		// A stored offset only ever comes from an interrupted FULL scan; the mode
+		// select resets to "quick" on reload, so it must not be trusted here or
+		// the resume would run a single chunk and stop.
+		runScanChunk('full', offset, button).finally(function () {
 			setButtonBusy(button, false);
 		});
 	})();

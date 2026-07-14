@@ -629,7 +629,14 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function render_settings_section(): void {
-		echo '<p>' . esc_html__( 'The background scanner runs every 15 minutes and processes 5 posts per cycle, so it never spikes your server.', 'native-link-health' ) . '</p>';
+		printf(
+			'<p>%s</p>',
+			sprintf(
+				/* translators: %d: configured batch size. */
+				esc_html__( 'The background scanner runs every 15 minutes and processes %d posts per cycle (adjustable below), so it never spikes your server.', 'native-link-health' ),
+				(int) $this->scanner->get_batch_size()
+			)
+		);
 	}
 
 	/**
@@ -1492,11 +1499,6 @@ class NLH_Admin {
 	}
 
 	/**
-	 * Verifies common AJAX security requirements.
-	 *
-	 * @return void
-	 */
-	/**
 	 * Discards any stray output (warnings, notices) before sending JSON.
 	 * Call before every wp_send_json_success/error to prevent JSON parse errors.
 	 */
@@ -1604,7 +1606,10 @@ class NLH_Admin {
 		foreach ( $this->scanner->get_scan_post_types() as $pt ) {
 			$counts = wp_count_posts( $pt );
 			if ( $counts ) {
-				$total_posts += (int) ( $counts->publish ?? 0 );
+				// Attachments are stored as 'inherit', never 'publish'.
+				$total_posts += 'attachment' === $pt
+					? (int) ( $counts->inherit ?? 0 )
+					: (int) ( $counts->publish ?? 0 );
 			}
 		}
 

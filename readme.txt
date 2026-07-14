@@ -2,13 +2,13 @@
 Contributors: nativelinkhealth
 Tags: broken-link-checker, link-checker, internal-links, seo, maintenance
 Requires at least: 6.2
-Tested up to: 6.8
+Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A local broken-link scanner and internal-link authority analyzer for WordPress. Runs on your server, avoids false positives, never crashes your site. No cloud, no accounts.
+A local broken-link scanner and internal-link authority analyzer. No false positives, no server spikes, no cloud, no accounts.
 
 == Description ==
 
@@ -78,7 +78,7 @@ It is an offline analysis of how link authority flows between your own pages (in
 
 = Does it require an external API or cloud service? =
 
-No. All scanning and analysis runs on your server. Nothing is sent anywhere.
+No. All analysis runs on your server, and your content is never sent to any third-party service. The only outbound requests are the ordinary HTTP checks the scanner makes against the links found in your content — the same requests a visitor's browser would make when clicking them.
 
 == Screenshots ==
 
@@ -88,6 +88,15 @@ No. All scanning and analysis runs on your server. Nothing is sent anywhere.
 4. Settings page with scan scope (post types, comments, menus) and auto-fix rules.
 
 == Changelog ==
+
+= 1.5.1 =
+* Fixed the "Media (attachments)" Scan Scope option scanning nothing: attachments are stored with the `inherit` status, which every scan query previously excluded.
+* Fixed the dashboard pagination controls always displaying in Spanish regardless of the site language, and made them translatable.
+* Fixed the CSV export and the "Group by post" view labeling comment- and menu-sourced records with an unrelated post's title.
+* Link Juice now includes Custom Post Types opted in via Scan Scope in its PageRank node set (previously they were scanned but silently dropped from the authority graph).
+* Resuming an interrupted full scan no longer stops after one chunk.
+* Added the missing translations for the dashboard badge tooltips and the scan-progress banner.
+* Diagnostic logging is now gated behind WP_DEBUG.
 
 = 1.5.0 =
 * Added a unified "How to use Native Link Health" help section to the Settings page — a collapsible reference covering all 4 screens and what the free vs Pro features do.

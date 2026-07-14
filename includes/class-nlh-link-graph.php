@@ -319,8 +319,7 @@ class NLH_Link_Graph {
 	 * @return array{nodes:int,edges:int}
 	 */
 	public function rebuild_all(): array {
-		$post_types = apply_filters( 'nlh_scan_post_types', array( 'post', 'page' ) );
-		$post_types = array_values( array_filter( array_map( 'sanitize_key', (array) $post_types ) ) );
+		$post_types = $this->get_scan_post_types();
 
 		$page       = 1;
 		$chunk_size = 100;
@@ -547,8 +546,7 @@ class NLH_Link_Graph {
 	private function get_node_ids(): array {
 		global $wpdb;
 
-		$post_types = apply_filters( 'nlh_scan_post_types', array( 'post', 'page' ) );
-		$post_types = array_values( array_filter( array_map( 'sanitize_key', (array) $post_types ) ) );
+		$post_types = $this->get_scan_post_types();
 
 		if ( empty( $post_types ) ) {
 			return array();
@@ -567,6 +565,26 @@ class NLH_Link_Graph {
 				)
 			)
 		);
+	}
+
+	/**
+	 * Returns the post types the graph covers — the scanner's list, which merges
+	 * the base post/page set with the Scan Scope opt-ins and the
+	 * nlh_scan_post_types filter. Before 1.5.1 this class applied the filter over
+	 * the base set only, so Scan Scope CPTs were scanned and mapped but silently
+	 * dropped from the PageRank node set.
+	 *
+	 * @since 1.5.1
+	 * @return string[]
+	 */
+	private function get_scan_post_types(): array {
+		if ( class_exists( 'NLH_Scanner' ) ) {
+			return ( new NLH_Scanner() )->get_scan_post_types();
+		}
+
+		$post_types = apply_filters( 'nlh_scan_post_types', array( 'post', 'page' ) );
+
+		return array_values( array_filter( array_map( 'sanitize_key', (array) $post_types ) ) );
 	}
 
 	/**

@@ -2,7 +2,7 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Native Link Health 1.3.1\n"
+"Project-Id-Version: Native Link Health 1.5.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/native-link-health\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,12 +18,6 @@ msgstr ""
 #: native-link-health.php
 #: admin/partials/nlh-dashboard.php:161
 msgid "Native Link Health"
-msgstr ""
-
-#. Plugin URI of the plugin
-#. Author URI of the plugin
-#: native-link-health.php
-msgid "https://wordpress.org/plugins/native-link-health/"
 msgstr ""
 
 #. Description of the plugin
@@ -433,10 +427,6 @@ msgstr ""
 
 #: admin/class-nlh-admin.php:555
 msgid "Peak Memory"
-msgstr ""
-
-#: admin/class-nlh-admin.php:577
-msgid "The background scanner runs every 15 minutes and processes 5 posts per cycle, so it never spikes your server."
 msgstr ""
 
 #: admin/class-nlh-admin.php:591
@@ -883,14 +873,6 @@ msgstr ""
 msgid "%d links"
 msgstr ""
 
-#: admin/partials/nlh-dashboard.php:335
-msgid "&laquo;"
-msgstr ""
-
-#: admin/partials/nlh-dashboard.php:336
-msgid "&raquo;"
-msgstr ""
-
 #: admin/partials/nlh-juice.php:54
 msgid "All pages"
 msgstr ""
@@ -1146,10 +1128,6 @@ msgstr ""
 
 #: includes/class-nlh-export.php:44
 msgid "Post ID"
-msgstr ""
-
-#: includes/class-nlh-export.php:45
-msgid "Post Title"
 msgstr ""
 
 #: includes/class-nlh-export.php:46
@@ -1607,4 +1585,80 @@ msgstr ""
 
 #: admin/partials/nlh-dashboard.php
 msgid "Detected automatically from your broken links — approve a suggestion to fix every matching URL at once."
+msgstr ""
+
+#: admin/class-nlh-admin.php
+msgid "HTTP 5xx: the server returned an internal error. The destination may be temporarily down or misconfigured."
+msgstr ""
+
+#: admin/class-nlh-admin.php
+msgid "HTTP 4xx: client error. 404 = page not found; 410 = permanently gone; 403 = access denied."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "This broken link was found inside a comment, not in post content."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "This broken link was found in a navigation menu item."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Critical impact (≥85): fixing this link should be your top priority — it affects high-traffic or high-authority pages."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "High impact (60–84): this broken link noticeably affects your site's authority or user experience."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Medium impact (25–59): worth fixing, but lower priority than high-impact links."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Low impact (<25): minor broken link with little effect on authority or traffic."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Regression: this link was working before but recently broke — it may indicate a site migration, domain change, or content removal."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Scan in progress — results may be incomplete"
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "No posts have been scanned yet. The background scanner will start automatically, or click \"Run Scan Now\" for an immediate check."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "%1$d of %2$d posts scanned so far. The scanner processes a few posts at a time to keep your site fast — results will fill in as it runs."
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Page navigation"
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Page %1$s of %2$s"
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Previous"
+msgstr ""
+
+#: admin/partials/nlh-dashboard.php
+msgid "Next"
+msgstr ""
+
+#: admin/class-nlh-admin.php
+msgid "The background scanner runs every 15 minutes and processes %d posts per cycle (adjustable below), so it never spikes your server."
+msgstr ""
+
+#: includes/class-nlh-export.php
+msgid "Source"
+msgstr ""
+
+#: includes/class-nlh-export.php
+msgid "Source Title"
 msgstr ""

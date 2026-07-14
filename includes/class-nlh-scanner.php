@@ -26,6 +26,20 @@ class NLH_Scanner {
 	const IDN_UNVERIFIABLE_MESSAGE = 'IDN: hostname could not be converted to ASCII — link not verified';
 
 	/**
+	 * Writes an internal diagnostic message to the PHP error log, but only when
+	 * WP_DEBUG is on — production sites never accumulate log noise from here.
+	 *
+	 * @since 1.5.1
+	 * @param string $message Message (without the plugin prefix).
+	 * @return void
+	 */
+	private static function log_debug( string $message ): void {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'Native Link Health: ' . $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Intentional, WP_DEBUG-gated diagnostic.
+		}
+	}
+
+	/**
 	 * Runs one fixed-size scanner batch.
 	 *
 	 * @return void
@@ -61,6 +75,25 @@ class NLH_Scanner {
 	}
 
 	/**
+	 * Post statuses to include when querying scannable content.
+	 *
+	 * Attachments are stored with post_status 'inherit', never 'publish', so a
+	 * publish-only query silently excludes them and the "Media (attachments)"
+	 * Scan Scope opt-in would scan nothing (the pre-1.5.1 behavior). 'inherit'
+	 * is added only when attachment is actually in scope; revisions cannot leak
+	 * in because every query here also filters by the scanned post types.
+	 *
+	 * @since 1.5.1
+	 * @param string[] $post_types The post types being queried.
+	 * @return string[]
+	 */
+	private function get_scan_post_statuses( array $post_types ): array {
+		return in_array( 'attachment', $post_types, true )
+			? array( 'publish', 'inherit' )
+			: array( 'publish' );
+	}
+
+	/**
 	 * Runs an immediate scan in chunks.
 	 *
 	 * @param int $chunk_size Number of posts to scan.
@@ -82,7 +115,7 @@ class NLH_Scanner {
 				'post_type'              => $post_types,
 				'posts_per_page'         => $chunk_size,
 				'offset'                 => $offset,
-				'post_status'            => 'publish',
+				'post_status'            => $this->get_scan_post_statuses( $post_types ),
 				'orderby'                => 'ID',
 				'order'                  => 'ASC',
 				'ignore_sticky_posts'    => true,
@@ -105,7 +138,7 @@ class NLH_Scanner {
 			if ( class_exists( 'NLH_Link_Graph' ) ) {
 				( new NLH_Link_Graph() )->compute_pagerank();
 			} else {
-				error_log( 'Native Link Health: NLH_Link_Graph class not found — link juice features disabled in ' . __METHOD__ );
+				self::log_debug( 'NLH_Link_Graph class not found — link juice features disabled in ' . __METHOD__ );
 			}
 		}
 
@@ -140,7 +173,7 @@ class NLH_Scanner {
 		if ( class_exists( 'NLH_Link_Graph' ) ) {
 			( new NLH_Link_Graph() )->record_post( $post_id, $post->post_content );
 		} else {
-			error_log( 'Native Link Health: NLH_Link_Graph class not found — link juice features disabled in ' . __METHOD__ );
+			self::log_debug( 'NLH_Link_Graph class not found — link juice features disabled in ' . __METHOD__ );
 		}
 
 		if ( $update ) {
@@ -293,7 +326,9 @@ class NLH_Scanner {
 	public function scan_post_now( int $post_id ): array {
 		$post = get_post( $post_id );
 
-		if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, $this->get_scan_post_types(), true ) ) {
+		$scan_types = $this->get_scan_post_types();
+
+		if ( ! $post || ! in_array( $post->post_type, $scan_types, true ) || ! in_array( $post->post_status, $this->get_scan_post_statuses( $scan_types ), true ) ) {
 			return array( 'error' => __( 'Post not found or not scannable.', 'native-link-health' ) );
 		}
 
@@ -335,7 +370,7 @@ class NLH_Scanner {
 		if ( class_exists( 'NLH_Link_Graph' ) ) {
 			$link_graph = new NLH_Link_Graph();
 		} else {
-			error_log( 'Native Link Health: NLH_Link_Graph class not found — link juice features disabled in ' . __METHOD__ );
+			self::log_debug( 'NLH_Link_Graph class not found — link juice features disabled in ' . __METHOD__ );
 			$link_graph = null;
 		}
 
@@ -927,29 +962,32 @@ class NLH_Scanner {
 				}
 			);
 		} elseif ( 'post' === $group_by ) {
+			// Group on (post_id, source_type): for comment records post_id holds the
+			// comment id, so grouping on post_id alone would mix a comment's records
+			// into an unrelated post's group and label them with that post's title.
 			$group_rows = $wpdb->get_results(
-				"SELECT post_id AS group_key, COUNT(*) AS count, MAX(discovered_at) AS latest
+				"SELECT post_id AS group_key, source_type, COUNT(*) AS count, MAX(discovered_at) AS latest
 				FROM {$table}
-				GROUP BY post_id
+				GROUP BY post_id, source_type
 				ORDER BY count DESC"
 			);
 
 			foreach ( (array) $group_rows as $group_row ) {
-				$items = $wpdb->get_results(
+				$source_type = (string) $group_row->source_type;
+				$items       = $wpdb->get_results(
 					$wpdb->prepare(
 						"SELECT id, post_id, source_type, raw_url, url_hash, status_code, error_message, impact_score, discovered_at, last_checked_at
 						FROM {$table}
-						WHERE post_id = %d
+						WHERE post_id = %d AND source_type = %s
 						ORDER BY impact_score DESC, last_checked_at DESC
 						LIMIT 50",
-						(int) $group_row->group_key
+						(int) $group_row->group_key,
+						$source_type
 					)
 				);
 
-				$title    = get_the_title( (int) $group_row->group_key );
 				$groups[] = array(
-					/* translators: %d: post ID. */
-					'group_key' => $title ? $title : sprintf( __( 'Post #%d', 'native-link-health' ), (int) $group_row->group_key ),
+					'group_key' => $this->get_source_group_label( (int) $group_row->group_key, $source_type ),
 					'count'     => (int) $group_row->count,
 					'items'     => is_array( $items ) ? $items : array(),
 				);
@@ -963,6 +1001,36 @@ class NLH_Scanner {
 			'total'       => $total_groups,
 			'total_pages' => max( 1, (int) ceil( $total_groups / $per_page ) ),
 		);
+	}
+
+	/**
+	 * Builds a human-readable group/row label for a record owner, aware that
+	 * comment records store the comment id in post_id and menu records use 0.
+	 *
+	 * @since 1.5.1
+	 * @param int    $post_id     Record post_id column (comment id for comments, 0 for menus).
+	 * @param string $source_type 'post' | 'comment' | 'menu'.
+	 * @return string
+	 */
+	public function get_source_group_label( int $post_id, string $source_type ): string {
+		if ( 'menu' === $source_type ) {
+			return __( 'Navigation menu', 'native-link-health' );
+		}
+
+		if ( 'comment' === $source_type ) {
+			$comment      = get_comment( $post_id );
+			$parent_title = $comment ? get_the_title( (int) $comment->comment_post_ID ) : '';
+
+			return $parent_title
+				/* translators: %s: post title. */
+				? sprintf( __( 'Comment on “%s”', 'native-link-health' ), $parent_title )
+				: __( '(comment)', 'native-link-health' );
+		}
+
+		$title = get_the_title( $post_id );
+
+		/* translators: %d: post ID. */
+		return $title ? $title : sprintf( __( 'Post #%d', 'native-link-health' ), $post_id );
 	}
 
 	/**
@@ -1070,12 +1138,14 @@ class NLH_Scanner {
 	 */
 	private function get_batch_posts(): array {
 		$batch_size = $this->get_batch_size();
+		$post_types = $this->get_scan_post_types();
+		$statuses   = $this->get_scan_post_statuses( $post_types );
 
 		$posts = get_posts(
 			array(
-				'post_type'      => $this->get_scan_post_types(),
+				'post_type'      => $post_types,
 				'posts_per_page' => $batch_size,
-				'post_status'    => 'publish',
+				'post_status'    => $statuses,
 				'meta_query'     => array(
 					array(
 						'key'     => '_nlh_last_scan',
@@ -1094,12 +1164,12 @@ class NLH_Scanner {
 		$remaining = $batch_size - count( $posts );
 		$scanned   = get_posts(
 			array(
-				'post_type'      => $this->get_scan_post_types(),
+				'post_type'      => $post_types,
 				'posts_per_page' => $remaining,
 				'meta_key'       => '_nlh_last_scan',
 				'orderby'        => 'meta_value_num',
 				'order'          => 'ASC',
-				'post_status'    => 'publish',
+				'post_status'    => $statuses,
 			)
 		);
 

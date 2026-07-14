@@ -26,7 +26,7 @@ class NLH_Export {
 		global $wpdb;
 
 		$table = $wpdb->prefix . 'nlh_link_errors';
-		$rows  = $wpdb->get_results( "SELECT post_id, raw_url, status_code, error_message, discovered_at, last_checked_at FROM {$table} ORDER BY impact_score DESC, last_checked_at DESC LIMIT 10000" );
+		$rows  = $wpdb->get_results( "SELECT post_id, source_type, raw_url, status_code, error_message, discovered_at, last_checked_at FROM {$table} ORDER BY impact_score DESC, last_checked_at DESC LIMIT 10000" );
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=utf-8' );
@@ -42,7 +42,8 @@ class NLH_Export {
 			$output,
 			array(
 				__( 'Post ID', 'native-link-health' ),
-				__( 'Post Title', 'native-link-health' ),
+				__( 'Source', 'native-link-health' ),
+				__( 'Source Title', 'native-link-health' ),
 				__( 'Broken URL', 'native-link-health' ),
 				__( 'Status Code', 'native-link-health' ),
 				__( 'Error', 'native-link-health' ),
@@ -51,18 +52,31 @@ class NLH_Export {
 			)
 		);
 
-		// Prime post caches to avoid N+1 queries for each row's title.
+		// Prime post caches to avoid N+1 queries for each row's title. Only post
+		// records reference real post ids (comment rows hold the comment id).
 		if ( ! empty( $rows ) ) {
-			$post_ids = array_unique( wp_list_pluck( $rows, 'post_id' ) );
-			_prime_post_caches( $post_ids, true, true );
+			$post_ids = array();
+			foreach ( $rows as $row ) {
+				if ( 'post' === ( $row->source_type ?? 'post' ) ) {
+					$post_ids[] = (int) $row->post_id;
+				}
+			}
+			if ( $post_ids ) {
+				_prime_post_caches( array_unique( $post_ids ), true, true );
+			}
 		}
 
+		$scanner = new NLH_Scanner();
+
 		foreach ( (array) $rows as $row ) {
+			$source_type = (string) ( $row->source_type ?? 'post' );
+
 			fputcsv(
 				$output,
 				array(
 					(int) $row->post_id,
-					$this->escape_csv_field( get_the_title( (int) $row->post_id ) ),
+					$source_type,
+					$this->escape_csv_field( $scanner->get_source_group_label( (int) $row->post_id, $source_type ) ),
 					$this->escape_csv_field( (string) $row->raw_url ),
 					(int) $row->status_code,
 					$this->escape_csv_field( (string) $row->error_message ),
