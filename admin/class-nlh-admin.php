@@ -56,6 +56,81 @@ class NLH_Admin {
 		add_action( 'wp_ajax_nlh_scan_post', array( $this, 'ajax_scan_post' ) );
 		add_action( 'admin_notices', array( $this, 'show_welcome_notice' ) );
 		add_action( 'wp_ajax_nlh_dismiss_welcome', array( $this, 'ajax_dismiss_welcome' ) );
+		add_action( 'in_admin_header', array( $this, 'hide_third_party_notices' ), 1000 );
+	}
+
+	/**
+	 * Whether the current request renders one of the plugin's admin screens.
+	 *
+	 * @return bool
+	 */
+	private function is_nlh_screen(): bool {
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		return in_array( $page, array( 'nlh-dashboard', 'nlh-settings', 'nlh-seo-audit', 'nlh-link-juice' ), true );
+	}
+
+	/**
+	 * Removes third-party admin notices from the plugin's own screens.
+	 *
+	 * Other plugins' promo/nag notices visually pollute the NLH pages (and
+	 * their inline JS can throw console errors there), so on NLH screens
+	 * every admin-notice callback that does not belong to NLH/NLH Pro is
+	 * unhooked. Runs on in_admin_header — after all plugins have registered
+	 * their notices, right before admin-header.php fires the notice hooks.
+	 * WP core settings errors are unaffected (options-head.php is included
+	 * directly by admin-header.php, not via these hooks).
+	 *
+	 * @return void
+	 */
+	public function hide_third_party_notices(): void {
+		if ( ! $this->is_nlh_screen() ) {
+			return;
+		}
+
+		global $wp_filter;
+
+		foreach ( array( 'admin_notices', 'all_admin_notices', 'network_admin_notices', 'user_admin_notices' ) as $hook ) {
+			if ( empty( $wp_filter[ $hook ] ) ) {
+				continue;
+			}
+
+			foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $id => $callback ) {
+					if ( ! $this->is_native_notice_callback( $callback['function'] ) ) {
+						unset( $wp_filter[ $hook ]->callbacks[ $priority ][ $id ] );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Whether an admin-notice callback belongs to NLH, NLH Pro, or WP core's
+	 * settings-errors renderer (the only outsider worth keeping).
+	 *
+	 * @param callable|string|array $callback The hooked callback.
+	 * @return bool
+	 */
+	private function is_native_notice_callback( $callback ): bool {
+		if ( is_string( $callback ) ) {
+			return str_starts_with( $callback, 'nlh' ) || 'settings_errors' === $callback;
+		}
+
+		if ( is_array( $callback ) && isset( $callback[0] ) ) {
+			$class = is_object( $callback[0] ) ? get_class( $callback[0] ) : (string) $callback[0];
+
+			return str_starts_with( $class, 'NLH' );
+		}
+
+		if ( $callback instanceof Closure ) {
+			$reflection = new ReflectionFunction( $callback );
+			$file       = wp_normalize_path( (string) $reflection->getFileName() );
+
+			return false !== strpos( $file, '/plugins/native-link-health' );
+		}
+
+		return false;
 	}
 
 	/**
