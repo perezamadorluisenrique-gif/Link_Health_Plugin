@@ -2272,7 +2272,7 @@ class NLH_Scanner {
 			'fragment' => __( 'Missing anchors', 'native-link-health' ),
 			'dns'      => __( 'DNS failures', 'native-link-health' ),
 			'ssl'      => __( 'SSL errors', 'native-link-health' ),
-			'timeout'  => __( 'Timeouts &amp; connection errors', 'native-link-health' ),
+			'timeout'  => __( 'Timeouts & connection errors', 'native-link-health' ),
 		);
 	}
 

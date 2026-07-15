@@ -36,7 +36,6 @@ delete_option( 'nlh_comment_scan_last_id' );
 delete_option( 'nlh_scan_metrics' );
 delete_option( 'nlh_auto_rules' );
 delete_option( 'nlh_show_welcome' );
-delete_option( 'nlh_suggestions' );
 delete_option( '_transient_nlh_suggestions' );
 delete_option( '_transient_timeout_nlh_suggestions' );
 delete_option( '_transient_nlh_seo_audit_results' );

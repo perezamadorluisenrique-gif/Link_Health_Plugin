@@ -67,7 +67,20 @@ class NLH_Admin {
 	private function is_nlh_screen(): bool {
 		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		return in_array( $page, array( 'nlh-dashboard', 'nlh-settings', 'nlh-seo-audit', 'nlh-link-juice' ), true );
+		/**
+		 * Filters the admin page slugs treated as plugin screens (and thus
+		 * shielded from third-party admin notices). NLH Pro appends its own
+		 * screens here.
+		 *
+		 * @since 1.5.2
+		 * @param string[] $screens Page slugs from $_GET['page'].
+		 */
+		$screens = apply_filters(
+			'nlh_shielded_screens',
+			array( 'nlh-dashboard', 'nlh-settings', 'nlh-seo-audit', 'nlh-link-juice' )
+		);
+
+		return in_array( $page, $screens, true );
 	}
 
 	/**
@@ -333,6 +346,15 @@ class NLH_Admin {
 						'resetView'     => __( 'Reset view', 'native-link-health' ),
 						'brokenLinks'   => __( 'Broken links', 'native-link-health' ),
 						'noBroken'      => __( 'No broken links found.', 'native-link-health' ),
+						'zoomIn'        => __( 'Zoom in', 'native-link-health' ),
+						'zoomOut'       => __( 'Zoom out', 'native-link-health' ),
+						'ringHighest'   => __( 'Top authority', 'native-link-health' ),
+						'ringHigh'      => __( 'High authority', 'native-link-health' ),
+						'ringMid'       => __( 'Medium authority', 'native-link-health' ),
+						'ringLow'       => __( 'Lower authority', 'native-link-health' ),
+						'scatterTitle'  => __( 'Bubble size = authority (link juice) · Click a bubble to see its connections', 'native-link-health' ),
+						'scatterX'      => __( 'Inbound links (links this page receives)', 'native-link-health' ),
+						'scatterY'      => __( 'Outbound links (links this page sends)', 'native-link-health' ),
 					),
 				)
 			);

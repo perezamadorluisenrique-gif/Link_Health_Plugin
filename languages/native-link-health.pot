@@ -2,7 +2,7 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Native Link Health 1.5.1\n"
+"Project-Id-Version: Native Link Health 1.5.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/native-link-health\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1291,7 +1291,7 @@ msgid "SSL errors"
 msgstr ""
 
 #: includes/class-nlh-scanner.php:1832
-msgid "Timeouts &amp; connection errors"
+msgid "Timeouts & connection errors"
 msgstr ""
 
 #: includes/class-nlh-seo-audit.php:53
@@ -1661,4 +1661,40 @@ msgstr ""
 
 #: includes/class-nlh-export.php
 msgid "Source Title"
+msgstr ""
+
+#: admin/class-nlh-admin.php:336
+msgid "Zoom in"
+msgstr ""
+
+#: admin/class-nlh-admin.php:337
+msgid "Zoom out"
+msgstr ""
+
+#: admin/class-nlh-admin.php:338
+msgid "Top authority"
+msgstr ""
+
+#: admin/class-nlh-admin.php:339
+msgid "High authority"
+msgstr ""
+
+#: admin/class-nlh-admin.php:340
+msgid "Medium authority"
+msgstr ""
+
+#: admin/class-nlh-admin.php:341
+msgid "Lower authority"
+msgstr ""
+
+#: admin/class-nlh-admin.php:342
+msgid "Bubble size = authority (link juice) · Click a bubble to see its connections"
+msgstr ""
+
+#: admin/class-nlh-admin.php:343
+msgid "Inbound links (links this page receives)"
+msgstr ""
+
+#: admin/class-nlh-admin.php:344
+msgid "Outbound links (links this page sends)"
 msgstr ""
