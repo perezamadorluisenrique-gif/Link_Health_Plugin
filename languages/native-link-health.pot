@@ -1,8 +1,6 @@
-# Copyright (C) 2026 Native Link Health contributors
-# This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Native Link Health 1.5.2\n"
+"Project-Id-Version: Native Link Health 1.5.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/native-link-health\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,8 +13,7 @@ msgstr ""
 "X-Domain: native-link-health\n"
 
 #. Plugin Name of the plugin
-#: native-link-health.php
-#: admin/partials/nlh-dashboard.php:161
+#: native-link-health.php admin/partials/nlh-dashboard.php:161
 msgid "Native Link Health"
 msgstr ""
 
@@ -30,21 +27,17 @@ msgstr ""
 msgid "Native Link Health contributors"
 msgstr ""
 
-#: admin/class-nlh-admin.php:68
-#: admin/class-nlh-admin.php:69
-#: admin/class-nlh-admin.php:92
-#: admin/class-nlh-admin.php:93
+#: admin/class-nlh-admin.php:68 admin/class-nlh-admin.php:69
+#: admin/class-nlh-admin.php:92 admin/class-nlh-admin.php:93
 #: admin/class-nlh-admin.php:1653
 msgid "Link Health"
 msgstr ""
 
-#: admin/class-nlh-admin.php:76
-#: admin/class-nlh-admin.php:77
+#: admin/class-nlh-admin.php:76 admin/class-nlh-admin.php:77
 msgid "SEO Audit"
 msgstr ""
 
-#: admin/class-nlh-admin.php:84
-#: admin/class-nlh-admin.php:85
+#: admin/class-nlh-admin.php:84 admin/class-nlh-admin.php:85
 #: admin/partials/nlh-juice.php:74
 msgid "Link Juice"
 msgstr ""
@@ -73,8 +66,7 @@ msgstr ""
 msgid "Link juice recalculated."
 msgstr ""
 
-#: admin/class-nlh-admin.php:219
-#: admin/partials/nlh-juice.php:428
+#: admin/class-nlh-admin.php:219 admin/partials/nlh-juice.php:428
 msgid "Loading..."
 msgstr ""
 
@@ -86,8 +78,7 @@ msgstr ""
 msgid "Link updated."
 msgstr ""
 
-#: admin/class-nlh-admin.php:222
-#: admin/class-nlh-admin.php:280
+#: admin/class-nlh-admin.php:222 admin/class-nlh-admin.php:280
 msgid "Request failed."
 msgstr ""
 
@@ -111,8 +102,7 @@ msgstr ""
 msgid "Links to"
 msgstr ""
 
-#: admin/class-nlh-admin.php:228
-#: admin/partials/nlh-dashboard.php:143
+#: admin/class-nlh-admin.php:228 admin/partials/nlh-dashboard.php:143
 msgid "New URL"
 msgstr ""
 
@@ -132,8 +122,7 @@ msgstr ""
 msgid "Flow"
 msgstr ""
 
-#: admin/class-nlh-admin.php:233
-#: admin/partials/nlh-juice.php:419
+#: admin/class-nlh-admin.php:233 admin/partials/nlh-juice.php:419
 #: admin/partials/nlh-juice.php:511
 msgid "Manage links"
 msgstr ""
@@ -178,43 +167,35 @@ msgstr ""
 msgid "Showing the top %1$d of %2$d pages by authority."
 msgstr ""
 
-#: admin/class-nlh-admin.php:245
-#: admin/partials/nlh-juice.php:148
+#: admin/class-nlh-admin.php:245 admin/partials/nlh-juice.php:148
 #: admin/partials/nlh-juice.php:374
 msgid "Orphan"
 msgstr ""
 
-#: admin/class-nlh-admin.php:246
-#: admin/partials/nlh-juice.php:149
+#: admin/class-nlh-admin.php:246 admin/partials/nlh-juice.php:149
 #: admin/partials/nlh-juice.php:380
 msgid "Dead end"
 msgstr ""
 
-#: admin/class-nlh-admin.php:247
-#: admin/partials/nlh-juice.php:66
-#: admin/partials/nlh-juice.php:150
-#: admin/partials/nlh-juice.php:386
+#: admin/class-nlh-admin.php:247 admin/partials/nlh-juice.php:66
+#: admin/partials/nlh-juice.php:150 admin/partials/nlh-juice.php:386
 msgid "Diluted"
 msgstr ""
 
-#: admin/class-nlh-admin.php:248
-#: admin/partials/nlh-juice.php:147
+#: admin/class-nlh-admin.php:248 admin/partials/nlh-juice.php:147
 #: admin/partials/nlh-juice.php:411
 msgid "Healthy"
 msgstr ""
 
-#: admin/class-nlh-admin.php:249
-#: admin/partials/nlh-juice.php:151
+#: admin/class-nlh-admin.php:249 admin/partials/nlh-juice.php:151
 msgid "Has broken links"
 msgstr ""
 
-#: admin/class-nlh-admin.php:250
-#: admin/partials/nlh-juice.php:136
+#: admin/class-nlh-admin.php:250 admin/partials/nlh-juice.php:136
 msgid "Reset view"
 msgstr ""
 
-#: admin/class-nlh-admin.php:251
-#: admin/class-nlh-admin.php:501
+#: admin/class-nlh-admin.php:251 admin/class-nlh-admin.php:501
 msgid "Broken links"
 msgstr ""
 
@@ -234,13 +215,11 @@ msgstr ""
 msgid "Ignore this URL permanently?"
 msgstr ""
 
-#: admin/class-nlh-admin.php:281
-#: admin/class-nlh-admin.php:1326
+#: admin/class-nlh-admin.php:281 admin/class-nlh-admin.php:1326
 msgid "Unknown"
 msgstr ""
 
-#: admin/class-nlh-admin.php:284
-#: admin/partials/nlh-dashboard.php:133
+#: admin/class-nlh-admin.php:284 admin/partials/nlh-dashboard.php:133
 msgid "History"
 msgstr ""
 
@@ -280,8 +259,7 @@ msgstr ""
 msgid "Fixed"
 msgstr ""
 
-#: admin/class-nlh-admin.php:295
-#: admin/partials/nlh-dashboard.php:113
+#: admin/class-nlh-admin.php:295 admin/partials/nlh-dashboard.php:113
 #: admin/partials/nlh-dashboard.php:240
 msgid "Regression"
 msgstr ""
@@ -290,8 +268,7 @@ msgstr ""
 msgid "Ignored"
 msgstr ""
 
-#: admin/class-nlh-admin.php:297
-#: admin/class-nlh-admin.php:511
+#: admin/class-nlh-admin.php:297 admin/class-nlh-admin.php:511
 msgid "Orphan pages"
 msgstr ""
 
@@ -359,10 +336,8 @@ msgstr ""
 msgid "An earlier scan was interrupted at post %d. Resume scanning?"
 msgstr ""
 
-#: admin/class-nlh-admin.php:327
-#: admin/class-nlh-admin.php:356
-#: admin/class-nlh-admin.php:369
-#: admin/class-nlh-admin.php:413
+#: admin/class-nlh-admin.php:327 admin/class-nlh-admin.php:356
+#: admin/class-nlh-admin.php:369 admin/class-nlh-admin.php:413
 msgid "You do not have permission to access this page."
 msgstr ""
 
@@ -429,38 +404,13 @@ msgstr ""
 msgid "Peak Memory"
 msgstr ""
 
-#: admin/class-nlh-admin.php:591
-#: includes/class-nlh-activator.php:26
+#: admin/class-nlh-admin.php:591 includes/class-nlh-activator.php:26
 msgid "Every 15 minutes"
 msgstr ""
 
-#: admin/class-nlh-admin.php:592
-msgid "Hourly"
-msgstr ""
-
-#: admin/class-nlh-admin.php:592
-#: admin/class-nlh-admin.php:593
-#: admin/class-nlh-admin.php:594
-#: includes/class-nlh-pro.php:168
+#: admin/class-nlh-admin.php:592 admin/class-nlh-admin.php:593
+#: admin/class-nlh-admin.php:594 includes/class-nlh-pro.php:168
 msgid "Pro"
-msgstr ""
-
-#: admin/class-nlh-admin.php:593
-msgid "Daily"
-msgstr ""
-
-#: admin/class-nlh-admin.php:594
-msgid "Weekly"
-msgstr ""
-
-#: admin/class-nlh-admin.php:596
-#: admin/class-nlh-admin.php:671
-#: admin/class-nlh-admin.php:728
-msgid "Available in Pro"
-msgstr ""
-
-#: admin/class-nlh-admin.php:597
-msgid "The free tier uses a fixed 15 minute cron interval."
 msgstr ""
 
 #: admin/class-nlh-admin.php:629
@@ -483,31 +433,15 @@ msgstr ""
 msgid "Scan navigation menu link URLs"
 msgstr ""
 
-#: admin/class-nlh-admin.php:670
-msgid ""
-"example.com\n"
-"*.example.org"
-msgstr ""
-
-#: admin/class-nlh-admin.php:672
-msgid "Domain ignore lists are reserved for Native Link Health Pro."
-msgstr ""
-
 #: admin/class-nlh-admin.php:713
 msgid "Optional JSON list of auto-fix rules applied during scans. Each rule has \"conditions\" and an \"action\" (e.g. replace one domain with another). These rewrite post content automatically — leave empty to disable."
 msgstr ""
 
-#: admin/class-nlh-admin.php:729
-msgid "Email alerts for newly broken links are reserved for Native Link Health Pro."
-msgstr ""
-
-#: admin/class-nlh-admin.php:792
-#: admin/class-nlh-admin.php:1230
+#: admin/class-nlh-admin.php:792 admin/class-nlh-admin.php:1230
 msgid "Missing URL data."
 msgstr ""
 
-#: admin/class-nlh-admin.php:797
-#: admin/class-nlh-admin.php:1235
+#: admin/class-nlh-admin.php:797 admin/class-nlh-admin.php:1235
 msgid "URL was not found in post content."
 msgstr ""
 
@@ -531,10 +465,8 @@ msgstr ""
 msgid "URL ignored."
 msgstr ""
 
-#: admin/class-nlh-admin.php:944
-#: admin/class-nlh-admin.php:1262
-#: admin/class-nlh-admin.php:1433
-#: includes/class-nlh-export.php:23
+#: admin/class-nlh-admin.php:944 admin/class-nlh-admin.php:1262
+#: admin/class-nlh-admin.php:1433 includes/class-nlh-export.php:23
 msgid "Insufficient permissions."
 msgstr ""
 
@@ -586,13 +518,11 @@ msgstr ""
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: admin/class-nlh-admin.php:1339
-#: admin/partials/nlh-dashboard.php:216
+#: admin/class-nlh-admin.php:1339 admin/partials/nlh-dashboard.php:216
 msgid "SSL"
 msgstr ""
 
-#: admin/class-nlh-admin.php:1340
-#: admin/partials/nlh-dashboard.php:215
+#: admin/class-nlh-admin.php:1340 admin/partials/nlh-dashboard.php:215
 msgid "DNS"
 msgstr ""
 
@@ -640,13 +570,11 @@ msgstr ""
 msgid "Scanning…"
 msgstr ""
 
-#: admin/class-nlh-admin.php:1636
-#: admin/class-nlh-admin.php:1690
+#: admin/class-nlh-admin.php:1636 admin/class-nlh-admin.php:1690
 msgid "Scan Now"
 msgstr ""
 
-#: admin/class-nlh-admin.php:1637
-#: admin/class-nlh-admin.php:1731
+#: admin/class-nlh-admin.php:1637 admin/class-nlh-admin.php:1731
 msgid "Scan complete."
 msgstr ""
 
@@ -711,10 +639,8 @@ msgstr ""
 msgid "Menu"
 msgstr ""
 
-#: admin/partials/nlh-dashboard.php:36
-#: admin/partials/nlh-juice.php:393
-#: admin/partials/nlh-juice.php:494
-#: admin/partials/nlh-juice.php:504
+#: admin/partials/nlh-dashboard.php:36 admin/partials/nlh-juice.php:393
+#: admin/partials/nlh-juice.php:494 admin/partials/nlh-juice.php:504
 msgid "(no title)"
 msgstr ""
 
@@ -766,7 +692,8 @@ msgstr ""
 msgid "Run Scan Now"
 msgstr ""
 
-#. translators: 1: last scan datetime, 2: next scan datetime, 3: posts scanned count.
+#. translators: 1: last scan datetime, 2: next scan datetime, 3: posts scanned
+#. count.
 #: admin/partials/nlh-dashboard.php:193
 #, php-format
 msgid "Last scan cycle: %1$s | Next scheduled: %2$s | Posts scanned: %3$d"
@@ -780,25 +707,8 @@ msgstr ""
 msgid "Error Type"
 msgstr ""
 
-#: admin/partials/nlh-dashboard.php:211
-#: admin/partials/nlh-dashboard.php:238
+#: admin/partials/nlh-dashboard.php:211 admin/partials/nlh-dashboard.php:238
 msgid "All"
-msgstr ""
-
-#: admin/partials/nlh-dashboard.php:212
-msgid "4xx"
-msgstr ""
-
-#: admin/partials/nlh-dashboard.php:213
-msgid "5xx"
-msgstr ""
-
-#: admin/partials/nlh-dashboard.php:214
-msgid "Missing anchor"
-msgstr ""
-
-#: admin/partials/nlh-dashboard.php:217
-msgid "Timeout / connection"
 msgstr ""
 
 #: admin/partials/nlh-dashboard.php:221
@@ -903,8 +813,7 @@ msgstr ""
 msgid "Your content changed since the last calculation, so the scores, diagram and recommendations below may be out of date."
 msgstr ""
 
-#: admin/partials/nlh-juice.php:108
-#: admin/partials/nlh-juice.php:121
+#: admin/partials/nlh-juice.php:108 admin/partials/nlh-juice.php:121
 msgid "Recalculate now"
 msgstr ""
 
@@ -1372,8 +1281,7 @@ msgstr ""
 msgid "Number of posts scanned per cron cycle (1-100). Defaults to %d."
 msgstr ""
 
-#: includes/class-nlh-scanner.php:526
-#: includes/class-nlh-scanner.php:1157
+#: includes/class-nlh-scanner.php:526 includes/class-nlh-scanner.php:1157
 msgid "Could not verify (anti-bot challenge or rate limit)."
 msgstr ""
 
@@ -1401,7 +1309,8 @@ msgstr ""
 msgid "Images without an alt attribute were found. Add descriptive alt text, or alt=\"\" for purely decorative images."
 msgstr ""
 
-#. translators: 1: image URL, 2: declared width, 3: declared height, 4: real width, 5: real height.
+#. translators: 1: image URL, 2: declared width, 3: declared height, 4: real
+#. width, 5: real height.
 #: includes/class-nlh-seo-audit.php:467
 #, php-format
 msgid "%1$s declares %2$dx%3$d but the file is %4$dx%5$d."
@@ -1493,7 +1402,8 @@ msgstr ""
 msgid "%d H1 headings found in the content — there should be only one."
 msgstr ""
 
-#. translators: 1: heading level before the skip, 2: heading level after the skip.
+#. translators: 1: heading level before the skip, 2: heading level after the
+#. skip.
 #: includes/class-nlh-seo-audit.php:973
 #, php-format
 msgid "Heading level skipped: H%1$d is followed directly by H%2$d."

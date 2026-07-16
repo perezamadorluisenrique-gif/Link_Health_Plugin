@@ -264,9 +264,11 @@ class NLH_Admin {
 		);
 
 		// NOTE: the Scan Frequency, Ignored Domains and Email Notifications
-		// fields were unregistered in 1.2.0. They had no backend and rendered as
-		// dead "Available in Pro" inputs. Their render_* methods are kept
-		// (unregistered) as starting points for the email/scheduling phases.
+		// fields were unregistered in 1.2.0 (they had no backend and rendered as
+		// dead "Available in Pro" inputs) and their render_* methods removed in
+		// 1.5.3 — the email/scheduling/ignore features now ship in the Pro plugin
+		// (NLHP_Settings / NLHP_Notifications), so the core stubs no longer serve
+		// as starting points.
 	}
 
 	/**
@@ -737,27 +739,6 @@ class NLH_Admin {
 	}
 
 	/**
-	 * Renders the scan frequency selector.
-	 *
-	 * Unregistered since 1.2.0 (no backend yet). Kept as a starting point for
-	 * the configurable-scheduling phase; not displayed on the settings screen.
-	 *
-	 * @return void
-	 */
-	public function render_scan_frequency_field(): void {
-		?>
-		<select id="nlh_scan_frequency" disabled>
-			<option selected><?php esc_html_e( 'Every 15 minutes', 'native-link-health' ); ?></option>
-			<option><?php esc_html_e( 'Hourly', 'native-link-health' ); ?> - <?php esc_html_e( 'Pro', 'native-link-health' ); ?></option>
-			<option><?php esc_html_e( 'Daily', 'native-link-health' ); ?> - <?php esc_html_e( 'Pro', 'native-link-health' ); ?></option>
-			<option><?php esc_html_e( 'Weekly', 'native-link-health' ); ?> - <?php esc_html_e( 'Pro', 'native-link-health' ); ?></option>
-		</select>
-		<span class="nlh-pro-badge"><?php esc_html_e( 'Available in Pro', 'native-link-health' ); ?></span>
-		<p class="description"><?php esc_html_e( 'The free tier uses a fixed 15 minute cron interval.', 'native-link-health' ); ?></p>
-		<?php
-	}
-
-	/**
 	 * Renders the scan-scope selector: extra post types, comments and menus.
 	 *
 	 * @return void
@@ -837,23 +818,6 @@ class NLH_Admin {
 	}
 
 	/**
-	 * Renders the ignored domains textarea.
-	 *
-	 * Unregistered since 1.2.0. Redundant with the live ignore list
-	 * (`nlh_ignored_urls`) managed from the dashboard; kept only until a proper
-	 * wildcard domain ignore backend is built.
-	 *
-	 * @return void
-	 */
-	public function render_ignored_domains_field(): void {
-		?>
-		<textarea id="nlh_ignored_domains" class="large-text code" rows="6" disabled placeholder="<?php echo esc_attr__( "example.com\n*.example.org", 'native-link-health' ); ?>"></textarea>
-		<span class="nlh-pro-badge"><?php esc_html_e( 'Available in Pro', 'native-link-health' ); ?></span>
-		<p class="description"><?php esc_html_e( 'Domain ignore lists are reserved for Native Link Health Pro.', 'native-link-health' ); ?></p>
-		<?php
-	}
-
-	/**
 	 * Renders disabled auto-fix rules editor.
 	 *
 	 * @return void
@@ -891,22 +855,6 @@ class NLH_Admin {
 		?>
 		<textarea id="nlh_auto_rules" name="nlh_auto_rules" class="large-text code" rows="8" placeholder="<?php echo esc_attr( $example ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
 		<p class="description"><?php esc_html_e( 'Optional JSON list of auto-fix rules applied during scans. Each rule has "conditions" and an "action" (e.g. replace one domain with another). These rewrite post content automatically — leave empty to disable.', 'native-link-health' ); ?></p>
-		<?php
-	}
-
-	/**
-	 * Renders the email notification field.
-	 *
-	 * Unregistered since 1.2.0 (no backend yet). Kept as a starting point for
-	 * the email-alerts/digest phase; not displayed on the settings screen.
-	 *
-	 * @return void
-	 */
-	public function render_email_notifications_field(): void {
-		?>
-		<input type="email" class="regular-text" value="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>" disabled>
-		<span class="nlh-pro-badge"><?php esc_html_e( 'Available in Pro', 'native-link-health' ); ?></span>
-		<p class="description"><?php esc_html_e( 'Email alerts for newly broken links are reserved for Native Link Health Pro.', 'native-link-health' ); ?></p>
 		<?php
 	}
 

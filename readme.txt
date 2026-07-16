@@ -4,7 +4,7 @@ Tags: broken-link-checker, link-checker, internal-links, seo, maintenance
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,10 @@ No. All analysis runs on your server, and your content is never sent to any thir
 4. Settings page with scan scope (post types, comments, menus) and auto-fix rules.
 
 == Changelog ==
+
+= 1.5.3 =
+* The dashboard's Error Type filter now shares a single wording source with the "Group by error type" view, so the same failure reads identically in both (e.g. "Missing anchors", "DNS failures").
+* Removed three long-unused disabled settings stubs ("scan frequency", "ignored domains", "email notifications") whose real features now ship in Native Link Health Pro.
 
 = 1.5.2 =
 * The four Native Link Health admin screens are now shielded from third-party admin notices (other plugins' promotional banners no longer bleed into them); the plugin's own notices and WordPress settings errors are kept intact.

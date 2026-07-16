@@ -272,12 +272,14 @@ $render_card = function ( $row ) {
 				<span><?php esc_html_e( 'Error Type', 'native-link-health' ); ?></span>
 				<select id="nlh-filter-error-type">
 					<option value="all"><?php esc_html_e( 'All', 'native-link-health' ); ?></option>
-					<option value="4xx"><?php esc_html_e( '4xx', 'native-link-health' ); ?></option>
-					<option value="5xx"><?php esc_html_e( '5xx', 'native-link-health' ); ?></option>
-					<option value="fragment"><?php esc_html_e( 'Missing anchor', 'native-link-health' ); ?></option>
-					<option value="dns"><?php esc_html_e( 'DNS', 'native-link-health' ); ?></option>
-					<option value="ssl"><?php esc_html_e( 'SSL', 'native-link-health' ); ?></option>
-					<option value="timeout"><?php esc_html_e( 'Timeout / connection', 'native-link-health' ); ?></option>
+					<?php
+					// Options are built from the scanner's single label source so
+					// the filter wording always matches the "Group by error type"
+					// view. Keys are the classify_error_type() slugs.
+					foreach ( $this->scanner->get_error_type_labels() as $nlh_type => $nlh_label ) :
+						?>
+						<option value="<?php echo esc_attr( $nlh_type ); ?>"><?php echo esc_html( $nlh_label ); ?></option>
+					<?php endforeach; ?>
 				</select>
 			</label>
 			<label>

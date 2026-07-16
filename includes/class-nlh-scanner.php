@@ -2262,10 +2262,16 @@ class NLH_Scanner {
 	/**
 	 * Human-readable labels for the error-type groups.
 	 *
+	 * The single source of truth for error-type wording: the dashboard "Group
+	 * by error type" view AND the dashboard's Error Type filter dropdown both
+	 * read these, so the two never drift into competing vocabularies ("Missing
+	 * anchor" vs "Missing anchors", "DNS" vs "DNS failures"). Keyed by the slug
+	 * returned from classify_error_type().
+	 *
 	 * @since 1.0.3
 	 * @return array<string,string>
 	 */
-	private function get_error_type_labels(): array {
+	public function get_error_type_labels(): array {
 		return array(
 			'5xx'      => __( 'Server errors (5xx)', 'native-link-health' ),
 			'4xx'      => __( 'Client errors (4xx)', 'native-link-health' ),
