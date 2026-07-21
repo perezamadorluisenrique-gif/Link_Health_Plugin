@@ -687,6 +687,15 @@ class NLH_Admin {
 			$metrics = array();
 		}
 
+		// Source the broken-link figure from the same live, grace-filtered count
+		// the health hero uses (get_broken_counts()['confirmed']) rather than the
+		// stored total_broken_found metric. The stored metric is a raw COUNT(*)
+		// refreshed only during a scan batch, so it would (a) disagree with the
+		// hero when long-unverifiable records exist and (b) go stale after a manual
+		// fix/ignore/bulk action — those paths mutate the errors table but never
+		// re-run update_scan_metrics().
+		$broken_confirmed = $this->get_broken_counts()['confirmed'];
+
 		$cards = array(
 			array(
 				'icon'  => 'dashicons-admin-links',
@@ -695,7 +704,7 @@ class NLH_Admin {
 			),
 			array(
 				'icon'  => 'dashicons-warning',
-				'value' => number_format_i18n( (int) ( $metrics['total_broken_found'] ?? 0 ) ),
+				'value' => number_format_i18n( (int) $broken_confirmed ),
 				'label' => __( 'Broken Links', 'native-link-health' ),
 			),
 			array(

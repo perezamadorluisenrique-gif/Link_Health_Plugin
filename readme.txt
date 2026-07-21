@@ -4,7 +4,7 @@ Tags: broken-link-checker, link-checker, internal-links, seo, maintenance
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,10 @@ No. All analysis runs on your server, and your content is never sent to any thir
 4. Settings page with scan scope (post types, comments, menus) and auto-fix rules.
 
 == Changelog ==
+
+= 1.5.4 =
+* The dashboard "Broken Links" metric now uses the same live, grace-filtered count as the Link Health Score hero, so the two figures always agree and the metric no longer goes stale after you fix, ignore, or bulk-correct links (previously it kept the last scan-batch total until the next cron run).
+* The Settings page title now uses the same header layout as the Dashboard, SEO Audit, and Link Juice screens for consistent spacing.
 
 = 1.5.3 =
 * The dashboard's Error Type filter now shares a single wording source with the "Group by error type" view, so the same failure reads identically in both (e.g. "Missing anchors", "DNS failures").

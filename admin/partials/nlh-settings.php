@@ -11,7 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="wrap nlh-wrap">
-	<h1><?php esc_html_e( 'Native Link Health Settings', 'native-link-health' ); ?></h1>
+	<div class="nlh-page-header">
+		<h1><?php esc_html_e( 'Native Link Health Settings', 'native-link-health' ); ?></h1>
+	</div>
 
 	<?php include NLH_PLUGIN_DIR . 'admin/partials/nlh-help.php'; ?>
 
