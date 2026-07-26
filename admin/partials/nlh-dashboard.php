@@ -329,7 +329,8 @@ $render_card = function ( $row ) {
 						<span class="screen-reader-text"><?php esc_html_e( 'Replacement', 'native-link-health' ); ?></span>
 						<input type="text" class="regular-text nlh-suggestion-replacement" placeholder="<?php esc_attr_e( 'Replacement domain or URL', 'native-link-health' ); ?>">
 					</label>
-					<button type="button" class="button button-primary nlh-approve-all"><?php esc_html_e( 'Approve All', 'native-link-health' ); ?></button>
+					<?php // Disabled until a replacement is typed — an empty replacement would blank every matching href. ?>
+					<button type="button" class="button button-primary nlh-approve-all" disabled><?php esc_html_e( 'Approve All', 'native-link-health' ); ?></button>
 				</div>
 			<?php endforeach; ?>
 		</div>

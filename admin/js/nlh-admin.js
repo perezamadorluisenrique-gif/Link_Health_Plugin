@@ -556,6 +556,18 @@
 		if (event.target.closest('#nlh-filter-search')) {
 			applyDashboardFilters();
 		}
+
+		var replacementInput = event.target.closest('.nlh-suggestion-replacement');
+
+		if (replacementInput) {
+			// Approving with an empty replacement would blank every matching href.
+			var card = replacementInput.closest('.nlh-suggestion-card');
+			var button = card ? card.querySelector('.nlh-approve-all') : null;
+
+			if (button) {
+				button.disabled = replacementInput.value.trim() === '';
+			}
+		}
 	});
 
 	document.addEventListener('change', function (event) {
@@ -704,6 +716,15 @@
 		if (approveAll) {
 			var suggestion = approveAll.closest('.nlh-suggestion-card');
 			var replacement = suggestion ? suggestion.querySelector('.nlh-suggestion-replacement') : null;
+			var replacementValue = replacement ? replacement.value.trim() : '';
+
+			// The button is disabled until the field is filled; this guards the
+			// path where it is re-enabled some other way. Sending '' would blank
+			// every matching href server-side.
+			if (replacementValue === '') {
+				showNotice(nlh_ajax.i18n.replacementRequired, 'error');
+				return;
+			}
 
 			setButtonBusy(approveAll, true);
 
@@ -712,7 +733,7 @@
 				nonce: nlh_ajax.nonce,
 				pattern: suggestion ? suggestion.dataset.pattern : '',
 				type: suggestion ? suggestion.dataset.type : '',
-				replacement: replacement ? replacement.value : ''
+				replacement: replacementValue
 			}).then(function (data) {
 				if (suggestion) {
 					suggestion.remove();

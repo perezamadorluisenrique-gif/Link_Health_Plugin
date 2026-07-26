@@ -14,6 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class NLH_SEO_Audit {
 	/**
+	 * Memoized result of get_public_posts(), or null before the first call.
+	 *
+	 * @var WP_Post[]|null
+	 */
+	private ?array $posts_cache = null;
+
+	/**
 	 * Common stop words (EN + ES) excluded from focus-keyword detection.
 	 *
 	 * Deliberately duplicated from the similar list in
@@ -977,11 +984,22 @@ class NLH_SEO_Audit {
 	}
 
 	/**
-	 * Returns public posts/pages.
+	 * Returns public posts/pages, memoized for the lifetime of the instance.
+	 *
+	 * All twelve audit checks iterate this list and run_seo_audit() runs them in
+	 * a single request, so without the cache the whole post library — full
+	 * content included — was paged out of the DB twelve times per audit.
+	 *
+	 * The cache is per-instance, and NLH_SEO_Audit is constructed fresh for each
+	 * audit run, so a subsequent run still sees current content.
 	 *
 	 * @return WP_Post[]
 	 */
 	private function get_public_posts(): array {
+		if ( null !== $this->posts_cache ) {
+			return $this->posts_cache;
+		}
+
 		$all_posts = array();
 		$paged     = 1;
 
@@ -1000,6 +1018,8 @@ class NLH_SEO_Audit {
 			$all_posts = array_merge( $all_posts, $posts );
 			++$paged;
 		} while ( count( $posts ) === 100 );
+
+		$this->posts_cache = $all_posts;
 
 		return $all_posts;
 	}
@@ -1126,6 +1146,14 @@ class NLH_SEO_Audit {
 	/**
 	 * Builds a normalized audit result.
 	 *
+	 * The item list is capped before it leaves this method: the whole result set
+	 * is stored whole in the day-long nlh_seo_audit_results transient, and on a
+	 * large site twelve unbounded lists of {post_id, title, url, detail} run to
+	 * megabytes in the options table. The dashboard renders only the first ten
+	 * items per check, so the cap is invisible there, and 'count' still carries
+	 * the true total — the reported number is never truncated, only the list.
+	 * Raise it with the nlh_seo_audit_max_items filter.
+	 *
 	 * @param string $status Status.
 	 * @param int    $count Count.
 	 * @param array  $items Items.
@@ -1133,11 +1161,22 @@ class NLH_SEO_Audit {
 	 * @return array
 	 */
 	private function result( string $status, int $count, array $items, string $message ): array {
+		/**
+		 * Filters how many detail items each audit check keeps.
+		 *
+		 * @since 1.5.5
+		 *
+		 * @param int $max Maximum items retained per check. Default 50.
+		 */
+		$max       = max( 1, (int) apply_filters( 'nlh_seo_audit_max_items', 50 ) );
+		$truncated = count( $items ) > $max;
+
 		return array(
-			'status'  => $status,
-			'count'   => $count,
-			'items'   => $items,
-			'message' => $message,
+			'status'    => $status,
+			'count'     => $count,
+			'items'     => $truncated ? array_slice( $items, 0, $max ) : $items,
+			'truncated' => $truncated,
+			'message'   => $message,
 		);
 	}
 }

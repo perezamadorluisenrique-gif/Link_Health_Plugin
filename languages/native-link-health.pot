@@ -215,6 +215,10 @@ msgstr ""
 msgid "Ignore this URL permanently?"
 msgstr ""
 
+#: admin/class-nlh-admin.php:387 admin/class-nlh-admin.php:1165
+msgid "A replacement URL is required."
+msgstr ""
+
 #: admin/class-nlh-admin.php:281 admin/class-nlh-admin.php:1326
 msgid "Unknown"
 msgstr ""

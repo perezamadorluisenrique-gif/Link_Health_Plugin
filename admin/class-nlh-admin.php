@@ -21,6 +21,13 @@ class NLH_Admin {
 	private NLH_Scanner $scanner;
 
 	/**
+	 * Memoized result of get_broken_counts(), or null before the first call.
+	 *
+	 * @var array{total:int,confirmed:int,unverifiable:int}|null
+	 */
+	private ?array $broken_counts_cache = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param NLH_Scanner $scanner Scanner instance.
@@ -384,6 +391,7 @@ class NLH_Admin {
 					'working'              => __( 'Working...', 'native-link-health' ),
 					'scanQueued'           => __( 'Scan queued.', 'native-link-health' ),
 					'confirmIgnore'        => __( 'Ignore this URL permanently?', 'native-link-health' ),
+					'replacementRequired'  => __( 'A replacement URL is required.', 'native-link-health' ),
 					'error'                => __( 'Request failed.', 'native-link-health' ),
 					'unknown'              => __( 'Unknown', 'native-link-health' ),
 					'transportBadges'      => $this->get_transport_badge_labels(),
@@ -541,9 +549,18 @@ class NLH_Admin {
 	 * depressing them forever. They still render in the list, flagged with the
 	 * "Unverified since" badge. Nothing is auto-deleted.
 	 *
+	 * Memoized per request: render_health_overview() and render_metrics_panel()
+	 * both need this figure and are called independently from the dashboard
+	 * template, so without the cache the table scan and its option lookups ran
+	 * twice on every page load.
+	 *
 	 * @return array{total:int,confirmed:int,unverifiable:int}
 	 */
 	private function get_broken_counts(): array {
+		if ( null !== $this->broken_counts_cache ) {
+			return $this->broken_counts_cache;
+		}
+
 		global $wpdb;
 
 		$errors_table = $wpdb->prefix . 'nlh_link_errors';
@@ -552,22 +569,37 @@ class NLH_Admin {
 		$total        = is_array( $rows ) ? count( $rows ) : 0;
 		$unverifiable = 0;
 		$cutoff       = time() - $this->scanner->get_unverified_grace_period();
+		$option_names = array();
 
 		foreach ( (array) $rows as $row ) {
-			$source_type = isset( $row->source_type ) ? (string) $row->source_type : 'post';
-			$suffix      = $this->scanner->state_key_suffix( $source_type, (int) $row->post_id );
-			$soft_since  = get_option( 'nlh_last_soft_' . (string) $row->url_hash . '_' . $suffix, false );
+			$source_type    = isset( $row->source_type ) ? (string) $row->source_type : 'post';
+			$suffix         = $this->scanner->state_key_suffix( $source_type, (int) $row->post_id );
+			$option_names[] = 'nlh_last_soft_' . (string) $row->url_hash . '_' . $suffix;
+		}
+
+		// The nlh_last_soft_* options are stored with autoload=false, so each
+		// get_option() below would otherwise be its own query — one per broken
+		// record. Prime them all in a single query first; the dashboard row
+		// template reads the same option names, so those hit the cache too.
+		if ( $option_names && function_exists( 'wp_prime_option_caches' ) ) {
+			wp_prime_option_caches( $option_names );
+		}
+
+		foreach ( $option_names as $option_name ) {
+			$soft_since = get_option( $option_name, false );
 
 			if ( false !== $soft_since && (int) $soft_since > 0 && (int) $soft_since < $cutoff ) {
 				++$unverifiable;
 			}
 		}
 
-		return array(
+		$this->broken_counts_cache = array(
 			'total'        => $total,
 			'confirmed'    => max( 0, $total - $unverifiable ),
 			'unverifiable' => $unverifiable,
 		);
+
+		return $this->broken_counts_cache;
 	}
 
 	/**
@@ -595,9 +627,12 @@ class NLH_Admin {
 		$orphans   = 0;
 		$has_graph = class_exists( 'NLH_Link_Graph' );
 		if ( $has_graph ) {
+			// get_summary() already returns calculate_health_score() under
+			// 'health_score'; calling the method separately would repeat its
+			// half-dozen aggregate queries for the same number.
 			$graph     = new NLH_Link_Graph();
-			$authority = (int) $graph->calculate_health_score();
 			$summary   = $graph->get_summary();
+			$authority = (int) ( $summary['health_score'] ?? 0 );
 			$orphans   = (int) ( $summary['orphans'] ?? 0 );
 		}
 
@@ -1154,6 +1189,14 @@ class NLH_Admin {
 				if ( '' === $pattern ) {
 						$this->clean_output_buffer();
 						wp_send_json_error( array( 'message' => __( 'Missing correction pattern.', 'native-link-health' ) ), 400 );
+				}
+
+				// An empty replacement would rewrite every matching href to "" —
+				// WP_HTML_Tag_Processor writes href="" and reports the update as
+				// applied, and delete_error_record() would then hide the damage.
+				if ( '' === $replacement ) {
+						$this->clean_output_buffer();
+						wp_send_json_error( array( 'message' => __( 'A replacement URL is required.', 'native-link-health' ) ), 400 );
 				}
 
 				global $wpdb;
@@ -1746,8 +1789,12 @@ class NLH_Admin {
 	 * @return string
 	 */
 	private function build_bulk_replacement_url( string $old_url, string $pattern, string $replacement, string $type ): string {
+		// Never return '' — the caller treats "different from the old URL" as a
+		// fix to apply, so an empty string would blank the href. Returning the
+		// old URL makes an empty replacement a no-op. ajax_bulk_correct()
+		// rejects this case up front; this is the second line of defence.
 		if ( '' === $replacement ) {
-			return '';
+			return $old_url;
 		}
 
 		if ( 'path_pattern' === $type ) {

@@ -215,6 +215,10 @@ msgstr "Escaneo en cola."
 msgid "Ignore this URL permanently?"
 msgstr "¿Ignorar esta URL permanentemente?"
 
+#: admin/class-nlh-admin.php:387 admin/class-nlh-admin.php:1165
+msgid "A replacement URL is required."
+msgstr "Se requiere una URL de reemplazo."
+
 #: admin/class-nlh-admin.php:281 admin/class-nlh-admin.php:1297
 msgid "Unknown"
 msgstr "Desconocido"

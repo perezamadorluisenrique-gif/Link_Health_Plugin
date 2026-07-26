@@ -4,7 +4,7 @@ Tags: broken-link-checker, link-checker, internal-links, seo, maintenance
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,12 @@ No. All analysis runs on your server, and your content is never sent to any thir
 4. Settings page with scan scope (post types, comments, menus) and auto-fix rules.
 
 == Changelog ==
+
+= 1.5.5 =
+* Fixed: approving a correction suggestion with the replacement field left empty no longer blanks the `href` of every matching link. The "Approve All" button now stays disabled until you enter a replacement, and the server rejects an empty one.
+* Fixed: saving the Settings page no longer clears the Native Link Health Pro notification settings (Pro options moved to their own settings group).
+* The SEO audit now loads your post library once per run instead of once per check, and keeps a bounded number of example items per check so the cached results stay small on large sites. Reported totals are unaffected.
+* The dashboard computes its broken-link tally once per page load instead of twice, and reads the per-link status flags in a single query rather than one per row.
 
 = 1.5.4 =
 * The dashboard "Broken Links" metric now uses the same live, grace-filtered count as the Link Health Score hero, so the two figures always agree and the metric no longer goes stale after you fix, ignore, or bulk-correct links (previously it kept the last scan-batch total until the next cron run).
