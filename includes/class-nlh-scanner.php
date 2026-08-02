@@ -75,6 +75,108 @@ class NLH_Scanner {
 	}
 
 	/**
+	 * Returns the content a post should be scanned against.
+	 *
+	 * Every read path — the cron batch, the manual full scan, the per-post
+	 * "Scan Now", fragment healing, and the Link Juice map — goes through here,
+	 * so a single filter covers all of them. Core reads `post_content` and
+	 * nothing else: page-builder payloads (Elementor's `_elementor_data`, Divi
+	 * shortcode meta), ACF/custom-field values, term descriptions and widget
+	 * areas are invisible to it. On an Elementor site NLH therefore finds zero
+	 * links. This is the extension point that lets Pro or a third party close
+	 * that gap without core carrying a format contract that breaks every time a
+	 * builder changes its JSON.
+	 *
+	 * Return additional HTML appended to the post content — the extracted URLs
+	 * are then indistinguishable from ones found in `post_content`. Anything
+	 * that is not markup is better contributed via `nlh_extra_urls`.
+	 *
+	 * IMPORTANT: this affects the **read** side only. Content writes still go
+	 * through nlh_update_post_link()/update_post_link(), which operate on the
+	 * real `post_content`. A URL surfaced from a page builder is reported but
+	 * cannot be auto-corrected — read support is not write support. (Pro's Bulk
+	 * Fix already refuses page-builder posts for exactly this reason.)
+	 *
+	 * @since 1.5.6
+	 * @param WP_Post|int $post Post object or ID.
+	 * @return string Content to scan; empty string when the post is unavailable.
+	 */
+	public function get_scan_content( $post ): string {
+		$post = get_post( $post );
+
+		if ( ! $post instanceof WP_Post ) {
+			return '';
+		}
+
+		$content = (string) $post->post_content;
+
+		/**
+		 * Filters the content a post is scanned against.
+		 *
+		 * @since 1.5.6
+		 * @param string  $content The post's post_content.
+		 * @param WP_Post $post    The post being scanned.
+		 */
+		$filtered = apply_filters( 'nlh_post_content', $content, $post );
+
+		return is_string( $filtered ) ? $filtered : $content;
+	}
+
+	/**
+	 * Returns extra URLs contributed for a source, beyond those parsed out of
+	 * its content.
+	 *
+	 * The companion to `nlh_post_content` for sources that are not markup —
+	 * an ACF url field, a theme-options setting, a term description. Returned
+	 * URLs are merged into the scanned set and are treated exactly like parsed
+	 * ones: probed through the same gated checker, recorded against the same
+	 * post, and — importantly — counted as "current" by delete_stale_records(),
+	 * so a contributed URL is not wiped on the very pass that recorded it.
+	 *
+	 * Contribute absolute URLs. Fragment-only values ('#anchor') are dropped:
+	 * they would be validated against post_content anchors, which is not where
+	 * a contributed URL lives.
+	 *
+	 * @since 1.5.6
+	 * @param int    $post_id     Post (or comment) ID the URLs belong to.
+	 * @param string $source_type Source bucket ('post', 'comment', 'menu').
+	 * @return string[] Unique, non-empty URLs.
+	 */
+	public function get_extra_urls( int $post_id, string $source_type = 'post' ): array {
+		/**
+		 * Filters extra URLs to scan for a source.
+		 *
+		 * @since 1.5.6
+		 * @param string[] $urls        Extra URLs. Default empty.
+		 * @param int      $post_id     Post (or comment) ID.
+		 * @param string   $source_type Source bucket ('post', 'comment', 'menu').
+		 */
+		$urls = apply_filters( 'nlh_extra_urls', array(), $post_id, $source_type );
+
+		if ( ! is_array( $urls ) ) {
+			return array();
+		}
+
+		$clean = array();
+
+		foreach ( $urls as $url ) {
+			if ( ! is_string( $url ) ) {
+				continue;
+			}
+
+			$url = trim( $url );
+
+			if ( '' === $url || '#' === $url[0] ) {
+				continue;
+			}
+
+			$clean[] = $url;
+		}
+
+		return array_values( array_unique( $clean ) );
+	}
+
+	/**
 	 * Post statuses to include when querying scannable content.
 	 *
 	 * Attachments are stored with post_status 'inherit', never 'publish', so a
@@ -170,8 +272,10 @@ class NLH_Scanner {
 		// Keep the internal link map fresh on every save (offline, no HTTP) so
 		// the juice report reflects edits immediately. Scores are recomputed by
 		// the next full scan or the manual "Recalculate" action.
+		$content = $this->get_scan_content( $post );
+
 		if ( class_exists( 'NLH_Link_Graph' ) ) {
-			( new NLH_Link_Graph() )->record_post( $post_id, $post->post_content );
+			( new NLH_Link_Graph() )->record_post( $post_id, $content );
 		} else {
 			self::log_debug( 'NLH_Link_Graph class not found — link juice features disabled in ' . __METHOD__ );
 		}
@@ -182,13 +286,15 @@ class NLH_Scanner {
 			// clear any now-resolved fragment errors right away instead of making
 			// the author wait for the next cron batch. Broken HTTP links still
 			// re-verify on the next scan (meta cleared above).
-			$this->heal_post_fragments( $post_id, $post->post_content );
+			$this->heal_post_fragments( $post_id, $content );
 			return;
 		}
 
 		delete_post_meta( $post_id, '_nlh_last_scan' );
 
-		foreach ( $this->extract_urls( $post->post_content ) as $url ) {
+		$urls = array_merge( $this->extract_urls( $content ), $this->get_extra_urls( $post_id, 'post' ) );
+
+		foreach ( $urls as $url ) {
 			$this->clear_url_cache( $url, $post_id );
 		}
 	}
@@ -380,7 +486,17 @@ class NLH_Scanner {
 
 		foreach ( $posts as $post ) {
 			$idn_unverifiable = array();
-			$urls             = $this->extract_urls( $post->post_content, $idn_unverifiable );
+			$content          = $this->get_scan_content( $post );
+			$urls             = $this->extract_urls( $content, $idn_unverifiable );
+
+			// URLs contributed by nlh_extra_urls are scanned as if they had been
+			// parsed out of the content — including being counted as "current"
+			// below, or the pass that records them would delete them as stale.
+			$extra_urls = $this->get_extra_urls( (int) $post->ID, 'post' );
+			if ( $extra_urls ) {
+				$urls = array_values( array_unique( array_merge( $urls, $extra_urls ) ) );
+			}
+
 			// IDN-unverifiable URLs must stay in the "current" set or the upsert
 			// below would be deleted as stale on the very same pass.
 			$this->delete_stale_records( $post->ID, array_merge( $urls, $idn_unverifiable ) );
@@ -389,7 +505,7 @@ class NLH_Scanner {
 			// Pure content parsing + url_to_postid(): no HTTP, independent of the
 			// broken-link probe pipeline below.
 			if ( $link_graph ) {
-				$link_graph->record_post( (int) $post->ID, $post->post_content );
+				$link_graph->record_post( (int) $post->ID, $content );
 			}
 
 			// Same-page deep links (#anchor, or an absolute URL pointing back to
@@ -420,7 +536,7 @@ class NLH_Scanner {
 				}
 			}
 			$fragment_urls    = array_values( $fragment_urls );
-			$broken_fragments = $this->validate_fragments( $post->post_content, $fragment_urls, $post->ID );
+			$broken_fragments = $this->validate_fragments( $content, $fragment_urls, $post->ID );
 			foreach ( $broken_fragments as $frag_url ) {
 				$frag_hash        = md5( $frag_url );
 				$frag_transient   = 'nlh_retry_' . $frag_hash . '_' . $post->ID;

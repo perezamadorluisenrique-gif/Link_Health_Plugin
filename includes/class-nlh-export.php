@@ -19,7 +19,7 @@ class NLH_Export {
 	 * @return void
 	 */
 	public function export_csv(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! nlh_current_user_can_read() ) {
 			wp_die( esc_html__( 'Insufficient permissions.', 'native-link-health' ) );
 		}
 

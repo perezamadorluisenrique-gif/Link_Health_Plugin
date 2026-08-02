@@ -14,12 +14,29 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class NLH_Activator {
 	/**
-	 * Adds the custom 15 minute cron interval.
+	 * Default scan schedule slug.
+	 *
+	 * @var string
+	 */
+	public const DEFAULT_SCHEDULE = 'nlh_every_15_min';
+
+	/**
+	 * Adds the plugin's custom cron intervals.
+	 *
+	 * Only the sub-hourly ones are ours; hourly/twicedaily/daily come from WP
+	 * core and are always available.
 	 *
 	 * @param array $schedules Existing schedules.
 	 * @return array
 	 */
 	public static function add_cron_schedule( array $schedules ): array {
+		if ( ! isset( $schedules['nlh_every_5_min'] ) ) {
+			$schedules['nlh_every_5_min'] = array(
+				'interval' => 5 * MINUTE_IN_SECONDS,
+				'display'  => __( 'Every 5 minutes', 'native-link-health' ),
+			);
+		}
+
 		if ( ! isset( $schedules['nlh_every_15_min'] ) ) {
 			$schedules['nlh_every_15_min'] = array(
 				'interval' => 15 * MINUTE_IN_SECONDS,
@@ -28,6 +45,56 @@ class NLH_Activator {
 		}
 
 		return $schedules;
+	}
+
+	/**
+	 * Schedule slugs the Scan Frequency setting accepts, in ascending interval
+	 * order, mapped to their seconds.
+	 *
+	 * Used both to validate the stored option and to compute the throughput
+	 * estimate shown next to the field.
+	 *
+	 * @since 1.5.6
+	 * @return array<string,int> Slug => interval in seconds.
+	 */
+	public static function get_allowed_schedules(): array {
+		return array(
+			'nlh_every_5_min'  => 5 * MINUTE_IN_SECONDS,
+			'nlh_every_15_min' => 15 * MINUTE_IN_SECONDS,
+			'hourly'           => HOUR_IN_SECONDS,
+			'twicedaily'       => 12 * HOUR_IN_SECONDS,
+			'daily'            => DAY_IN_SECONDS,
+		);
+	}
+
+	/**
+	 * Returns the currently configured scan schedule slug.
+	 *
+	 * Falls back to the 15-minute default for an unset or unrecognised option,
+	 * so a hand-edited value can never leave the scanner unscheduled.
+	 *
+	 * @since 1.5.6
+	 * @return string
+	 */
+	public static function get_scan_schedule(): string {
+		$slug = (string) get_option( 'nlh_scan_frequency', self::DEFAULT_SCHEDULE );
+
+		return isset( self::get_allowed_schedules()[ $slug ] ) ? $slug : self::DEFAULT_SCHEDULE;
+	}
+
+	/**
+	 * Re-schedules the scan batch onto the currently configured interval.
+	 *
+	 * wp_schedule_event() stores the interval at scheduling time, so changing
+	 * the option has no effect until the existing event is cleared and a new
+	 * one booked. Hooked on update_option_nlh_scan_frequency.
+	 *
+	 * @since 1.5.6
+	 * @return void
+	 */
+	public static function reschedule_cron(): void {
+		wp_clear_scheduled_hook( 'nlh_run_batch' );
+		wp_schedule_event( time(), self::get_scan_schedule(), 'nlh_run_batch' );
 	}
 
 	/**
@@ -300,6 +367,7 @@ class NLH_Activator {
 	private static function set_default_options(): void {
 		add_option( 'nlh_ignored_urls', array() );
 		add_option( 'nlh_scan_batch_size', NLH_BATCH_SIZE );
+		add_option( 'nlh_scan_frequency', self::DEFAULT_SCHEDULE );
 		add_option(
 			'nlh_scan_scope',
 			array(
@@ -329,7 +397,7 @@ class NLH_Activator {
 	 */
 	private static function schedule_cron(): void {
 		if ( ! wp_next_scheduled( 'nlh_run_batch' ) ) {
-			wp_schedule_event( time(), 'nlh_every_15_min', 'nlh_run_batch' );
+			wp_schedule_event( time(), self::get_scan_schedule(), 'nlh_run_batch' );
 		}
 	}
 }

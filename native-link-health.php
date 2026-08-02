@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Native Link Health
  * Description:       A lightweight broken link scanner and internal-link authority analyzer for WordPress. Runs locally, never crashes your server, and avoids false positives. No cloud, no accounts.
- * Version:           1.5.5
+ * Version:           1.5.6
  * Requires at least: 6.2
  * Requires PHP:      8.0
  * Author:            Native Link Health contributors
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'NLH_VERSION', '1.5.5' );
+define( 'NLH_VERSION', '1.5.6' );
 define( 'NLH_DB_VERSION', '2.3' );
 define( 'NLH_BATCH_SIZE', 5 );
 define( 'NLH_PLUGIN_FILE', __FILE__ );
@@ -74,6 +74,85 @@ register_activation_hook( __FILE__, array( 'NLH_Activator', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'NLH_Deactivator', 'deactivate' ) );
 
 add_filter( 'cron_schedules', array( 'NLH_Activator', 'add_cron_schedule' ) );
+
+// wp_schedule_event() freezes the interval at scheduling time, so a frequency
+// change only takes effect once the booked event is cleared and re-created.
+add_action( 'update_option_nlh_scan_frequency', array( 'NLH_Activator', 'reschedule_cron' ) );
+
+/**
+ * Returns the capability required to view the plugin's admin screens.
+ *
+ * Read access covers the dashboards (broken links, SEO audit, Link Juice) and
+ * the read-only AJAX endpoints behind them. On agency sites the intended user
+ * is often an Editor or a dedicated SEO role rather than an administrator, so
+ * this is filterable. Destructive actions route through
+ * nlh_get_write_capability() instead — lowering the bar for *looking* is not
+ * the same as lowering it for *changing post content*.
+ *
+ * @since 1.5.6
+ * @return string Capability slug.
+ */
+function nlh_get_capability(): string {
+	/**
+	 * Filters the capability required to read the plugin's admin screens.
+	 *
+	 * @since 1.5.6
+	 * @param string $capability Default 'manage_options'.
+	 */
+	$capability = apply_filters( 'nlh_capability', 'manage_options' );
+
+	return is_string( $capability ) && '' !== $capability ? $capability : 'manage_options';
+}
+
+/**
+ * Returns the capability required for destructive/write actions.
+ *
+ * Applies to anything that edits post content or changes configuration:
+ * single/bulk corrections, Link Juice re-linking, the ignore list, the rules
+ * editor, and the Settings page. Read-only work (dashboards, scans, re-checks,
+ * the SEO audit, PageRank recomputation, CSV export of data already visible on
+ * the dashboard) stays on nlh_get_capability().
+ *
+ * This deliberately does NOT inherit from nlh_get_capability(): lowering the
+ * bar to let an SEO role *look* at the dashboard must not silently also hand
+ * that role bulk find-and-replace over every post on the site. Opening up reads
+ * is one decision; opening up writes is a second, separate one, so a site that
+ * wants a single gate has to say so by filtering both.
+ *
+ * @since 1.5.6
+ * @return string Capability slug.
+ */
+function nlh_get_write_capability(): string {
+	/**
+	 * Filters the capability required for the plugin's destructive actions.
+	 *
+	 * @since 1.5.6
+	 * @param string $capability Default 'manage_options' — independent of nlh_capability.
+	 */
+	$capability = apply_filters( 'nlh_write_capability', 'manage_options' );
+
+	return is_string( $capability ) && '' !== $capability ? $capability : 'manage_options';
+}
+
+/**
+ * Whether the current user may read the plugin's admin screens.
+ *
+ * @since 1.5.6
+ * @return bool
+ */
+function nlh_current_user_can_read(): bool {
+	return current_user_can( nlh_get_capability() );
+}
+
+/**
+ * Whether the current user may perform the plugin's destructive actions.
+ *
+ * @since 1.5.6
+ * @return bool
+ */
+function nlh_current_user_can_write(): bool {
+	return current_user_can( nlh_get_write_capability() );
+}
 
 /**
  * Updates a link in post content with the native WordPress HTML tag processor.

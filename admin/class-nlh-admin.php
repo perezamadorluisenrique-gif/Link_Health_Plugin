@@ -162,7 +162,7 @@ class NLH_Admin {
 		add_management_page(
 			__( 'Link Health', 'native-link-health' ),
 			__( 'Link Health', 'native-link-health' ),
-			'manage_options',
+			nlh_get_capability(),
 			'nlh-dashboard',
 			array( $this, 'render_dashboard_page' )
 		);
@@ -170,7 +170,7 @@ class NLH_Admin {
 		add_management_page(
 			__( 'SEO Audit', 'native-link-health' ),
 			__( 'SEO Audit', 'native-link-health' ),
-			'manage_options',
+			nlh_get_capability(),
 			'nlh-seo-audit',
 			array( $this, 'render_seo_page' )
 		);
@@ -178,7 +178,7 @@ class NLH_Admin {
 		add_management_page(
 			__( 'Link Juice', 'native-link-health' ),
 			__( 'Link Juice', 'native-link-health' ),
-			'manage_options',
+			nlh_get_capability(),
 			'nlh-link-juice',
 			array( $this, 'render_juice_page' )
 		);
@@ -186,7 +186,7 @@ class NLH_Admin {
 		add_options_page(
 			__( 'Link Health', 'native-link-health' ),
 			__( 'Link Health', 'native-link-health' ),
-			'manage_options',
+			nlh_get_write_capability(),
 			'nlh-settings',
 			array( $this, 'render_settings_page' )
 		);
@@ -215,6 +215,16 @@ class NLH_Admin {
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_textarea_field',
 				'default'           => '',
+			)
+		);
+
+		register_setting(
+			'nlh_settings',
+			'nlh_scan_frequency',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( $this, 'sanitize_scan_frequency' ),
+				'default'           => NLH_Activator::DEFAULT_SCHEDULE,
 			)
 		);
 
@@ -255,6 +265,24 @@ class NLH_Admin {
 			'nlh_scan_settings'
 		);
 
+		add_settings_field(
+			'nlh_scan_frequency',
+			__( 'Scan Frequency', 'native-link-health' ),
+			array( $this, 'render_scan_frequency_field' ),
+			'nlh-settings',
+			'nlh_scan_settings'
+		);
+
+		register_setting(
+			'nlh_settings',
+			'nlh_remove_all_on_uninstall',
+			array(
+				'type'              => 'boolean',
+				'sanitize_callback' => array( $this, 'sanitize_checkbox' ),
+				'default'           => false,
+			)
+		);
+
 		add_settings_section(
 			'nlh_automation_settings',
 			__( 'Automation', 'native-link-health' ),
@@ -268,6 +296,21 @@ class NLH_Admin {
 			array( $this, 'render_auto_rules_field' ),
 			'nlh-settings',
 			'nlh_automation_settings'
+		);
+
+		add_settings_section(
+			'nlh_data_settings',
+			__( 'Data & Uninstall', 'native-link-health' ),
+			array( $this, 'render_data_settings_section' ),
+			'nlh-settings'
+		);
+
+		add_settings_field(
+			'nlh_remove_all_on_uninstall',
+			__( 'On uninstall', 'native-link-health' ),
+			array( $this, 'render_remove_all_field' ),
+			'nlh-settings',
+			'nlh_data_settings'
 		);
 
 		// NOTE: the Scan Frequency, Ignored Domains and Email Notifications
@@ -445,7 +488,7 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function render_dashboard_page(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! nlh_current_user_can_read() ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'native-link-health' ) );
 		}
 
@@ -475,7 +518,7 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function render_seo_page(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! nlh_current_user_can_read() ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'native-link-health' ) );
 		}
 
@@ -488,7 +531,7 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function render_juice_page(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! nlh_current_user_can_read() ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'native-link-health' ) );
 		}
 
@@ -532,7 +575,7 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function render_settings_page(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! nlh_current_user_can_write() ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'native-link-health' ) );
 		}
 
@@ -903,6 +946,149 @@ class NLH_Admin {
 	}
 
 	/**
+	 * Renders the scan-frequency selector.
+	 *
+	 * The field was unregistered in 1.2.0 and its renderer deleted in 1.5.3
+	 * because it was a backend-less "Available in Pro" stub. It comes back in
+	 * 1.5.6 with a real backend: the selected slug is what schedules
+	 * nlh_run_batch (NLH_Activator::reschedule_cron()).
+	 *
+	 * Also prints the throughput this frequency implies at the configured batch
+	 * size, because the default (5 posts / 15 min ≈ 480 posts a day) reads as a
+	 * bug on a large site until you see the arithmetic.
+	 *
+	 * @since 1.5.6
+	 * @return void
+	 */
+	public function render_scan_frequency_field(): void {
+		$current  = NLH_Activator::get_scan_schedule();
+		$allowed  = NLH_Activator::get_allowed_schedules();
+		$labels   = array(
+			'nlh_every_5_min'  => __( 'Every 5 minutes', 'native-link-health' ),
+			'nlh_every_15_min' => __( 'Every 15 minutes (default)', 'native-link-health' ),
+			'hourly'           => __( 'Hourly', 'native-link-health' ),
+			'twicedaily'       => __( 'Twice daily', 'native-link-health' ),
+			'daily'            => __( 'Daily', 'native-link-health' ),
+		);
+		$batch    = $this->scanner->get_batch_size();
+		$interval = max( 1, (int) ( $allowed[ $current ] ?? 0 ) );
+		$per_day  = (int) floor( ( DAY_IN_SECONDS / $interval ) * $batch );
+		$next     = wp_next_scheduled( 'nlh_run_batch' );
+		?>
+		<select name="nlh_scan_frequency" id="nlh_scan_frequency">
+			<?php foreach ( $allowed as $slug => $seconds ) : ?>
+				<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $current, $slug ); ?>>
+					<?php echo esc_html( $labels[ $slug ] ?? $slug ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<p class="description">
+			<?php
+			printf(
+				/* translators: 1: posts per batch, 2: estimated posts scanned per day. */
+				esc_html__( 'How often the background scan runs. At %1$d posts per batch this works out to roughly %2$s posts a day.', 'native-link-health' ),
+				(int) $batch,
+				esc_html( number_format_i18n( $per_day ) )
+			);
+			?>
+		</p>
+		<p class="description">
+			<?php esc_html_e( 'Scanning is deliberately slow and incremental so it never loads your server. A large site takes days to complete its first full pass — that is by design, not a stall. Raise the batch size and the frequency together if you want it faster, or use "Scan Now" on the dashboard for an immediate full pass.', 'native-link-health' ); ?>
+		</p>
+		<?php if ( $next ) : ?>
+			<p class="description">
+				<?php
+				printf(
+					/* translators: %s: human-readable time until the next scheduled scan. */
+					esc_html__( 'Next scheduled run: in %s.', 'native-link-health' ),
+					esc_html( human_time_diff( (int) $next ) )
+				);
+				?>
+			</p>
+		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Sanitizes the scan-frequency setting.
+	 *
+	 * Anything not in the allow-list falls back to the 15-minute default, so a
+	 * bad value can never leave nlh_run_batch unschedulable.
+	 *
+	 * @since 1.5.6
+	 * @param mixed $value Raw submitted value.
+	 * @return string Validated schedule slug.
+	 */
+	public function sanitize_scan_frequency( $value ): string {
+		$slug = is_string( $value ) ? sanitize_key( $value ) : '';
+
+		return isset( NLH_Activator::get_allowed_schedules()[ $slug ] )
+			? $slug
+			: NLH_Activator::DEFAULT_SCHEDULE;
+	}
+
+	/**
+	 * Renders the intro copy for the Data & Uninstall section.
+	 *
+	 * @since 1.5.6
+	 * @return void
+	 */
+	public function render_data_settings_section(): void {
+		?>
+		<p class="description">
+			<?php esc_html_e( 'Control what happens to your scan data when the plugin is deleted.', 'native-link-health' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Renders the "delete everything on uninstall" opt-in.
+	 *
+	 * Off by default. Until 1.5.6 uninstall.php dropped every table and option
+	 * unconditionally, which also wiped nlh_health_history — the ~90-day
+	 * snapshot trail the Pro reporting feature reads — even when Pro stayed
+	 * installed. Mirrors the Pro plugin's nlhp_remove_all_on_uninstall opt-in.
+	 *
+	 * @since 1.5.6
+	 * @return void
+	 */
+	public function render_remove_all_field(): void {
+		$remove_all = (bool) get_option( 'nlh_remove_all_on_uninstall', false );
+		?>
+		<?php // Hidden sibling guarantees a value posts even when unchecked. ?>
+		<input type="hidden" name="nlh_remove_all_on_uninstall" value="0">
+		<label for="nlh_remove_all_on_uninstall">
+			<input type="checkbox"
+					name="nlh_remove_all_on_uninstall"
+					id="nlh_remove_all_on_uninstall"
+					value="1"
+					<?php checked( $remove_all ); ?>>
+			<?php esc_html_e( 'Delete all Native Link Health data when the plugin is uninstalled.', 'native-link-health' ); ?>
+		</label>
+		<p class="description">
+			<?php esc_html_e( 'Off by default: your broken-link records, correction history, link map and health-score history survive an uninstall, so reinstalling picks up where you left off. Turn this on for a complete cleanup.', 'native-link-health' ); ?>
+		</p>
+		<p class="description">
+			<?php esc_html_e( 'Note: the health-score history is also what Native Link Health Pro charts in its trend report. Deleting it removes that history for Pro too.', 'native-link-health' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Sanitizes a checkbox option to a strict boolean.
+	 *
+	 * The paired hidden input guarantees a value is always posted, so an
+	 * unchecked box saves false rather than leaving the prior value stale.
+	 *
+	 * @since 1.5.6
+	 * @param mixed $value Submitted value ('1' when checked, '0' otherwise).
+	 * @return bool
+	 */
+	public function sanitize_checkbox( $value ): bool {
+		return (bool) $value;
+	}
+
+	/**
 	 * Sanitizes integer settings.
 	 *
 	 * @param mixed $value Raw value.
@@ -971,7 +1157,7 @@ class NLH_Admin {
 	public function ajax_correct_url(): void {
 		$this->run_ajax_safe(
 			function () {
-				$this->verify_ajax_request();
+				$this->verify_ajax_write_request();
 
 				$post_id   = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
 				$record_id = isset( $_POST['record_id'] ) ? absint( $_POST['record_id'] ) : 0;
@@ -1052,7 +1238,7 @@ class NLH_Admin {
 	public function ajax_ignore_url(): void {
 		$this->run_ajax_safe(
 			function () {
-				$this->verify_ajax_request();
+				$this->verify_ajax_write_request();
 
 				$url       = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
 				$post_id   = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
@@ -1130,7 +1316,7 @@ class NLH_Admin {
 			function () {
 				check_ajax_referer( 'nlh_run_now_action', 'nonce' );
 
-				if ( ! current_user_can( 'manage_options' ) ) {
+				if ( ! nlh_current_user_can_read() ) {
 						$this->clean_output_buffer();
 						wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'native-link-health' ) ), 403 );
 				}
@@ -1180,7 +1366,7 @@ class NLH_Admin {
 	public function ajax_bulk_correct(): void {
 		$this->run_ajax_safe(
 			function () {
-				$this->verify_ajax_request();
+				$this->verify_ajax_write_request();
 
 				$pattern     = isset( $_POST['pattern'] ) ? sanitize_text_field( wp_unslash( $_POST['pattern'] ) ) : '';
 				$type        = isset( $_POST['type'] ) ? sanitize_key( wp_unslash( $_POST['type'] ) ) : 'domain_death';
@@ -1425,7 +1611,7 @@ class NLH_Admin {
 	public function ajax_juice_relink(): void {
 		$this->run_ajax_safe(
 			function () {
-				$this->verify_ajax_request();
+				$this->verify_ajax_write_request();
 
 				$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
 				$old_url = isset( $_POST['old_url'] ) ? esc_url_raw( wp_unslash( $_POST['old_url'] ) ) : '';
@@ -1464,7 +1650,7 @@ class NLH_Admin {
 	public function handle_export_csv(): void {
 		check_admin_referer( 'nlh_export_csv_action', 'nlh_export_nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! nlh_current_user_can_read() ) {
 			wp_die( esc_html__( 'Insufficient permissions.', 'native-link-health' ) );
 		}
 
@@ -1637,7 +1823,27 @@ class NLH_Admin {
 	private function verify_ajax_request( string $action = 'nlh_ajax_nonce' ): void {
 		check_ajax_referer( $action, 'nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! nlh_current_user_can_read() ) {
+			$this->clean_output_buffer();
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'native-link-health' ) ), 403 );
+		}
+	}
+
+	/**
+	 * Verifies nonce and the stricter write capability.
+	 *
+	 * Used by the handlers that change post content or plugin configuration, so
+	 * a site that lowers nlh_capability to give an SEO role read access does not
+	 * thereby hand it the ability to rewrite post content.
+	 *
+	 * @since 1.5.6
+	 * @param string $action Nonce action name.
+	 * @return void
+	 */
+	private function verify_ajax_write_request( string $action = 'nlh_ajax_nonce' ): void {
+		check_ajax_referer( $action, 'nonce' );
+
+		if ( ! nlh_current_user_can_write() ) {
 			$this->clean_output_buffer();
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'native-link-health' ) ), 403 );
 		}
@@ -1966,7 +2172,7 @@ class NLH_Admin {
 	 * @return void
 	 */
 	public function show_welcome_notice(): void {
-		if ( ! get_option( 'nlh_show_welcome' ) || ! current_user_can( 'manage_options' ) ) {
+		if ( ! get_option( 'nlh_show_welcome' ) || ! nlh_current_user_can_read() ) {
 			return;
 		}
 
@@ -2014,7 +2220,7 @@ class NLH_Admin {
 	public function ajax_dismiss_welcome(): void {
 		check_ajax_referer( 'nlh_dismiss_welcome', 'nonce' );
 
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( nlh_current_user_can_read() ) {
 			delete_option( 'nlh_show_welcome' );
 		}
 

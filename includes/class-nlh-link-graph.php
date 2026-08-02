@@ -323,6 +323,8 @@ class NLH_Link_Graph {
 
 		$page       = 1;
 		$chunk_size = 100;
+		// Built once, not per post: only used to resolve nlh_post_content.
+		$scanner = class_exists( 'NLH_Scanner' ) ? new NLH_Scanner() : null;
 
 		do {
 			$query = new WP_Query(
@@ -343,9 +345,15 @@ class NLH_Link_Graph {
 
 			foreach ( $query->posts as $post_id ) {
 				$post = get_post( (int) $post_id );
-				if ( $post instanceof WP_Post ) {
-					$this->record_post( (int) $post_id, $post->post_content );
+				if ( ! $post instanceof WP_Post ) {
+					continue;
 				}
+
+				// Same content the scanner sees, so an offline rebuild and a scan
+				// never disagree about which links a post has (nlh_post_content).
+				$content = $scanner ? $scanner->get_scan_content( $post ) : $post->post_content;
+
+				$this->record_post( (int) $post_id, $content );
 			}
 
 			++$page;
